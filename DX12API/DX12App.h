@@ -1,4 +1,10 @@
 #pragma once
+
+#if defined(DEBUG) || defined(_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
+
 #ifndef DX12App_H
 #define DX12App_H
 #include <wrl/client.h>
@@ -6,13 +12,18 @@
 #include <d2d1.h>
 #include <d3d12.h>
 #include <dwrite.h>
-#include "WinAPISetting.h"
 #include <DirectXMath.h>
+#include "WinAPISetting.h"
+#include "d3dUtil.h"
 #include "DXGameTimer.h"
 //添加ImGui
 #include "imgui.h"
 #include "imgui_impl_dx11.h"
 #include "imgui_impl_win32.h"
+
+
+
+
 class DX12App
 {
 public:
