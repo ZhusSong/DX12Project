@@ -77,35 +77,69 @@ endforeach()
 # 为项目附加包含目录，使其文件夹中的文件可被整个项目访问
 include_directories(DX12API)
 include_directories(DX12API/TextureLoader)
+include_directories(DX12API/MathHelper)
 
 # 设置文件目录
 
  set (HLSL_Files
  )
+ #游戏进程相关
 set (SOURCES
+#入口
 Game/DX12Project.cpp
+#游戏进程
 Game/GameApp.cpp
 Game/GameApp.h
  )
- 
+
+ #DX12API
  set (DX12API
  #编译设置
 DX12API/WinAPISetting.h
-#程序时间
-DX12API/DXGameTimer.cpp
-DX12API/DXGameTimer.h
-#DX11相关API
+#DX12相关API
 DX12API/DX12App.cpp
 DX12API/DX12App.h
  )
 
+#程序时间
+ set(GameTimer
+ DX12API/DXGameTimer.cpp
+ DX12API/DXGameTimer.h
+ )
+
+#DX12工具
+ set(UtilityAPI
+ DX12API/d3dUtil.cpp
+ DX12API/d3dUtil.h
+ )
+ #辅助数学工具
+ set(MathHelper
+ DX12API/MathHelper/MathHelper.cpp
+ DX12API/MathHelper/MathHelper.h
+ )
+ #贴图读取
+ set (TextureLoader
+ DX12API/TextureLoader/DDSTextureLoader.cpp
+DX12API/TextureLoader/DDSTextureLoader.h
+DX12API/TextureLoader/WICTextureLoader.cpp
+DX12API/TextureLoader/WICTextureLoader.h
+ )
+ #HLSL文件分组
  source_group(HLSL FILES ${HLSL_Files})
+ #Game文件分组
  source_group(Game FILES ${SOURCES})
+ #API文件分组
+ #新增文件时需在此处添加分组
  source_group(DX12API FILES ${DX12API})
+ source_group(DX12API\\TextureLoader FILES ${TextureLoader})
+ source_group(DX12API\\MathHelper FILES ${MathHelper})
+ source_group(DX12API\\GameTimer FILES ${GameTimer})
+ source_group(DX12API\\UtilityAPI FILES ${UtilityAPI})
 
-
+ #添加可执行文件
+ #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
-${DX12API} 
+${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper}
 ${HLSL_Files})
 # 添加链接库
 target_link_libraries(${TARGET_NAME}  d3d12.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib d2d1.lib dwrite.lib winmm.lib legacy_stdio_definitions.lib)
