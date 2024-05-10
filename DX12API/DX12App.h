@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifndef DX12App_H
 #define DX12App_H
 #include <wrl/client.h>

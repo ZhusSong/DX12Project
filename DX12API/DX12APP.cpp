@@ -1,4 +1,4 @@
-﻿#include "DX12App.h"
+#include "DX12App.h"
 #include <sstream>
 #pragma warning(disable: 6031)
 extern "C"

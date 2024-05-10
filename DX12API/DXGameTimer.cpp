@@ -1,4 +1,4 @@
-﻿#include <thread>
+#include <thread>
 #include <chrono>
 #include <windows.h>
 #include "DXGameTimer.h"

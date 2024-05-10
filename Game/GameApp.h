@@ -1,4 +1,4 @@
-﻿//游戏程序入口
+//游戏程序入口
 #pragma once
 #ifndef GAMEAPP_H
 #define GAMEPAPP_H
