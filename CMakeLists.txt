@@ -13,7 +13,7 @@ set(ASSET_DIR "asset")
 
 # 使用ImGui时设置为ON
 # 需要将项目中的ImGui文件夹复制进来，保留*.h/*.cpp/CMakeLists.txt
-set(USE_IMGUI OFF)
+set(USE_IMGUI ON)
 
 # 使用Assimp时设置为ON
 # 需要将解压的assimp文件夹内CMakeList.txt所在的全部文件复制到当前项目的Assimp文件夹内
@@ -91,8 +91,12 @@ Game/GameApp.h
  set (DX12API
  #编译设置
 DX12API/WinAPISetting.h
+#程序时间
+DX12API/DXGameTimer.cpp
+DX12API/DXGameTimer.h
+#DX11相关API
 DX12API/DX12App.cpp
-DX12API/DX12App.cpp
+DX12API/DX12App.h
  )
 
  source_group(HLSL FILES ${HLSL_Files})

@@ -1,16 +1,27 @@
 ﻿#pragma once
 #ifndef DX12App_H
 #define DX12App_H
-
-class DX11App
+#include <wrl/client.h>
+#include <string>
+#include <d2d1.h>
+#include <d3d12.h>
+#include <dwrite.h>
+#include "WinAPISetting.h"
+#include <DirectXMath.h>
+#include "DXGameTimer.h"
+//添加ImGui
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+class DX12App
 {
 public:
     //初始化
      //Initialisation
      //初期化
-    DX11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);
+    DX12App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight);
 
-    virtual ~DX11App();
+    virtual ~DX12App();
 
     //获取应用实例的句柄
     HINSTANCE AppInstance()const;
@@ -49,4 +60,41 @@ protected:
     bool InitImGui();
     //显示帧数
     void ShowFrameCount();
-}
+
+protected:
+    //窗口初始化
+    bool InitMainWindow();
+    // Direct2D初始化
+    bool InitDirect2D();
+    //Direct3D初始化
+    bool InitDirect3D();
+
+    bool InitImGui();
+    //显示帧数
+    void ShowFrameCount();
+
+    //应用实例句柄
+    HINSTANCE m_AppInstance;
+    //主窗口
+    HWND      m_MainWnd;
+    //是否暂停
+    bool      m_AppPaused;
+    //是否最小化
+    bool      m_Minimized;
+    //是否最大化
+    bool      m_Maximized;
+    //窗口大小是否变化
+    bool      m_Resizing;
+    //是否开启4倍多重采样
+    bool      m_Enable4xMsaa;
+    //MSAA质量等级
+    UINT      m_4xMsaaQuality;
+
+    //计时器
+    DXGameTimer m_Timer;
+
+    //模板
+    template <class T>
+    using ComPtr = Microsoft::WRL::ComPtr<T>;
+};
+#endif

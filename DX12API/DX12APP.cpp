@@ -1,4 +1,4 @@
-﻿#include "DX11App.h"
+﻿#include "DX12App.h"
 #include <sstream>
 #pragma warning(disable: 6031)
 extern "C"
@@ -25,7 +25,7 @@ MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return g_d3dApp->MsgProc(hwnd, msg, wParam, lParam);
 }
 
-DX11App::DX11App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
+DX12App::DX12App(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
     : m_AppInstance(hInstance),
     m_MainWndName(windowName),
     m_ViewWidth(initWidth),
