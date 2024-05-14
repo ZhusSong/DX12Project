@@ -185,6 +185,7 @@ protected:
     //窗口高度
     int mClientHeight;
     D3D_DRIVER_TYPE md3dDriverType = D3D_DRIVER_TYPE_HARDWARE;
+    //设置缓冲区图像像素格式为标准化(颜色强度范围为0-1)8位RGBA
     DXGI_FORMAT mBackBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
     DXGI_FORMAT mDepthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
