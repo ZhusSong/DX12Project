@@ -92,17 +92,27 @@ int DX12App::Run()
         // 若无窗口信息则处理游戏进程
         else
         {
-            mTimer.GetTick();
-            //若当前程序未暂停则进行更新与绘制
-            if (!mAppPaused)
+            //mTimer.GetTick();
+            // 设置帧数
+            if (mTimer.SetFrame(mFrameCount))
             {
-                ShowFrameCount();
-                Update(mTimer);
-                Draw(mTimer);
-            }
-            else
-            {
-                Sleep(100);
+                //若当前程序未暂停则进行更新与绘制
+                if (!mAppPaused)
+                {
+                    ShowFrameCount();
+
+                    // 添加ImGui
+                    ImGui_ImplDX12_NewFrame();
+                    ImGui_ImplWin32_NewFrame();
+                    ImGui::NewFrame();
+
+                    Update(mTimer);
+                    Draw(mTimer);
+                }
+                else
+                {
+                    Sleep(100);
+                }
             }
         }
     }
@@ -116,6 +126,8 @@ bool DX12App::Init()
     if (!InitDirect3D())
         return false;
 
+    if (!InitImGui())
+        return false;
     // Do the initial resize code.
     // 按照初始宽高比进行创建
     OnResize();
@@ -140,6 +152,14 @@ void DX12App::CreateRtvAndDsvDescriptorHeaps()
     dsvHeapDesc.NodeMask = 0;
     ThrowIfFailed(md3dDevice->CreateDescriptorHeap(
         &dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
+
+    D3D12_DESCRIPTOR_HEAP_DESC SrvHeapDesc;
+    SrvHeapDesc.NumDescriptors = 1;
+    SrvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    SrvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    SrvHeapDesc.NodeMask = 0;
+    ThrowIfFailed(md3dDevice->CreateDescriptorHeap(
+        &SrvHeapDesc, IID_PPV_ARGS(mSrvHeap.GetAddressOf())));
 }
 
 void DX12App::OnResize()
@@ -566,40 +586,164 @@ void DX12App::CreateSwapChain()
 
 void DX12App::FlushCommandQueue()
 {
+    //每次调用时增加围栏值，接下来将命令标记至此围栏处
+    mCurrentFence++;
+    //向命令队列中添加一条设置新围栏点的命令
+    //因修改围栏值需由GPU修改，因此在GPU处理完命令队列中此Signal()的命令之前，它不会设置新的围栏点
+    ThrowIfFailed(mCommandQueue->Signal(mFence.Get(), mCurrentFence));
+
+    //在CPU端等待GPU，直到后者执行完此围栏点之前的所有命令
+    if (mFence->GetCompletedValue() < mCurrentFence)
+    {
+        HANDLE eventHandle = CreateEventEx(nullptr,false,false,EVENT_ALL_ACCESS);
+        //若GPU处理至当前Signal()的指令，则激发预定事件
+        ThrowIfFailed(mFence->SetEventOnCompletion(mCurrentFence, eventHandle));
+        //等待GPU执行至此围栏，激发事件
+        WaitForSingleObject(eventHandle, INFINITE);
+        CloseHandle(eventHandle);
+    }
 }
 
 ID3D12Resource* DX12App::CurrentBackBuffer() const
 {
-    return nullptr;
+    return mSwapChainBuffer[mCurrBackBuffer].Get();
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE DX12App::CurrentBackBufferView() const
 {
-    return D3D12_CPU_DESCRIPTOR_HANDLE();
+    return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+        mRtvHeap->GetCPUDescriptorHandleForHeapStart(),
+        mCurrBackBuffer,
+        mRtvDescriptorSize);
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE DX12App::DepthStencilView() const
 {
-    return D3D12_CPU_DESCRIPTOR_HANDLE();
+    return mDsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
 void DX12App::ShowFrameCount()
 {
+    // 该代码计算每秒帧速，并计算每一帧渲染需要的时间，显示在窗口标题
+    static int frameCnt = 0;
+    static float timeElapsed = 0.0f;
+
+    frameCnt++;
+
+    if ((mTimer.GetTotalTime() - timeElapsed) >= 1.0f)
+    {
+        float fps = (float)frameCnt; // fps = frameCnt / 1
+        float mspf = 1000.0f / fps;
+
+        std::wostringstream outs;
+        outs.precision(6);
+        outs << mMainWndCaption << L"    "
+            << L"FPS: " << fps << L"    "
+            /*    << L"Frame Time: " << mspf << L" (ms)" */
+            << " delta time is " << mTimer.GetDeltaTime();
+        SetWindowText(mhMainWnd, outs.str().c_str());
+
+        // Reset for next average.
+        frameCnt = 0;
+        timeElapsed += 1.0f;
+    }
 }
 
 void DX12App::LogAdapters()
 {
+    UINT i = 0;
+    IDXGIAdapter* adapter = nullptr;
+    std::vector<IDXGIAdapter*> adapterList;
+    while (mdxgiFactory->EnumAdapters(i, &adapter) != DXGI_ERROR_NOT_FOUND)
+    {
+        DXGI_ADAPTER_DESC desc;
+        adapter->GetDesc(&desc);
+
+        std::wstring text = L"***Adapter: ";
+        text += desc.Description;
+        text += L"\n";
+
+        OutputDebugString(text.c_str());
+
+        adapterList.push_back(adapter);
+
+        ++i;
+    }
+
+    for (size_t i = 0; i < adapterList.size(); ++i)
+    {
+        LogAdapterOutputs(adapterList[i]);
+        ReleaseCom(adapterList[i]);
+    }
 }
 
 void DX12App::LogAdapterOutputs(IDXGIAdapter* adapter)
 {
+    UINT i = 0;
+    IDXGIOutput* output = nullptr;
+    while (adapter->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
+    {
+        DXGI_OUTPUT_DESC desc;
+        output->GetDesc(&desc);
+
+        std::wstring text = L"***Output: ";
+        text += desc.DeviceName;
+        text += L"\n";
+        OutputDebugString(text.c_str());
+
+        LogOutputDisplayModes(output, mBackBufferFormat);
+
+        ReleaseCom(output);
+
+        ++i;
+    }
 }
 
 void DX12App::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 {
+    UINT count = 0;
+    UINT flags = 0;
+
+    // Call with nullptr to get list count.
+    output->GetDisplayModeList(format, flags, &count, nullptr);
+
+    std::vector<DXGI_MODE_DESC> modeList(count);
+    output->GetDisplayModeList(format, flags, &count, &modeList[0]);
+
+    for (auto& x : modeList)
+    {
+        UINT n = x.RefreshRate.Numerator;
+        UINT d = x.RefreshRate.Denominator;
+        std::wstring text =
+            L"Width = " + std::to_wstring(x.Width) + L" " +
+            L"Height = " + std::to_wstring(x.Height) + L" " +
+            L"Refresh = " + std::to_wstring(n) + L"/" + std::to_wstring(d) +
+            L"\n";
+
+        ::OutputDebugString(text.c_str());
+    }
 }
 
 bool DX12App::InitImGui()
 {
-    return false;
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // 允许键盘控制
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigWindowsMoveFromTitleBarOnly = true;              // 仅允许标题拖动
+
+    // 设置ImGui风格
+    ImGui::StyleColorsDark();
+    ImGui_ImplWin32_Init(mhMainWnd);
+    ImGui_ImplDX12_Init(md3dDevice.Get(), SwapChainBufferCount,
+        DXGI_FORMAT_R8G8B8A8_UNORM, mSrvHeap.Get(),
+        mSrvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
+        mSrvHeap.Get()->GetGPUDescriptorHandleForHeapStart());
+
+    // 设置平台/渲染器后端
+    ImGui_ImplWin32_Init(mhMainWnd);
+    
+
+    return true;
 }

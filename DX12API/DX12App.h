@@ -18,7 +18,8 @@
 #include "DXGameTimer.h"
 //添加ImGui
 #include "imgui.h"
-#include "imgui_impl_dx11.h"
+//#include "imgui_impl_dx11.h"
+#include "imgui_impl_dx12.h"
 #include "imgui_impl_win32.h"
 
 
@@ -97,7 +98,7 @@ protected:
     //创建交换链
     void CreateSwapChain();
 
-    //强制CPU等待GPU，直到GPU处理完队列中所有命令
+    //创建围栏(fence)强制CPU等待GPU，直到GPU处理完队列中所有命令
     void FlushCommandQueue();
     //返回交换链中当前后台缓冲区的ID3D12Resource
     ID3D12Resource* CurrentBackBuffer()const;
@@ -143,6 +144,8 @@ protected:
 
     //计时器
     DXGameTimer mTimer;
+    //帧数
+    int mFrameCount=60;
 
     //模板
     template <class T>
@@ -154,7 +157,9 @@ protected:
     //d3d设备
     ComPtr<ID3D12Device> md3dDevice;
 
+    //围栏
     ComPtr<ID3D12Fence> mFence;
+    //用于标识围栏点的整数
     UINT64 mCurrentFence = 0;
 
     ComPtr<ID3D12CommandQueue> mCommandQueue;
@@ -168,6 +173,7 @@ protected:
 
     ComPtr<ID3D12DescriptorHeap> mRtvHeap;
     ComPtr<ID3D12DescriptorHeap> mDsvHeap;
+    ComPtr<ID3D12DescriptorHeap> mSrvHeap;
 
     D3D12_VIEWPORT mScreenViewport;
     D3D12_RECT mScissorRect;
