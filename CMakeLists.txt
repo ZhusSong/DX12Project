@@ -13,7 +13,7 @@ set(ASSET_DIR "asset")
 
 # 使用ImGui时设置为ON
 # 需要将项目中的ImGui文件夹复制进来，保留*.h/*.cpp/CMakeLists.txt
-set(USE_IMGUI ON)
+set(USE_IMGUI OFF)
 
 # 使用Assimp时设置为ON
 # 需要将解压的assimp文件夹内CMakeList.txt所在的全部文件复制到当前项目的Assimp文件夹内

@@ -13,7 +13,7 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
 }
 //Im
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+//extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 namespace
 {
     // This is just used to forward Windows messages from a global window
@@ -102,9 +102,9 @@ int DX12App::Run()
                     ShowFrameCount();
 
                     // 添加ImGui
-                    ImGui_ImplDX12_NewFrame();
+                /*    ImGui_ImplDX12_NewFrame();
                     ImGui_ImplWin32_NewFrame();
-                    ImGui::NewFrame();
+                    ImGui::NewFrame();*/
 
                     Update(mTimer);
                     Draw(mTimer);
@@ -126,8 +126,8 @@ bool DX12App::Init()
     if (!InitDirect3D())
         return false;
 
-    if (!InitImGui())
-        return false;
+ /*   if (!InitImGui())
+        return false;*/
     // Do the initial resize code.
     // 按照初始宽高比进行创建
     OnResize();
@@ -173,6 +173,12 @@ void DX12App::OnResize()
     FlushCommandQueue();
     //错误处理
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+
+    // Release the previous resources we will be recreating.
+    // 释放将要被重置的缓冲资源
+    for (int i = 0; i < SwapChainBufferCount; ++i)
+        mSwapChainBuffer[i].Reset();
+    mDepthStencilBuffer.Reset();
 
     // Resize the swap chain.
     // 重设交换链
@@ -726,24 +732,24 @@ void DX12App::LogOutputDisplayModes(IDXGIOutput* output, DXGI_FORMAT format)
 
 bool DX12App::InitImGui()
 {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // 允许键盘控制
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-    io.ConfigWindowsMoveFromTitleBarOnly = true;              // 仅允许标题拖动
+    //IMGUI_CHECKVERSION();
+    //ImGui::CreateContext();
+    //ImGuiIO& io = ImGui::GetIO();
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // 允许键盘控制
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    //io.ConfigWindowsMoveFromTitleBarOnly = true;              // 仅允许标题拖动
 
-    // 设置ImGui风格
-    ImGui::StyleColorsDark();
-    ImGui_ImplWin32_Init(mhMainWnd);
-    ImGui_ImplDX12_Init(md3dDevice.Get(), SwapChainBufferCount,
-        DXGI_FORMAT_R8G8B8A8_UNORM, mSrvHeap.Get(),
-        mSrvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
-        mSrvHeap.Get()->GetGPUDescriptorHandleForHeapStart());
+    //// 设置ImGui风格
+    //ImGui::StyleColorsDark();
+    //ImGui_ImplWin32_Init(mhMainWnd);
+    //ImGui_ImplDX12_Init(md3dDevice.Get(), SwapChainBufferCount,
+    //    DXGI_FORMAT_R8G8B8A8_UNORM, mSrvHeap.Get(),
+    //    mSrvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
+    //    mSrvHeap.Get()->GetGPUDescriptorHandleForHeapStart());
 
-    // 设置平台/渲染器后端
-    ImGui_ImplWin32_Init(mhMainWnd);
-    
+    //// 设置平台/渲染器后端
+    //ImGui_ImplWin32_Init(mhMainWnd);
+    //
 
     return true;
 }
