@@ -26,6 +26,8 @@ private:
     virtual void OnResize()override;
     virtual void Update(const DXGameTimer& gt)override;
     virtual void Draw(const DXGameTimer& gt)override;
+
+    void DrawGame();
 };
 
 #endif

@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{912F82B0-ABA8-3F6B-A6CF-6A232E7DFF92}</ProjectGuid>
+    <ProjectGuid>{BFAC75A1-EBA8-376A-8FD5-8741D42FA555}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
     <Platform>x64</Platform>
@@ -32,22 +32,22 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -59,47 +59,46 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">H:\DX11Project\ImGui\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">H:\DX12Project\ImGui\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ImGui.dir\Debug\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ImGuid</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ImGui</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">H:\DX11Project\ImGui\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">H:\DX12Project\ImGui\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ImGui.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ImGui</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">H:\DX11Project\ImGui\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">H:\DX12Project\ImGui\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">ImGui.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">ImGui</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">H:\DX11Project\ImGui\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">H:\DX12Project\ImGui\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ImGui.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ImGui</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;UNICODE;_UNICODE;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;UNICODE;_UNICODE;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -112,28 +111,27 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -146,28 +144,27 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>MinSpace</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -180,27 +177,26 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;UNICODE;_UNICODE;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\DX11Project\DX11API;H:\DX11Project\DX11API\TextureLoader;H:\DX11Project\DX11API\InputAPI;H:\DX11Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>H:\DX12Project\ImGui\.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -212,11 +208,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="H:\DX11Project\ImGui\CMakeLists.txt">
+    <CustomBuild Include="H:\DX12Project\ImGui\CMakeLists.txt">
       <UseUtf8Encoding>Always</UseUtf8Encoding>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule H:/DX11Project/ImGui/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule H:/DX12Project/ImGui/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-E:\CMakeGui\bin\cmake.exe -SH:/DX11Project -BH:/DX11Project --check-stamp-file H:/DX11Project/ImGui/CMakeFiles/generate.stamp
+E:\CMakeGui\bin\cmake.exe -SH:/DX12Project/ImGui -BH:/DX12Project/ImGui --check-stamp-file H:/DX12Project/ImGui/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -224,12 +220,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">H:\DX11Project\ImGui\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompilerABI.c;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompilerABI.cpp;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCommonLanguageInclude.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCompilerIdDetection.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompileFeatures.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerABI.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerId.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeFindBinUtils.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeGenericSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeInitializeConfigs.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeLanguageInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitIncludeInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitLinkInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseLibraryArchitecture.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystem.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCompilerCommon.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ADSP-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMCC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\AppleClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Borland-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Cray-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CrayClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GHS-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IAR-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Intel-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVHPC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OrangeC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PGI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PathScale-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SCO-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Tasking-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Watcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CompilerId\VS-10.vcxproj.in;E:\CMakeGui\share\cmake-3.28\Modules\Internal\FeatureTesting.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Determine-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Initialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\WindowsPaths.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCXXCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeRCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">H:\DX12Project\ImGui\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule H:/DX11Project/ImGui/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule H:/DX12Project/ImGui/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-E:\CMakeGui\bin\cmake.exe -SH:/DX11Project -BH:/DX11Project --check-stamp-file H:/DX11Project/ImGui/CMakeFiles/generate.stamp
+E:\CMakeGui\bin\cmake.exe -SH:/DX12Project/ImGui -BH:/DX12Project/ImGui --check-stamp-file H:/DX12Project/ImGui/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -237,12 +233,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">H:\DX11Project\ImGui\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompilerABI.c;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompilerABI.cpp;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCommonLanguageInclude.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCompilerIdDetection.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompileFeatures.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerABI.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerId.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeFindBinUtils.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeGenericSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeInitializeConfigs.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeLanguageInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitIncludeInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitLinkInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseLibraryArchitecture.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystem.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCompilerCommon.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ADSP-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMCC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\AppleClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Borland-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Cray-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CrayClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GHS-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IAR-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Intel-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVHPC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OrangeC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PGI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PathScale-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SCO-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Tasking-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Watcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CompilerId\VS-10.vcxproj.in;E:\CMakeGui\share\cmake-3.28\Modules\Internal\FeatureTesting.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Determine-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Initialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\WindowsPaths.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCXXCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeRCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">H:\DX12Project\ImGui\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule H:/DX11Project/ImGui/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule H:/DX12Project/ImGui/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-E:\CMakeGui\bin\cmake.exe -SH:/DX11Project -BH:/DX11Project --check-stamp-file H:/DX11Project/ImGui/CMakeFiles/generate.stamp
+E:\CMakeGui\bin\cmake.exe -SH:/DX12Project/ImGui -BH:/DX12Project/ImGui --check-stamp-file H:/DX12Project/ImGui/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -250,12 +246,12 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">H:\DX11Project\ImGui\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompilerABI.c;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompilerABI.cpp;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCommonLanguageInclude.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCompilerIdDetection.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompileFeatures.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerABI.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerId.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeFindBinUtils.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeGenericSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeInitializeConfigs.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeLanguageInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitIncludeInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitLinkInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseLibraryArchitecture.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystem.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCompilerCommon.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ADSP-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMCC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\AppleClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Borland-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Cray-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CrayClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GHS-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IAR-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Intel-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVHPC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OrangeC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PGI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PathScale-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SCO-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Tasking-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Watcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CompilerId\VS-10.vcxproj.in;E:\CMakeGui\share\cmake-3.28\Modules\Internal\FeatureTesting.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Determine-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Initialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\WindowsPaths.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCXXCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeRCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">H:\DX12Project\ImGui\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule H:/DX11Project/ImGui/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule H:/DX12Project/ImGui/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-E:\CMakeGui\bin\cmake.exe -SH:/DX11Project -BH:/DX11Project --check-stamp-file H:/DX11Project/ImGui/CMakeFiles/generate.stamp
+E:\CMakeGui\bin\cmake.exe -SH:/DX12Project/ImGui -BH:/DX12Project/ImGui --check-stamp-file H:/DX12Project/ImGui/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -263,23 +259,23 @@ endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">H:\DX11Project\ImGui\CMakeFiles\generate.stamp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCCompilerABI.c;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXCompilerABI.cpp;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCXXInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCommonLanguageInclude.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeCompilerIdDetection.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompileFeatures.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerABI.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineCompilerId.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeDetermineSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeFindBinUtils.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeGenericSystem.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeInitializeConfigs.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeLanguageInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitIncludeInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseImplicitLinkInfo.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeParseLibraryArchitecture.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCCompiler.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeRCInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystem.cmake.in;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInformation.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeSystemSpecificInitialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCXXCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestCompilerCommon.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CMakeTestRCCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ADSP-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMCC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\ARMClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\AppleClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Borland-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Bruce-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CMakeCommonCompilerMacros.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Clang-DetermineCompilerInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Comeau-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Compaq-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Cray-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\CrayClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Embarcadero-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Fujitsu-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\FujitsuClang-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GHS-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\GNU-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\HP-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IAR-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-C-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMCPP-CXX-DetermineVersionInternal.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IBMClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Intel-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\IntelLLVM-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\LCC-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVHPC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\NVIDIA-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OpenWatcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\OrangeC-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PGI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\PathScale-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SCO-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SDCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\SunPro-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TI-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Tasking-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\TinyCC-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\VisualAge-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\Watcom-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XL-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\XLClang-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-C-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Compiler\zOS-CXX-DetermineCompiler.cmake;E:\CMakeGui\share\cmake-3.28\Modules\CompilerId\VS-10.vcxproj.in;E:\CMakeGui\share\cmake-3.28\Modules\Internal\FeatureTesting.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Determine-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-Initialize.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-C.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC-CXX.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows-MSVC.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\Windows.cmake;E:\CMakeGui\share\cmake-3.28\Modules\Platform\WindowsPaths.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeCXXCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeRCCompiler.cmake;H:\DX12Project\ImGui\CMakeFiles\3.28.0-rc4\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">H:\DX12Project\ImGui\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="H:\DX11Project\ImGui\imgui.cpp" />
-    <ClCompile Include="H:\DX11Project\ImGui\imgui_demo.cpp" />
-    <ClCompile Include="H:\DX11Project\ImGui\imgui_draw.cpp" />
-    <ClCompile Include="H:\DX11Project\ImGui\imgui_impl_dx11.cpp" />
-    <ClCompile Include="H:\DX11Project\ImGui\imgui_impl_win32.cpp" />
-    <ClCompile Include="H:\DX11Project\ImGui\imgui_tables.cpp" />
-    <ClCompile Include="H:\DX11Project\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="H:\DX12Project\ImGui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="H:\DX11Project\ZERO_CHECK.vcxproj">
-      <Project>{EAF08D6A-B016-37E2-93B8-0B1803DF9DFF}</Project>
+    <ProjectReference Include="H:\DX12Project\ImGui\ZERO_CHECK.vcxproj">
+      <Project>{32C43608-F294-378F-8229-4731E5104B81}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

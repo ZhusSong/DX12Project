@@ -69,8 +69,12 @@ void GameApp::Draw(const DXGameTimer& gt)
         1, &CD3DX12_RESOURCE_BARRIER::Transition(
             CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
+    //绘制游戏物体及画面
+    DrawGame();
+
+
     // Done recording commands.
-    // 完成对命令的记录
+    // 完成对命令的记录,需在此之前进行游戏物体及逻辑的绘制
     ThrowIfFailed(mCommandList->Close());
 
     // Add the command list to the queue for execution.
@@ -86,4 +90,33 @@ void GameApp::Draw(const DXGameTimer& gt)
     // Wait until frame commands are complete.  
     // 等待此帧的命令执行完毕。
     FlushCommandQueue();
+}
+
+void GameApp::DrawGame()
+{
+    bool show_demo_window = true;
+    if (show_demo_window)
+        ImGui::ShowDemoWindow(&show_demo_window);
+    static int counter = 0;
+    //test1    控制旋转
+    ImGui::Begin("WangMeifo!Test");                          // Create a window called "Hello, world!" and append into it.
+
+    ImGui::Text("Drag the slider to rotate the Angle of the Box.");               // Display some text (you can use a format strings too)
+    ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+
+    //ImGui::SliderFloat("float", &mPhi, 0.1f, 1.0f);  //mPhi立方体的旋转角度
+  //  ImGui::SliderFloat("float", &mTheta, 0.1f, 1.0f);  //mTheta也是旋转角度
+    // Edit 1 float using a slider from 0.0f to 1.0f
+
+    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        counter++;
+    ImGui::SameLine();
+    ImGui::Text("counter = %d", counter);
+
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::End();
+
+    ImGui::Render();
+    mCommandList->SetDescriptorHeaps(1, mSrvHeap.GetAddressOf());
+    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
 }
