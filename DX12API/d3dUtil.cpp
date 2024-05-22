@@ -45,6 +45,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> d3dUtil::CreateDefaultBuffer(
     ComPtr<ID3D12Resource> defaultBuffer;
 
     // Create the actual default buffer resource.
+    // 创建实际的默认缓冲区资源
     ThrowIfFailed(device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
         D3D12_HEAP_FLAG_NONE,
@@ -55,6 +56,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> d3dUtil::CreateDefaultBuffer(
 
     // In order to copy CPU memory data into our default buffer, we need to create
     // an intermediate upload heap. 
+    // 为将cpu端内存中的数据复制到默认缓冲区，需创建一个处于中介位置的上传堆
     ThrowIfFailed(device->CreateCommittedResource(
         &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
         D3D12_HEAP_FLAG_NONE,
@@ -65,6 +67,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> d3dUtil::CreateDefaultBuffer(
 
 
     // Describe the data we want to copy into the default buffer.
+    // 描述我们希望复制到默认缓冲区中的数据
     D3D12_SUBRESOURCE_DATA subResourceData = {};
     subResourceData.pData = initData;
     subResourceData.RowPitch = byteSize;
@@ -73,6 +76,9 @@ Microsoft::WRL::ComPtr<ID3D12Resource> d3dUtil::CreateDefaultBuffer(
     // Schedule to copy the data to the default buffer resource.  At a high level, the helper function UpdateSubresources
     // will copy the CPU memory into the intermediate upload heap.  Then, using ID3D12CommandList::CopySubresourceRegion,
     // the intermediate upload heap data will be copied to mBuffer.
+    // 将数据复制到默认缓冲区资源的流程
+    // UpdateSubresources辅助函数会先将数据从CPU端的内存中复制位于中介位置的上传堆
+    // 再通过调用ID3D12CommandList::CopySubresourceRegion函数，将上传堆中的数据复制到mBuffer中
     cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(defaultBuffer.Get(),
         D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
     UpdateSubresources<1>(cmdList, defaultBuffer.Get(), uploadBuffer.Get(), 0, 0, 1, &subResourceData);
@@ -82,7 +88,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> d3dUtil::CreateDefaultBuffer(
     // Note: uploadBuffer has to be kept alive after the above function calls because
     // the command list has not been executed yet that performs the actual copy.
     // The caller can Release the uploadBuffer after it knows the copy has been executed.
-
+    // 注:调用上述函数后，必须保证uploadBuffer依然存在，而不能将它立刻销毁
+    // 这是因为命令列表中的复制操作可能尚未执行，待调用者得知复制完成的消息后，方可释放uploadBuffer
 
     return defaultBuffer;
 }
