@@ -82,6 +82,9 @@ include_directories(DX12API/MathHelper)
 # 设置文件目录
 
  set (HLSL_Files
+ HLSL/06_basic.hlsli
+  HLSL/06_color_ps.hlsl
+  HLSL/06_color_vs.hlsl
  )
  #游戏进程相关
 set (SOURCES
@@ -99,6 +102,7 @@ DX12API/WinAPISetting.h
 #DX12相关API
 DX12API/DX12App.cpp
 DX12API/DX12App.h
+DX12API/UploadBuffer.h
  )
 
 #程序时间

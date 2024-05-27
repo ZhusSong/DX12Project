@@ -1,5 +1,5 @@
 #include "GameApp.h"
-
+#include "MathHelper.h"
 
 
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
@@ -18,6 +18,25 @@ bool GameApp::Init()
     if (!DX12App::Init())
         return false;
 
+    // Reset the command list to prep for initialization commands.
+    // 重置命令列表为执行初始化命令做好准备
+    ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+    BuildDescriptorHeaps();
+    BuildConstantBuffers();
+    BuildRootSignature();
+    BuildShadersAndInputLayout();
+    BuildBoxGeometry();
+    BuildPSO();
+
+    // Execute the initialization commands.
+    // 执行初始化命令
+    ThrowIfFailed(mCommandList->Close());
+    ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
+    mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
+
+    // Wait until initialization is complete.
+    // 等待初始化完成
+    FlushCommandQueue();
 
     return true;
 }
@@ -25,10 +44,39 @@ bool GameApp::Init()
 void GameApp::OnResize()
 {
     DX12App::OnResize();
+    // The window resized, so update the aspect ratio and recompute the projection matrix.
+    // 若窗口尺寸被调整，则更新纵横比并重新计算投影矩阵
+    XMMATRIX P=XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi,AspectRatio(), 1.0f, 1000.0f);
+    XMStoreFloat4x4(&mProj, P);
+
 }
 
 void GameApp::Update(const DXGameTimer& gt)
 {
+    // Convert Spherical to Cartesian coordinates.
+    // 将球坐标转换为笛卡尔坐标
+    float x = mRadius * sinf(mPhi) * cosf(mTheta);
+    float z = mRadius * sinf(mPhi) * sinf(mTheta);
+    float y = mRadius * cosf(mPhi);
+
+    // Build the view matrix.
+    // 构建观察矩阵
+    XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+    XMVECTOR target = XMVectorZero();
+    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+    XMStoreFloat4x4(&mView, view);
+
+    XMMATRIX world = XMLoadFloat4x4(&mWorld);
+    XMMATRIX proj = XMLoadFloat4x4(&mProj);
+    XMMATRIX worldViewProj = world * view * proj;
+
+    // Update the constant buffer with the latest worldViewProj matrix.
+    // 使用最新的 worldViewProj 矩阵来更新常量缓冲区
+    ObjectConstants objConstants;
+    XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+    mObjectCB->CopyData(0, objConstants);
 }
 
 void GameApp::Draw(const DXGameTimer& gt)
