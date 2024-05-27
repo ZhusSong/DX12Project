@@ -92,15 +92,15 @@ void GameApp::Draw(const DXGameTimer& gt)
     // 将某个命令列表加入命令队列后，便重置该命令列表以此来复用命令列表及其内存
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
-    // Indicate a state transition on the resource usage.
-    // 对资源状态进行转换，将资源从呈现状态转换为渲染目标状态
-    mCommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
-        D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET));
-
     // Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
     // 设置视口与裁剪矩阵，它们需要随着命令列表的重置而重置
     mCommandList->RSSetViewports(1, &mScreenViewport);
     mCommandList->RSSetScissorRects(1, &mScissorRect);
+
+    // Indicate a state transition on the resource usage.
+    // 对资源状态进行转换，将资源从呈现状态转换为渲染目标状态
+    mCommandList->ResourceBarrier(1,&CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
+        D3D12_RESOURCE_STATE_PRESENT,D3D12_RESOURCE_STATE_RENDER_TARGET));
 
     // Clear the back buffer and depth buffer.
     // 清空后台缓冲区与深度缓冲区
@@ -111,6 +111,31 @@ void GameApp::Draw(const DXGameTimer& gt)
     // 指定将要渲染的缓冲区
     mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
+    // 获取描述符堆并绑定至命令列表
+    // Bind the descriptor heap(s) to the pipeline
+    ID3D12DescriptorHeap* descriptHeaps[] = { mCbvHeap.Get() };
+    mCommandList->SetDescriptorHeaps(_countof(descriptHeaps), descriptHeaps);
+
+    // 设置根签名
+    // Sets the root signature for the command list
+    mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
+
+    // 设置顶点缓冲区与索引缓冲区
+    // Sets the vertex buffer and index buffer
+    mCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
+    mCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
+
+    // 设置图元拓扑为三角形列表
+    // Sets the primitive topology to a triangle list,
+    mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // 获取本次绘制所需的cbv并将描述符与渲染流水线绑定
+    mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+
+    // 通过索引进行绘制
+    // Draw geometry by indices.
+    mCommandList->DrawIndexedInstanced(mBoxGeo->DrawArgs["box"].IndexCount,1,0,0,0);
+    
     // Indicate a state transition on the resource usage.
     // 再次对资源文件状态进行转换，将资源从渲染目标状态转换为呈现状态
     mCommandList->ResourceBarrier(
@@ -167,4 +192,86 @@ void GameApp::DrawGame()
     ImGui::Render();
     mCommandList->SetDescriptorHeaps(1, mSrvHeap.GetAddressOf());
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
+}
+void GameApp::BuildDescriptorHeaps()
+{
+    D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+    cbvHeapDesc.NumDescriptors = 1;
+    cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+    cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+    cbvHeapDesc.NodeMask = 0;
+    ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&mCbvHeap)));
+}
+
+void GameApp::BuildConstantBuffers()
+{
+    mObjectCB = std::make_unique<UploadBuffer<ObjectConstants>>(md3dDevice.Get(), 1, true);
+
+    UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+    D3D12_GPU_VIRTUAL_ADDRESS cbAddress = mObjectCB->Resource()->GetGPUVirtualAddress();
+    // Offset to the ith object constant buffer in the buffer.
+    // 偏移到常量缓冲区中第i个物体对应的常量数据，此处取i=0
+    int boxCBufIndex = 0;
+    cbAddress += boxCBufIndex * objCBByteSize;
+
+    D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+    cbvDesc.BufferLocation = cbAddress;
+    cbvDesc.SizeInBytes = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+
+    md3dDevice->CreateConstantBufferView(
+        &cbvDesc,
+        mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+}
+void GameApp::BuildRootSignature()
+{
+    // Shader programs typically require resources as input (constant buffers,
+    // textures, samplers).  The root signature defines the resources the shader
+    // programs expect.  If we think of the shader programs as a function, and
+    // the input resources as function parameters, then the root signature can be
+    // thought of as defining the function signature.  
+    // ***************************************************************
+    // 着色器程序一般需要以资源作为输入，例如常量缓冲区、纹理。采样器等
+    // 根签名则定义了着色器程序所需的具体资源
+    // 若将着色器程序看作一个函数，则将输入的资源当做像函数传递的参数数据，
+    // 那么便可认为根签名定义的是函数签名
+    
+    // Root parameter can be a table, root descriptor or root constants.
+    // 根签名可以是描述符表、根描述符或根常量
+    CD3DX12_ROOT_PARAMETER slotRootParameter[1];
+
+    // Create a single descriptor table of CBVs.
+    // 创建由单个CBV所组成的描述符表
+    CD3DX12_DESCRIPTOR_RANGE cbvTable;
+    cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 
+        1,  // 表中的描述符数量
+        0); // 将这段描述符区域绑定至此基准着色器寄存器(base shader register)
+    slotRootParameter[0].InitAsDescriptorTable(
+        1,              // 描述符区域的数量
+        &cbvTable);     // 指向描述符区域数组的指针
+
+
+    // A root signature is an array of root parameters.
+    // 根签名由一组根参数构成
+    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameter, 0, nullptr,
+        D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+    // create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
+    // 用单个寄存器槽来创建一个根签名，该槽位指向一个仅含有单个常量缓冲区的的描述符区域
+    ComPtr<ID3DBlob> serializedRootSig = nullptr;
+    ComPtr<ID3DBlob> errorBlob = nullptr;
+    HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+        serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf());
+
+    if (errorBlob != nullptr)
+    {
+        ::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+    }
+    ThrowIfFailed(hr);
+
+    ThrowIfFailed(md3dDevice->CreateRootSignature(
+        0,
+        serializedRootSig->GetBufferPointer(),
+        serializedRootSig->GetBufferSize(),
+        IID_PPV_ARGS(&mRootSignature)));
 }

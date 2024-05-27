@@ -33,7 +33,9 @@ private:
 
     void DrawGame();
 
+    // 创建常量缓冲区描述符堆
     void BuildDescriptorHeaps();
+    // 创建常量缓冲区
     void BuildConstantBuffers();
     void BuildRootSignature();
     void BuildShadersAndInputLayout();
