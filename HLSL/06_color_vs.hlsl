@@ -1,5 +1,5 @@
 #include"06_basic.hlsli"
-VertexOut VS(VertexIn vin)
+VertexOut vs(VertexIn vin)
 {
     VertexOut vout;
 	

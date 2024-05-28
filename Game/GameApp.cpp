@@ -278,8 +278,8 @@ void GameApp::BuildShadersAndInputLayout()
 {
     HRESULT hr = S_OK;
 
-    mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\06_color_VS.cso");
-    mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\06_color_PS.cso");
+    mvsByteCode = d3dUtil::CompileShader(L"HLSL\\06_color_vs.hlsl", nullptr, "VS", "vs_5_0");
+    mpsByteCode = d3dUtil::CompileShader(L"HLSL\\06_color_ps.hlsl", nullptr, "PS", "vs_5_0");
 
     mInputLayout =
     {
