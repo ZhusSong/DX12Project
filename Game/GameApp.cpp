@@ -27,6 +27,7 @@ bool GameApp::Init()
     BuildBoxGeometry();
     BuildPSO();
 
+
     // Execute the initialization commands.
     // 执行初始化命令
     ThrowIfFailed(mCommandList->Close());
@@ -89,7 +90,8 @@ void GameApp::Draw(const DXGameTimer& gt)
     // A command list can be reset after it has been added to the command queue via ExecuteCommandList.
     // Reusing the command list reuses memory.
     // 将某个命令列表加入命令队列后，便重置该命令列表以此来复用命令列表及其内存
-    ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+    // ****24.5.28 忘记复用内存
+    ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), mPSO.Get()));
 
     // Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
     // 设置视口与裁剪矩阵，它们需要随着命令列表的重置而重置
@@ -278,9 +280,10 @@ void GameApp::BuildShadersAndInputLayout()
 {
     HRESULT hr = S_OK;
 
-    mvsByteCode = d3dUtil::CompileShader(L"HLSL\\06_color_vs.hlsl", nullptr, "VS", "vs_5_0");
-    mpsByteCode = d3dUtil::CompileShader(L"HLSL\\06_color_ps.hlsl", nullptr, "PS", "vs_5_0");
-
+   /* mvsByteCode = d3dUtil::CompileShader(L"HLSL\\06_color_vs.hlsl", nullptr, "vs", "vs_5_0");
+    mpsByteCode = d3dUtil::CompileShader(L"HLSL\\06_color_ps.hlsl", nullptr, "ps", "vs_5_0");*/
+    mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\06_color_vs.cso");
+    mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\06_color_ps.cso"); 
     mInputLayout =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },

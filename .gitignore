@@ -33,4 +33,4 @@
 /.vs/
 /x64/
 /out
-/d3d12book-master/
+d3d12book-master/*
