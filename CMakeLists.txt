@@ -25,6 +25,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_compile_definitions(UNICODE _UNICODE)
 
 # 设置MSVC编译格式为utf-8
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 # 将HLSL文件夹中的内容添加到build过程
 file(COPY ${HLSL_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -121,6 +122,11 @@ DX12API/UploadBuffer.h
  DX12API/MathHelper/MathHelper.cpp
  DX12API/MathHelper/MathHelper.h
  )
+ #基础几何体相关
+ set(BasicGeometry
+ DX12API/GeometryGenerator.cpp
+ DX12API/GeometryGenerator.h
+ )
  #贴图读取
  set (TextureLoader
  DX12API/TextureLoader/DDSTextureLoader.cpp
@@ -133,17 +139,19 @@ DX12API/TextureLoader/WICTextureLoader.h
  #Game文件分组
  source_group(Game FILES ${SOURCES})
  #API文件分组
+
  #新增文件时需在此处添加分组
  source_group(DX12API FILES ${DX12API})
  source_group(DX12API\\TextureLoader FILES ${TextureLoader})
  source_group(DX12API\\MathHelper FILES ${MathHelper})
+ source_group(DX12API\\BasicGeometry FILES ${BasicGeometry})
  source_group(DX12API\\GameTimer FILES ${GameTimer})
  source_group(DX12API\\UtilityAPI FILES ${UtilityAPI})
 
  #添加可执行文件
  #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
-${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper}
+${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${BasicGeometry}
 ${HLSL_Files})
 # 添加链接库
 target_link_libraries(${TARGET_NAME}  d3d12.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib d2d1.lib dwrite.lib winmm.lib legacy_stdio_definitions.lib)
