@@ -5,6 +5,7 @@
 #include <DirectXColors.h>
 
 #include "DX12App.h"
+#include "MathHelper.h"
 #include "UploadBuffer.h"
 using namespace DirectX;
 using namespace DirectX::PackedVector;
@@ -37,9 +38,13 @@ private:
     void BuildDescriptorHeaps();
     // 创建常量缓冲区
     void BuildConstantBuffers();
+    //创建根签名
     void BuildRootSignature();
+    //创建Shader与输入布局
     void BuildShadersAndInputLayout();
+    //创建盒子几何体
     void BuildBoxGeometry();
+    //创建PSO(流水线状态对象)
     void BuildPSO();
 private:
     ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
