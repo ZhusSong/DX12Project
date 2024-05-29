@@ -61,7 +61,6 @@ GeometryGenerator::MeshData GeometryGenerator::CreateBox(float width, float heig
 	// Create the indices 
 	// 创建索引
 	uint32 i[36];
-	uint32 i[36];
 
 	// Fill in the front face index data
 	// 填充正面索引数据

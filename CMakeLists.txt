@@ -127,6 +127,12 @@ DX12API/UploadBuffer.h
  DX12API/GeometryGenerator.cpp
  DX12API/GeometryGenerator.h
  )
+ 
+ #帧资源处理
+ set(FrameResource
+ DX12API/FrameResource.cpp
+ DX12API/FrameResource.h
+ )
  #贴图读取
  set (TextureLoader
  DX12API/TextureLoader/DDSTextureLoader.cpp
@@ -145,13 +151,14 @@ DX12API/TextureLoader/WICTextureLoader.h
  source_group(DX12API\\TextureLoader FILES ${TextureLoader})
  source_group(DX12API\\MathHelper FILES ${MathHelper})
  source_group(DX12API\\BasicGeometry FILES ${BasicGeometry})
+ source_group(DX12API\\FrameResource FILES ${FrameResource})
  source_group(DX12API\\GameTimer FILES ${GameTimer})
  source_group(DX12API\\UtilityAPI FILES ${UtilityAPI})
 
  #添加可执行文件
  #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
-${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${BasicGeometry}
+${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${BasicGeometry} ${FrameResource}
 ${HLSL_Files})
 # 添加链接库
 target_link_libraries(${TARGET_NAME}  d3d12.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib d2d1.lib dwrite.lib winmm.lib legacy_stdio_definitions.lib)

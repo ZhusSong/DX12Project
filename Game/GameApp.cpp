@@ -20,11 +20,13 @@ bool GameApp::Init()
     // Reset the command list to prep for initialization commands.
     // 重置命令列表为执行初始化命令做好准备
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
-    BuildDescriptorHeaps();
-    BuildConstantBuffers();
     BuildRootSignature();
     BuildShadersAndInputLayout();
-    BuildBoxGeometry();
+    BuildShapeGeometry();
+    BuildRenderItems();
+    BuildFrameResources();
+    BuildDescriptorHeaps();
+    BuildConstantBuffers();
     BuildPSO();
 
 
@@ -53,46 +55,52 @@ void GameApp::OnResize()
 
 void GameApp::Update(const DXGameTimer& gt)
 {
-    // Convert Spherical to Cartesian coordinates.
-    // 将球坐标转换为笛卡尔坐标
-    float x = mRadius * sinf(mPhi) * cosf(mTheta);
-    float z = mRadius * sinf(mPhi) * sinf(mTheta);
-    float y = mRadius * cosf(mPhi);
+    OnKeyboardInput(gt);
+    UpdateCamera(gt);
 
-    // Build the view matrix.
-    // 构建观察矩阵
-    XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
-    XMVECTOR target = XMVectorZero();
-    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    // Cycle through the circular frame resource array.
+    // 循环获取帧资源循环数组中的元素
+    mCurrFrameResourceIndex = (mCurrFrameResourceIndex + 1) % gNumFrameResources;
+    mCurrFrameResource = mFrameResources[mCurrFrameResourceIndex].get();
 
-    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-    XMStoreFloat4x4(&mView, view);
-
-    XMMATRIX world = XMLoadFloat4x4(&mWorld);
-    XMMATRIX proj = XMLoadFloat4x4(&mProj);
-    XMMATRIX worldViewProj = world * view * proj;
-
-    // Update the constant buffer with the latest worldViewProj matrix.
-    // 使用最新的 worldViewProj 矩阵来更新常量缓冲区
-    ObjectConstants objConstants;
-    XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
-    mObjectCB->CopyData(0, objConstants);
+    // Has the GPU finished processing the commands of the current frame resource?
+    // If not, wait until the GPU has completed commands up to this fence point.
+    // 检查GPU是否已经执行完处理当前帧资源的所有命令
+    // 若还没完成，则令CPU等待，直到GPU完成所有命令的执行并抵达此围栏点
+    if (mCurrFrameResource->Fence != 0 && mFence->GetCompletedValue() < mCurrFrameResource->Fence)
+    {
+        HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+        ThrowIfFailed(mFence->SetEventOnCompletion(mCurrFrameResource->Fence, eventHandle));
+        WaitForSingleObject(eventHandle, INFINITE);
+        CloseHandle(eventHandle);
+    }
+    // 更新常量缓冲区等在mCurrFrameResource内的资源
+    UpdateObjectCBs(gt);
+    UpdateMainPassCB(gt);
+  
 }
 
 void GameApp::Draw(const DXGameTimer& gt)
 {
-    // Reuse the memory associated with command recording.
-    // We can only reset when the associated command lists have finished execution on the GPU.
-    // 重复使用记录命令的相关内存
-    // 只有当与GPU关联的命令列表执行完成时才将其重置
-    ThrowIfFailed(mDirectCmdListAlloc->Reset());
+    auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
+   
 
     // A command list can be reset after it has been added to the command queue via ExecuteCommandList.
     // Reusing the command list reuses memory.
     // 将某个命令列表加入命令队列后，便重置该命令列表以此来复用命令列表及其内存
     // ****24.5.28 忘记复用内存
-    ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), mPSO.Get()));
+    ThrowIfFailed(cmdListAlloc->Reset());
 
+    // 在通过ExecuteCommandList方法将命令列表添加到命令队列之后，我们就可以进行重置
+    // 以复用命令列表即复用与之相关的内存
+    if (mIsWireframe)
+    {
+        ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), mPSOs["opaque_wireframe"].Get()));
+    }
+    else
+    {
+        ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), mPSOs["opaque"].Get()));
+    }
     // Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
     // 设置视口与裁剪矩阵，它们需要随着命令列表的重置而重置
     mCommandList->RSSetViewports(1, &mScreenViewport);
@@ -121,22 +129,14 @@ void GameApp::Draw(const DXGameTimer& gt)
     // Sets the root signature for the command list
     mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-    // 设置顶点缓冲区与索引缓冲区
-    // Sets the vertex buffer and index buffer
-    mCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
-    mCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
+    // 通过当前帧索引计算着色器资源视图与常量缓冲区视图，并分配至图形根签名中的描述符表
+    int passCbvIndex = mPassCbvOffset + mCurrFrameResourceIndex;
+    auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
+    passCbvHandle.Offset(passCbvIndex, mCbvSrvUavDescriptorSize);
+    mCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);
 
-    // 设置图元拓扑为三角形列表
-    // Sets the primitive topology to a triangle list,
-    mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    DrawRenderItems(mCommandList.Get(), mOpaqueRitems);
 
-    // 获取本次绘制所需的cbv并将描述符与渲染流水线绑定
-    mCommandList->SetGraphicsRootDescriptorTable(0, mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-
-    // 通过索引进行绘制
-    // Draw geometry by indices.
-    mCommandList->DrawIndexedInstanced(mBoxGeo->DrawArgs["box"].IndexCount,1,0,0,0);
-    
     // Indicate a state transition on the resource usage.
     // 再次对资源文件状态进行转换，将资源从渲染目标状态转换为呈现状态
     mCommandList->ResourceBarrier(
@@ -161,9 +161,84 @@ void GameApp::Draw(const DXGameTimer& gt)
     ThrowIfFailed(mSwapChain->Present(0, 0));
     mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
 
-    // Wait until frame commands are complete.  
-    // 等待此帧的命令执行完毕。
-    FlushCommandQueue();
+    // Advance the fence value to mark commands up to this fence point.
+    // 增加围栏值，将之前的命令标记到此围栏点
+    mCurrFrameResource->Fence = ++mCurrentFence;
+
+    // Add an instruction to the command queue to set a new fence point. 
+    // Because we are on the GPU timeline, the new fence point won't be 
+    // set until the GPU finishes processing all the commands prior to this Signal().
+    // 向命令队列添加一条新指令以设置新围栏点
+    // 因为GPU还在执行我们此前向命令队列中传入的命令，因此GPU不会立即设置新围栏点
+    // 这要等到它处理完Signal()函数之前的所有命令
+    mCommandQueue->Signal(mFence.Get(), mCurrentFence);
+
+}
+
+void GameApp::OnMouseDown()
+{
+    if (ImGui::IsKeyDown)
+    {
+
+    }
+}
+
+void GameApp::OnMouseUp()
+{
+   
+}
+
+void GameApp::OnMouseMove()
+{
+
+}
+void GameApp::UpdateCamera(const DXGameTimer& gt)
+{	
+    // Convert Spherical to Cartesian coordinates.
+    // 球面坐标转笛卡尔坐标
+    mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
+    mEyePos.z = mRadius * sinf(mPhi) * sinf(mTheta);
+    mEyePos.y = mRadius * cosf(mPhi);
+
+    // Build the view matrix.
+    // 构建观察矩阵
+    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
+    XMVECTOR target = XMVectorZero();
+    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+    XMStoreFloat4x4(&mView, view);
+
+}
+
+void GameApp::UpdateObjectCBs(const DXGameTimer& gt)
+{
+    auto currObjectCB = mCurrFrameResource->ObjectCB.get();
+    for (auto& e : mAllRitems)
+    {
+        // Only update the cbuffer data if the constants have changed.  
+        // This needs to be tracked per frame resource.
+        // 只要常量发生了改变就要更新常量缓冲区内的数据，且要对每个帧资源都进行更新
+        if (e->NumFramesDirty > 0)
+        {
+            XMMATRIX world = XMLoadFloat4x4(&e->World);
+
+            ObjectConstants objConstants;
+            XMStoreFloat4x4(&objConstants.World, XMMatrixTranspose(world));
+
+            currObjectCB->CopyData(e->ObjCBIndex, objConstants);
+
+            // Next FrameResource need to be updated too.
+            // 下一帧的资源也需要更新
+            e->NumFramesDirty--;
+        }
+    }
+}
+void GameApp::UpdateMainPassCB(const DXGameTimer& gt)
+{
+
+
+
 }
 
 void GameApp::DrawGame()
