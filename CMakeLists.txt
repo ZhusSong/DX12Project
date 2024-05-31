@@ -67,7 +67,7 @@ foreach(HLSL_FILE ${HLSL_FILES})
     set_source_files_properties(${HLSL_FILE} PROPERTIES
                                 VS_SHADER_OBJECT_FILE_NAME HLSL/${HLSL_FBASENAME_WE}.cso
                                 VS_SHADER_TYPE ${SHADER_TYPE}
-                                VS_SHADER_MODEL 5.1
+                                VS_SHADER_MODEL 5.0
                                 VS_SHADER_ENTRYPOINT ${ENTRY_POINT}
                                 VS_SHADER_DISABLE_OPTIMIZATIONS $<$<CONFIG:Debug>:true>
                                 VS_SHADER_ENABLE_DEBUG $<$<CONFIG:Debug>:true>)
@@ -94,6 +94,8 @@ Game/DX12Project.cpp
 #游戏进程
 Game/GameApp.cpp
 Game/GameApp.h
+Game/Wave.cpp
+Game/Wave.h
  )
 
  #DX12API

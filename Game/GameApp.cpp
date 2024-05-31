@@ -21,20 +21,17 @@ bool GameApp::Init()
     // Reset the command list to prep for initialization commands.
     // 重置命令列表为执行初始化命令做好准备
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
+
+
+    mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
+
     BuildRootSignature();
-
     BuildShadersAndInputLayout();
-
-    BuildShapeGeometry();
-
+    BuildLandGeometry();
+    BuildWavesGeometryBuffers();
     BuildRenderItems();
-
+    BuildRenderItems();
     BuildFrameResources();
-
-    BuildDescriptorHeaps();
-
-    BuildConstantBuffersViews();
-
     BuildPSO();
 
 
@@ -84,6 +81,9 @@ void GameApp::Update(const DXGameTimer& gt)
     // 更新常量缓冲区等在mCurrFrameResource内的资源
     UpdateObjectCBs(gt);
     UpdateMainPassCB(gt);
+    UpdateWaves(gt);
+
+   
   
 }
 
@@ -127,30 +127,29 @@ void GameApp::Draw(const DXGameTimer& gt)
     // 指定将要渲染的缓冲区
     mCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &DepthStencilView());
 
-    // 获取描述符堆并绑定至命令列表
-    // Bind the descriptor heap(s) to the pipeline
-    ID3D12DescriptorHeap* descriptHeaps[] = { mCbvHeap.Get() };
-    mCommandList->SetDescriptorHeaps(_countof(descriptHeaps), descriptHeaps);
+    //// 获取描述符堆并绑定至命令列表
+    //// Bind the descriptor heap(s) to the pipeline
+    //ID3D12DescriptorHeap* descriptHeaps[] = { mCbvHeap.Get() };
+    //mCommandList->SetDescriptorHeaps(_countof(descriptHeaps), descriptHeaps);
 
     // 设置根签名
     // Sets the root signature for the command list
     mCommandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-    // 通过当前帧索引计算着色器资源视图与常量缓冲区视图，并分配至图形根签名中的描述符表
-    int passCbvIndex = mPassCbvOffset + mCurrFrameResourceIndex;
-    auto passCbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-    passCbvHandle.Offset(passCbvIndex, mCbvSrvUavDescriptorSize);
-    mCommandList->SetGraphicsRootDescriptorTable(1, passCbvHandle);
+    // Bind per-pass constant buffer.  We only need to do this once per-pass.
+    // 绑定渲染过程中所用的常量缓冲区，每个渲染过程中我们只需这样做一次
+    auto passCB = mCurrFrameResource->PassCB->Resource();
+    mCommandList->SetGraphicsRootConstantBufferView(1, passCB->GetGPUVirtualAddress());
 
-    DrawRenderItems(mCommandList.Get(), mOpaqueRitems);
+
+    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);
 
     // Indicate a state transition on the resource usage.
     // 再次对资源文件状态进行转换，将资源从渲染目标状态转换为呈现状态
-    mCommandList->ResourceBarrier(
-        1, &CD3DX12_RESOURCE_BARRIER::Transition(
-            CurrentBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+    mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(), 
+        D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-    //绘制游戏物体及画面
+    //绘制ImHui
     DrawGame();
 
 
@@ -184,6 +183,7 @@ void GameApp::Draw(const DXGameTimer& gt)
 
 void GameApp::OnMouseDown()
 {
+
 }
 
 void GameApp::OnMouseUp()
@@ -266,7 +266,44 @@ void GameApp::UpdateMainPassCB(const DXGameTimer& gt)
     currPassCB->CopyData(0, mMainPassCB);
 
 }
+void GameApp::UpdateWaves(const DXGameTimer& gt)
+{
+    // Every quarter second, generate a random wave.
+    // 每1/4秒创造一个随机波浪
+    static float t_base = 0.0f;
+    if ((mTimer.GetTotalTime() - t_base) >= 0.25f)
+    {
+        t_base += 0.25f;
 
+        int i = MathHelper::Rand(4, mWaves->RowCount() - 5);
+        int j = MathHelper::Rand(4, mWaves->ColumnCount() - 5);
+
+        float r = MathHelper::RandF(0.2f, 0.5f);
+
+        mWaves->Disturb(i, j, r);
+    }
+
+    // Update the wave simulation.
+    // 更新波浪模拟
+    mWaves->Update(gt.GetDeltaTime());
+
+    // Update the wave vertex buffer with the new solution.
+    // 用波浪方程解出的新数据来更新波浪顶点缓冲区
+    auto currWavesVB = mCurrFrameResource->WavesVB.get();
+    for (int i = 0; i < mWaves->VertexCount(); ++i)
+    {
+        Vertex v;
+
+        v.Pos = mWaves->Position(i);
+        v.Color = XMFLOAT4(DirectX::Colors::Blue);
+
+        currWavesVB->CopyData(i, v);
+    }
+
+    // Set the dynamic VB of the wave renderitem to the current frame VB.
+    // 将波浪渲染项的动态顶点缓冲区设置到当前帧的顶点缓冲区
+    mWavesRitem->Geo->VertexBufferGPU = currWavesVB->Resource();
+}
 void GameApp::DrawGame()
 {
     bool show_demo_window = false;
@@ -295,88 +332,88 @@ void GameApp::DrawGame()
     mCommandList->SetDescriptorHeaps(1, mSrvHeap.GetAddressOf());
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
 }
-void GameApp::BuildDescriptorHeaps()
-{
-    UINT objCount = (UINT)mOpaqueRitems.size();
-
-    // Need a CBV descriptor for each object for each frame resource,
-    // +1 for the perPass CBV for each frame resource.
-    // 需要为每个帧资源中的每个物体都创建一个CBV描述符
-    // 为了容纳每个帧资源中的渲染过程CBV而+1
-    UINT numDescriptors = (objCount + 1) * gNumFrameResources;
-
-    // Save an offset to the start of the pass CBVs.These are the last 3 descriptors.
-    // 保存渲染过程CBV的起始偏移量，在本程序中，这是在最后的3个描述符
-    mPassCbvOffset = objCount * gNumFrameResources;
-
-    D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-    cbvHeapDesc.NumDescriptors = numDescriptors;
-    cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-    cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-    cbvHeapDesc.NodeMask = 0;
-    ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
-        IID_PPV_ARGS(&mCbvHeap)));
-}
-
-void GameApp::BuildConstantBuffersViews()
-{
-    UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
-
-    UINT objCount = (UINT)mOpaqueRitems.size();
-
-    // Need a CBV descriptor for each object for each frame resource.
-    // 需要为每个帧资源中的每个物体都创建一个CBV描述符
-    for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
-    {
-        auto objectCB = mFrameResources[frameIndex]->ObjectCB->Resource();
-        for (UINT i = 0; i < objCount; ++i)
-        {
-            D3D12_GPU_VIRTUAL_ADDRESS cbAddress = objectCB->GetGPUVirtualAddress();
-
-            // Offset to the ith object constant buffer in the buffer.
-            // 偏移到缓冲区中第i个物体的常量缓冲区
-            cbAddress += i * objCBByteSize;
-
-            // Offset to the object cbv in the descriptor heap.
-            // 偏移到该物体在描述符堆中的CBV
-            int heapIndex = frameIndex * objCount + i;
-
-            auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-            handle.Offset(heapIndex, mCbvSrvUavDescriptorSize);
-
-            D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-            cbvDesc.BufferLocation = cbAddress;
-            cbvDesc.SizeInBytes = objCBByteSize;
-
-            md3dDevice->CreateConstantBufferView(&cbvDesc, handle);
-        }
-    }
-
-    UINT passCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
-
-    // Last three descriptors are the pass CBVs for each frame resource.
-    // 最后的三个描述符依次是每个帧资源的渲染过程CBV
-    for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
-    {
-        auto passCB = mFrameResources[frameIndex]->PassCB->Resource();
-        // 每个帧资源的渲染过程缓冲区中只存有一个常量缓冲区
-        D3D12_GPU_VIRTUAL_ADDRESS cbAddress = passCB->GetGPUVirtualAddress();
-
-        // Offset to the pass cbv in the descriptor heap.
-        // 偏移到描述符堆中对应的渲染过程CBV
-        int heapIndex = mPassCbvOffset + frameIndex;
-
-        //指定要偏移到第几个描述符，再给出描述符的增量大小
-        auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvHeap->GetCPUDescriptorHandleForHeapStart());
-        handle.Offset(heapIndex, mCbvSrvUavDescriptorSize);
-
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-        cbvDesc.BufferLocation = cbAddress;
-        cbvDesc.SizeInBytes = passCBByteSize;
-
-        md3dDevice->CreateConstantBufferView(&cbvDesc, handle);
-    }
-}
+//void GameApp::BuildDescriptorHeaps()
+//{
+//    UINT objCount = (UINT)mOpaqueRitems.size();
+//
+//    // Need a CBV descriptor for each object for each frame resource,
+//    // +1 for the perPass CBV for each frame resource.
+//    // 需要为每个帧资源中的每个物体都创建一个CBV描述符
+//    // 为了容纳每个帧资源中的渲染过程CBV而+1
+//    UINT numDescriptors = (objCount + 1) * gNumFrameResources;
+//
+//    // Save an offset to the start of the pass CBVs.These are the last 3 descriptors.
+//    // 保存渲染过程CBV的起始偏移量，在本程序中，这是在最后的3个描述符
+//    mPassCbvOffset = objCount * gNumFrameResources;
+//
+//    D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+//    cbvHeapDesc.NumDescriptors = numDescriptors;
+//    cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+//    cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+//    cbvHeapDesc.NodeMask = 0;
+//    ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&cbvHeapDesc,
+//        IID_PPV_ARGS(&mCbvHeap)));
+//}
+//
+//void GameApp::BuildConstantBuffersViews()
+//{
+//    UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
+//
+//    UINT objCount = (UINT)mOpaqueRitems.size();
+//
+//    // Need a CBV descriptor for each object for each frame resource.
+//    // 需要为每个帧资源中的每个物体都创建一个CBV描述符
+//    for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
+//    {
+//        auto objectCB = mFrameResources[frameIndex]->ObjectCB->Resource();
+//        for (UINT i = 0; i < objCount; ++i)
+//        {
+//            D3D12_GPU_VIRTUAL_ADDRESS cbAddress = objectCB->GetGPUVirtualAddress();
+//
+//            // Offset to the ith object constant buffer in the buffer.
+//            // 偏移到缓冲区中第i个物体的常量缓冲区
+//            cbAddress += i * objCBByteSize;
+//
+//            // Offset to the object cbv in the descriptor heap.
+//            // 偏移到该物体在描述符堆中的CBV
+//            int heapIndex = frameIndex * objCount + i;
+//
+//            auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+//            handle.Offset(heapIndex, mCbvSrvUavDescriptorSize);
+//
+//            D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+//            cbvDesc.BufferLocation = cbAddress;
+//            cbvDesc.SizeInBytes = objCBByteSize;
+//
+//            md3dDevice->CreateConstantBufferView(&cbvDesc, handle);
+//        }
+//    }
+//
+//    UINT passCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(PassConstants));
+//
+//    // Last three descriptors are the pass CBVs for each frame resource.
+//    // 最后的三个描述符依次是每个帧资源的渲染过程CBV
+//    for (int frameIndex = 0; frameIndex < gNumFrameResources; ++frameIndex)
+//    {
+//        auto passCB = mFrameResources[frameIndex]->PassCB->Resource();
+//        // 每个帧资源的渲染过程缓冲区中只存有一个常量缓冲区
+//        D3D12_GPU_VIRTUAL_ADDRESS cbAddress = passCB->GetGPUVirtualAddress();
+//
+//        // Offset to the pass cbv in the descriptor heap.
+//        // 偏移到描述符堆中对应的渲染过程CBV
+//        int heapIndex = mPassCbvOffset + frameIndex;
+//
+//        //指定要偏移到第几个描述符，再给出描述符的增量大小
+//        auto handle = CD3DX12_CPU_DESCRIPTOR_HANDLE(mCbvHeap->GetCPUDescriptorHandleForHeapStart());
+//        handle.Offset(heapIndex, mCbvSrvUavDescriptorSize);
+//
+//        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+//        cbvDesc.BufferLocation = cbAddress;
+//        cbvDesc.SizeInBytes = passCBByteSize;
+//
+//        md3dDevice->CreateConstantBufferView(&cbvDesc, handle);
+//    }
+//}
 void GameApp::BuildRootSignature()
 {
     // Shader programs typically require resources as input (constant buffers,
@@ -390,26 +427,13 @@ void GameApp::BuildRootSignature()
     // 若将着色器程序看作一个函数，则将输入的资源当做像函数传递的参数数据，
     // 那么便可认为根签名定义的是函数签名
 
-    CD3DX12_DESCRIPTOR_RANGE cbvTable0;
-    cbvTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 
-        1, 
-        0);
-
-    CD3DX12_DESCRIPTOR_RANGE cbvTable1;
-    cbvTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 
-        1,  // 表中的描述符数量
-        1); // 将这段描述符区域绑定至此基准着色器寄存器(base shader register)
-
+   
     // Root parameter can be a table, root descriptor or root constants.
     // 根签名可以是描述符表、根描述符或根常量
     CD3DX12_ROOT_PARAMETER slotRootParameter[2];
-    slotRootParameter[0].InitAsDescriptorTable(
-        1,              // 描述符区域的数量
-        &cbvTable0);     // 指向描述符区域数组的指针
+    slotRootParameter[0].InitAsConstantBufferView(0); // 指向描述符区域数组的指针
 
-    slotRootParameter[1].InitAsDescriptorTable(
-        1,              // 描述符区域的数量
-        &cbvTable1);     // 指向描述符区域数组的指针
+    slotRootParameter[1].InitAsConstantBufferView(1);     // 指向描述符区域数组的指针
 
     // A root signature is an array of root parameters.
     // 根签名由一组根参数构成
@@ -439,8 +463,8 @@ void GameApp::BuildShadersAndInputLayout()
 {
     HRESULT hr = S_OK;
 
-    mShaders["standardVS"] = d3dUtil::CompileShader(L"HLSL\\07_color_vs.hlsl", nullptr, "vs", "vs_5_1");
-    mShaders["opaquePS"] = d3dUtil::CompileShader(L"HLSL\\07_color_ps.hlsl", nullptr, "ps", "ps_5_1");
+    mShaders["standardVS"] = d3dUtil::CompileShader(L"HLSL\\07_color_vs.hlsl", nullptr, "vs", "vs_5_0");
+    mShaders["opaquePS"] = d3dUtil::CompileShader(L"HLSL\\07_color_ps.hlsl", nullptr, "ps", "ps_5_0");
    /* mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\06_color_vs.cso");
     mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\06_color_ps.cso"); */
     mInputLayout =
@@ -451,106 +475,62 @@ void GameApp::BuildShadersAndInputLayout()
 }
 
 
-void GameApp::BuildShapeGeometry()
+void GameApp::BuildLandGeometry()
 {
     GeometryGenerator geoGen;
-    GeometryGenerator::MeshData box = geoGen.CreateBox(1.5f, 0.5f, 1.5f, 3);
-    GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
-    GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
-    GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
+    GeometryGenerator::MeshData grid = geoGen.CreateGrid(160.0f, 160.0f, 50, 50);
 
     //
-    // We are concatenating all the geometry into one big vertex/index buffer.  So
-    // define the regions in the buffer each submesh covers.
-    // 将所有几何体数据都合并到一对大的顶点/索引缓冲区中
-    // 以此来定义每个子网格数据在缓冲区中所占的范围
+    // Extract the vertex elements we are interested and apply the height function to
+    // each vertex.  In addition, color the vertices based on their height so we have
+    // sandy looking beaches, grassy low hills, and snow mountain peaks.
+    // 获取我们需要的顶点元素，并利用高度函数计算每个顶点的高度值
+    // 由于顶点的颜色根据它的高度而定，因此会有不同颜色的物体
+    // 
 
-    // Cache the vertex offsets to each object in the concatenated vertex buffer.
-    // 对合并顶点缓冲区中每个物体的顶点偏移量进行缓存
-    UINT boxVertexOffset = 0;
-    UINT gridVertexOffset = (UINT)box.Vertices.size();
-    UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
-    UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
-
-    // Cache the starting index for each object in the concatenated index buffer.
-    // 对合并索引缓冲区中每个物体的起始索引进行缓存
-    UINT boxIndexOffset = 0;
-    UINT gridIndexOffset = (UINT)box.Indices32.size();
-    UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
-    UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
-
-    // Define the SubmeshGeometry that cover different regions of the vertex/index buffers.
-    // 定义的多个SubmeshGeometry结构体中包含了顶点/索引缓冲区中不同几何体的子网格数据
-
-    SubmeshGeometry boxSubmesh;
-    boxSubmesh.IndexCount = (UINT)box.Indices32.size();
-    boxSubmesh.StartIndexLocation = boxIndexOffset;
-    boxSubmesh.BaseVertexLocation = boxVertexOffset;
-
-    SubmeshGeometry gridSubmesh;
-    gridSubmesh.IndexCount = (UINT)grid.Indices32.size();
-    gridSubmesh.StartIndexLocation = gridIndexOffset;
-    gridSubmesh.BaseVertexLocation = gridVertexOffset;
-
-    SubmeshGeometry sphereSubmesh;
-    sphereSubmesh.IndexCount = (UINT)sphere.Indices32.size();
-    sphereSubmesh.StartIndexLocation = sphereIndexOffset;
-    sphereSubmesh.BaseVertexLocation = sphereVertexOffset;
-
-    SubmeshGeometry cylinderSubmesh;
-    cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
-    cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
-    cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
-
-    //
-    // Extract the vertex elements we are interested in and pack the
-    // vertices of all the meshes into one vertex buffer.
-    // 提取出所需的顶点元素并将所有网格的顶点置入一个顶点缓冲区
-
-    auto totalVertexCount =
-        box.Vertices.size() +
-        grid.Vertices.size() +
-        sphere.Vertices.size() +
-        cylinder.Vertices.size();
-
-    std::vector<Vertex> vertices(totalVertexCount);
-
-    UINT k = 0;
-    for (size_t i = 0; i < box.Vertices.size(); ++i, ++k)
+    std::vector<Vertex> vertices(grid.Vertices.size());
+    for (size_t i = 0; i < grid.Vertices.size(); ++i)
     {
-        vertices[k].Pos = box.Vertices[i].Position;
-        vertices[k].Color = XMFLOAT4(DirectX::Colors::DarkGreen);
-    }
+        auto& p = grid.Vertices[i].Position;
+        vertices[i].Pos = p;
+        vertices[i].Pos.y = GetHillsHeight(p.x, p.z);
 
-    for (size_t i = 0; i < grid.Vertices.size(); ++i, ++k)
-    {
-        vertices[k].Pos = grid.Vertices[i].Position;
-        vertices[k].Color = XMFLOAT4(DirectX::Colors::ForestGreen);
+        // Color the vertex based on its height.
+        // 根据顶点高度为其上色
+        if (vertices[i].Pos.y < -10.0f)
+        {
+            // Sandy beach color.
+            vertices[i].Color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
+        }
+        else if (vertices[i].Pos.y < 5.0f)
+        {
+            // Light yellow-green.
+            vertices[i].Color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
+        }
+        else if (vertices[i].Pos.y < 12.0f)
+        {
+            // Dark yellow-green.
+            vertices[i].Color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
+        }
+        else if (vertices[i].Pos.y < 20.0f)
+        {
+            // Dark brown.
+            vertices[i].Color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
+        }
+        else
+        {
+            // White snow.
+            vertices[i].Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+        }
     }
-
-    for (size_t i = 0; i < sphere.Vertices.size(); ++i, ++k)
-    {
-        vertices[k].Pos = sphere.Vertices[i].Position;
-        vertices[k].Color = XMFLOAT4(DirectX::Colors::Crimson);
-    }
-
-    for (size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
-    {
-        vertices[k].Pos = cylinder.Vertices[i].Position;
-        vertices[k].Color = XMFLOAT4(DirectX::Colors::SteelBlue);
-    }
-
-    std::vector<std::uint16_t> indices;
-    indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
-    indices.insert(indices.end(), std::begin(grid.GetIndices16()), std::end(grid.GetIndices16()));
-    indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
-    indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
 
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+
+    std::vector<std::uint16_t> indices = grid.GetIndices16();
     const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
     auto geo = std::make_unique<MeshGeometry>();
-    geo->Name = "shapeGeo";
+    geo->Name = "landGeo";
 
     ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
     CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
@@ -569,12 +549,73 @@ void GameApp::BuildShapeGeometry()
     geo->IndexFormat = DXGI_FORMAT_R16_UINT;
     geo->IndexBufferByteSize = ibByteSize;
 
-    geo->DrawArgs["box"] = boxSubmesh;
-    geo->DrawArgs["grid"] = gridSubmesh;
-    geo->DrawArgs["sphere"] = sphereSubmesh;
-    geo->DrawArgs["cylinder"] = cylinderSubmesh;
+    SubmeshGeometry submesh;
+    submesh.IndexCount = (UINT)indices.size();
+    submesh.StartIndexLocation = 0;
+    submesh.BaseVertexLocation = 0;
 
-    mGeometries[geo->Name] = std::move(geo);
+    geo->DrawArgs["grid"] = submesh;
+
+    mGeometries["landGeo"] = std::move(geo);
+}
+
+void GameApp::BuildWavesGeometryBuffers()
+{
+    std::vector<std::uint16_t> indices(3 * mWaves->TriangleCount()); // 3 indices per face
+    assert(mWaves->VertexCount() < 0x0000ffff);
+
+    // Iterate over each quad.
+    // 迭代每个需要被创建的面片
+    int m = mWaves->RowCount();
+    int n = mWaves->ColumnCount();
+    int k = 0;
+    for (int i = 0; i < m - 1; ++i)
+    {
+        for (int j = 0; j < n - 1; ++j)
+        {
+            indices[k] = i * n + j;
+            indices[k + 1] = i * n + j + 1;
+            indices[k + 2] = (i + 1) * n + j;
+
+            indices[k + 3] = (i + 1) * n + j;
+            indices[k + 4] = i * n + j + 1;
+            indices[k + 5] = (i + 1) * n + j + 1;
+            // next quad
+            // 每个面片含有两个三角形即6个顶点，因此+6来创建下一个面片
+            k += 6; 
+        }
+    }
+
+    UINT vbByteSize = mWaves->VertexCount() * sizeof(Vertex);
+    UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+
+    auto geo = std::make_unique<MeshGeometry>();
+    geo->Name = "waterGeo";
+
+    // Set dynamically.
+    // 动态设置
+    geo->VertexBufferCPU = nullptr;
+    geo->VertexBufferGPU = nullptr;
+
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
+    CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+    geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+
+    geo->VertexByteStride = sizeof(Vertex);
+    geo->VertexBufferByteSize = vbByteSize;
+    geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+    geo->IndexBufferByteSize = ibByteSize;
+
+    SubmeshGeometry submesh;
+    submesh.IndexCount = (UINT)indices.size();
+    submesh.StartIndexLocation = 0;
+    submesh.BaseVertexLocation = 0;
+
+    geo->DrawArgs["grid"] = submesh;
+
+    mGeometries["waterGeo"] = std::move(geo);
 }
 void GameApp::BuildPSO()
 {
@@ -597,7 +638,7 @@ void GameApp::BuildPSO()
         mShaders["opaquePS"]->GetBufferSize()
     };
     opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+    //opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
     opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     opaquePsoDesc.SampleMask = UINT_MAX;
@@ -626,89 +667,37 @@ void GameApp::BuildFrameResources()
     for (int i = 0; i < gNumFrameResources; ++i)
     {
         mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(),
-            1, (UINT)mAllRitems.size()));
+            1, (UINT)mAllRitems.size(), mWaves->VertexCount()));
     }
 }
 
 void GameApp::BuildRenderItems()
 {
-    auto boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(0.0f, 0.5f, 0.0f));
-    boxRitem->ObjCBIndex = 0;
-    boxRitem->Geo = mGeometries["shapeGeo"].get();
-    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
-    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
-    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    mAllRitems.push_back(std::move(boxRitem));
+    auto wavesRitem = std::make_unique<RenderItem>();
+    wavesRitem->World = MathHelper::Identity4x4();
+    wavesRitem->ObjCBIndex = 0;
+    wavesRitem->Geo = mGeometries["waterGeo"].get();
+    wavesRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    wavesRitem->IndexCount = wavesRitem->Geo->DrawArgs["grid"].IndexCount;
+    wavesRitem->StartIndexLocation = wavesRitem->Geo->DrawArgs["grid"].StartIndexLocation;
+    wavesRitem->BaseVertexLocation = wavesRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
+
+    mWavesRitem = wavesRitem.get();
 
     auto gridRitem = std::make_unique<RenderItem>();
     gridRitem->World = MathHelper::Identity4x4();
     gridRitem->ObjCBIndex = 1;
-    gridRitem->Geo = mGeometries["shapeGeo"].get();
+    gridRitem->Geo = mGeometries["landGeo"].get();
     gridRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
     gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
+
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(gridRitem.get());
+
+    mAllRitems.push_back(std::move(wavesRitem));
     mAllRitems.push_back(std::move(gridRitem));
-
-    //构建柱体与球体
-    UINT objCBIndex = 2;
-    for (int i = 0; i < 5; ++i)
-    {
-        auto leftCylRitem = std::make_unique<RenderItem>();
-        auto rightCylRitem = std::make_unique<RenderItem>();
-        auto leftSphereRitem = std::make_unique<RenderItem>();
-        auto rightSphereRitem = std::make_unique<RenderItem>();
-
-        XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i * 5.0f);
-        XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i * 5.0f);
-
-        XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i * 5.0f);
-        XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i * 5.0f);
-
-        XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
-        leftCylRitem->ObjCBIndex = objCBIndex++;
-        leftCylRitem->Geo = mGeometries["shapeGeo"].get();
-        leftCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        leftCylRitem->IndexCount = leftCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-        leftCylRitem->StartIndexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-        leftCylRitem->BaseVertexLocation = leftCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-
-        XMStoreFloat4x4(&rightCylRitem->World, leftCylWorld);
-        rightCylRitem->ObjCBIndex = objCBIndex++;
-        rightCylRitem->Geo = mGeometries["shapeGeo"].get();
-        rightCylRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        rightCylRitem->IndexCount = rightCylRitem->Geo->DrawArgs["cylinder"].IndexCount;
-        rightCylRitem->StartIndexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-        rightCylRitem->BaseVertexLocation = rightCylRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-
-        XMStoreFloat4x4(&leftSphereRitem->World, leftSphereWorld);
-        leftSphereRitem->ObjCBIndex = objCBIndex++;
-        leftSphereRitem->Geo = mGeometries["shapeGeo"].get();
-        leftSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        leftSphereRitem->IndexCount = leftSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-        leftSphereRitem->StartIndexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-        leftSphereRitem->BaseVertexLocation = leftSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-
-        XMStoreFloat4x4(&rightSphereRitem->World, rightSphereWorld);
-        rightSphereRitem->ObjCBIndex = objCBIndex++;
-        rightSphereRitem->Geo = mGeometries["shapeGeo"].get();
-        rightSphereRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        rightSphereRitem->IndexCount = rightSphereRitem->Geo->DrawArgs["sphere"].IndexCount;
-        rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
-        rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
-
-        mAllRitems.push_back(std::move(leftCylRitem));
-        mAllRitems.push_back(std::move(rightCylRitem));
-        mAllRitems.push_back(std::move(leftSphereRitem));
-        mAllRitems.push_back(std::move(rightSphereRitem));
-    }
-
-    // All the render items are opaque.
-    // 所有渲染项均为非透明
-    for (auto& e : mAllRitems)
-        mOpaqueRitems.push_back(e.get());
+ 
 }
 
 void GameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)
@@ -718,6 +707,7 @@ void GameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vec
     auto objectCB = mCurrFrameResource->ObjectCB->Resource();
 
     // For each render item...
+    // 对每个渲染项执行
     for (size_t i = 0; i < ritems.size(); ++i)
     {
         auto ri = ritems[i];
@@ -726,13 +716,30 @@ void GameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vec
         cmdList->IASetIndexBuffer(&ri->Geo->IndexBufferView());
         cmdList->IASetPrimitiveTopology(ri->PrimitiveType);
 
-        // Offset to the CBV in the descriptor heap for this object and for this frame resource.
-        UINT cbvIndex = mCurrFrameResourceIndex * (UINT)mOpaqueRitems.size() + ri->ObjCBIndex;
-        auto cbvHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(mCbvHeap->GetGPUDescriptorHandleForHeapStart());
-        cbvHandle.Offset(cbvIndex, mCbvSrvUavDescriptorSize);
+        D3D12_GPU_VIRTUAL_ADDRESS objCBAddress = objectCB->GetGPUVirtualAddress();
+        objCBAddress += ri->ObjCBIndex * objCBByteSize;
 
-        cmdList->SetGraphicsRootDescriptorTable(0, cbvHandle);
+        cmdList->SetGraphicsRootConstantBufferView(0, objCBAddress);
 
         cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
     }
+}
+
+float GameApp::GetHillsHeight(float x, float z)const
+{
+    return 0.3f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
+}
+
+XMFLOAT3 GameApp::GetHillsNormal(float x, float z)const
+{
+    // n = (-df/dx, 1, -df/dz)
+    XMFLOAT3 n(
+        -0.03f * z * cosf(0.1f * x) - 0.3f * cosf(0.1f * z),
+        1.0f,
+        -0.3f * sinf(0.1f * x) + 0.03f * x * sinf(0.1f * z));
+
+    XMVECTOR unitNormal = XMVector3Normalize(XMLoadFloat3(&n));
+    XMStoreFloat3(&n, unitNormal);
+
+    return n;
 }

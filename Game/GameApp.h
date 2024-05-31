@@ -2,7 +2,11 @@
 #pragma once
 #ifndef GAMEAPP_H
 #define GAMEPAPP_H
+#include <cassert>
 #include <DirectXColors.h>
+#include <ppl.h>
+#include <vector>
+#include <algorithm>
 
 #include "DX12App.h"
 #include "MathHelper.h"
@@ -10,10 +14,11 @@
 #include "FrameResource.h"
 #include "GeometryGenerator.h"
 
+#include"Wave.h"
+
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-
 
 
 // Lightweight structure stores parameters to draw a shape.This will vary from app-to-app.
@@ -56,6 +61,12 @@ struct RenderItem
     int BaseVertexLocation = 0;
 };
 
+enum class RenderLayer : int
+{
+    Opaque = 0,
+    Count
+};
+
 class GameApp : public DX12App
 {
 public:
@@ -79,19 +90,19 @@ private:
     void UpdateCamera(const DXGameTimer& gt);
     void UpdateObjectCBs(const DXGameTimer& gt);
     void UpdateMainPassCB(const DXGameTimer& gt);
+    void UpdateWaves(const DXGameTimer& gt);
 
     void DrawGame();
 
-    // 创建常量缓冲区描述符堆
-    void BuildDescriptorHeaps();
-    // 创建常量缓冲区视图
-    void BuildConstantBuffersViews();
     //创建根签名
     void BuildRootSignature();
     //创建Shader与输入布局
     void BuildShadersAndInputLayout();
-    //创建几何体缓冲区、缓存绘制调用所需参数以及绘制物体
-    void BuildShapeGeometry();
+
+    //创建陆地几何体
+    void BuildLandGeometry();
+    void BuildWavesGeometryBuffers();
+
     //创建PSO(流水线状态对象)
     void BuildPSO();
     // 创建帧资源
@@ -100,6 +111,10 @@ private:
     void BuildRenderItems();
     // 绘制渲染对象
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
+
+
+    float GetHillsHeight(float x, float z)const;
+    XMFLOAT3 GetHillsNormal(float x, float z)const;
 private:
     std::vector<std::unique_ptr<FrameResource>> mFrameResources;
     FrameResource* mCurrFrameResource = nullptr;
@@ -107,9 +122,6 @@ private:
 
     // 根签名
     ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
-    ComPtr<ID3D12DescriptorHeap> mCbvHeap = nullptr;
-
-    ComPtr<ID3D12DescriptorHeap> mSrvDescriptorHeap = nullptr;
 
     std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
     std::unordered_map<std::string, ComPtr<ID3DBlob>> mShaders;
@@ -117,12 +129,17 @@ private:
 
     std::vector<D3D12_INPUT_ELEMENT_DESC> mInputLayout;
 
+    RenderItem* mWavesRitem = nullptr;
     // 待渲染的成员
     std::vector<std::unique_ptr<RenderItem>> mAllRitems;
-    std::vector<RenderItem*> mOpaqueRitems;
+
+    // Render items divided by PSO.
+    std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
+
+    std::unique_ptr<Waves> mWaves;
 
     PassConstants mMainPassCB;
-    UINT mPassCbvOffset = 0;
+
 
     bool mIsWireframe = false;
 
@@ -132,9 +149,14 @@ private:
 
     float mTheta = 1.5f * XM_PI;
     float mPhi = XM_PIDIV4;
-    float mRadius = 5.0f;
+    float mRadius = 50.0f;
+
+    float mSunTheta = 1.25f * XM_PI;
+    float mSunPhi = XM_PIDIV4;
 
     POINT mLastMousePos;
+
+
 };
 
 #endif
