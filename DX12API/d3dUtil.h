@@ -207,12 +207,23 @@ struct MeshGeometry
 
 struct Light
 {
+    // 光照的颜色
     DirectX::XMFLOAT3 Strength = { 0.5f, 0.5f, 0.5f };
-    float FalloffStart = 1.0f;                          // point/spot light only
-    DirectX::XMFLOAT3 Direction = { 0.0f, -1.0f, 0.0f };// directional/spot light only
-    float FalloffEnd = 10.0f;                           // point/spot light only
-    DirectX::XMFLOAT3 Position = { 0.0f, 0.0f, 0.0f };  // point/spot light only
-    float SpotPower = 64.0f;                            // spot light only
+    // point/spot light only
+    // 仅供点光/聚光灯使用
+    float FalloffStart = 1.0f;  
+    // directional/spot light only
+    // 仅供方向光/聚光灯使用
+    DirectX::XMFLOAT3 Direction = { 0.0f, -1.0f, 0.0f };
+    // point/spot light only
+    // 仅供点光/聚光灯使用
+    float FalloffEnd = 10.0f;      
+    // point/spot light only
+    // 仅供点光/聚光灯使用
+    DirectX::XMFLOAT3 Position = { 0.0f, 0.0f, 0.0f };  
+    // spot light only
+    // 仅供聚光灯使用
+    float SpotPower = 64.0f;                           
 };
 
 #define MaxLights 16
@@ -229,29 +240,41 @@ struct MaterialConstants
 
 // Simple struct to represent a material for our demos.  A production 3D engine
 // would likely create a class hierarchy of Materials.
+// 表示材质的简单结构体
 struct Material
 {
     // Unique material name for lookup.
+    // 便于查找材质的唯一对应名称
     std::string Name;
 
     // Index into constant buffer corresponding to this material.
+    // 本材质的常量缓冲区索引
     int MatCBIndex = -1;
 
     // Index into SRV heap for diffuse texture.
+    // 漫反射纹理在SRV堆中的索引
     int DiffuseSrvHeapIndex = -1;
 
     // Index into SRV heap for normal texture.
+    // 
     int NormalSrvHeapIndex = -1;
 
     // Dirty flag indicating the material has changed and we need to update the constant buffer.
     // Because we have a material constant buffer for each FrameResource, we have to apply the
     // update to each FrameResource.  Thus, when we modify a material we should set 
     // NumFramesDirty = gNumFrameResources so that each frame resource gets the update.
+    // 已更新标志(DirtyFlag)，表示本材质已有变动，而我们也需要更新常量缓冲区
+    // 由于每个帧资源都有一个材质常量缓冲区，所以必须对每个帧资源都进行更新
+    // 因此当修改某个材质时，应该设置NumFrameDirty=gNumFrameResources使每个帧资源都能得到更新
     int NumFramesDirty = gNumFrameResources;
 
     // Material constant buffer data used for shading.
+    // 用于着色的材质常量缓冲区数据
+    // 漫反射反照率
     DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+    // 材质属性
     DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
+    // 粗糙度
     float Roughness = .25f;
     DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
 };
