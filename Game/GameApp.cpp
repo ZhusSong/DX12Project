@@ -38,6 +38,7 @@ bool GameApp::Init()
     BuildWavesGeometryBuffers();
     BuildMaterials();
     BuildRenderItems();
+    BuildRenderItems();
     BuildFrameResources();
     BuildPSO();
 
@@ -47,7 +48,6 @@ bool GameApp::Init()
     ThrowIfFailed(mCommandList->Close());
     ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
     mCommandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-
     // Wait until initialization is complete.
     // 等待初始化完成
     FlushCommandQueue();
@@ -512,8 +512,9 @@ void GameApp::BuildRootSignature()
     // Root parameter can be a table, root descriptor or root constants.
     // 根签名可以是描述符表、根描述符或根常量
     CD3DX12_ROOT_PARAMETER slotRootParameter[3];
-    slotRootParameter[0].InitAsConstantBufferView(0); // 指向描述符区域数组的指针
-    slotRootParameter[1].InitAsConstantBufferView(1);  
+    // 指向描述符区域数组的指针
+    slotRootParameter[0].InitAsConstantBufferView(0);
+    slotRootParameter[1].InitAsConstantBufferView(1);
     slotRootParameter[2].InitAsConstantBufferView(2);
 
     // A root signature is an array of root parameters.
@@ -564,9 +565,7 @@ void GameApp::BuildLandGeometry()
     // Extract the vertex elements we are interested and apply the height function to
     // each vertex.  In addition, color the vertices based on their height so we have
     // sandy looking beaches, grassy low hills, and snow mountain peaks.
-    // 获取我们需要的顶点元素，并利用高度函数计算每个顶点的高度值
-    // 由于顶点的颜色根据它的高度而定，因此会有不同颜色的物体
-    // 
+    //
 
     std::vector<Vertex> vertices(grid.Vertices.size());
     for (size_t i = 0; i < grid.Vertices.size(); ++i)
@@ -576,68 +575,40 @@ void GameApp::BuildLandGeometry()
         vertices[i].Pos.y = GetHillsHeight(p.x, p.z);
         vertices[i].Normal = GetHillsNormal(p.x, p.z);
     }
-        //    // Color the vertex based on its height.
-        //    // 根据顶点高度为其上色
-        //    if (vertices[i].Pos.y < -10.0f)
-        //    {
-        //        // Sandy beach color.
-        //        vertices[i].Color = XMFLOAT4(1.0f, 0.96f, 0.62f, 1.0f);
-        //    }
-        //    else if (vertices[i].Pos.y < 5.0f)
-        //    {
-        //        // Light yellow-green.
-        //        vertices[i].Color = XMFLOAT4(0.48f, 0.77f, 0.46f, 1.0f);
-        //    }
-        //    else if (vertices[i].Pos.y < 12.0f)
-        //    {
-        //        // Dark yellow-green.
-        //        vertices[i].Color = XMFLOAT4(0.1f, 0.48f, 0.19f, 1.0f);
-        //    }
-        //    else if (vertices[i].Pos.y < 20.0f)
-        //    {
-        //        // Dark brown.
-        //        vertices[i].Color = XMFLOAT4(0.45f, 0.39f, 0.34f, 1.0f);
-        //    }
-        //    else
-        //    {
-        //        // White snow.
-        //        vertices[i].Color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-        //    }
-        //}
 
-        const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
 
-        std::vector<std::uint16_t> indices = grid.GetIndices16();
-        const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+    std::vector<std::uint16_t> indices = grid.GetIndices16();
+    const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
-        auto geo = std::make_unique<MeshGeometry>();
-        geo->Name = "landGeo";
+    auto geo = std::make_unique<MeshGeometry>();
+    geo->Name = "landGeo";
 
-        ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
-        CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+    ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
+    CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 
-        ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
-        CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
+    CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-        geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-            mCommandList.Get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
+    geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
 
-        geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-            mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+    geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
 
-        geo->VertexByteStride = sizeof(Vertex);
-        geo->VertexBufferByteSize = vbByteSize;
-        geo->IndexFormat = DXGI_FORMAT_R16_UINT;
-        geo->IndexBufferByteSize = ibByteSize;
+    geo->VertexByteStride = sizeof(Vertex);
+    geo->VertexBufferByteSize = vbByteSize;
+    geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+    geo->IndexBufferByteSize = ibByteSize;
 
-        SubmeshGeometry submesh;
-        submesh.IndexCount = (UINT)indices.size();
-        submesh.StartIndexLocation = 0;
-        submesh.BaseVertexLocation = 0;
+    SubmeshGeometry submesh;
+    submesh.IndexCount = (UINT)indices.size();
+    submesh.StartIndexLocation = 0;
+    submesh.BaseVertexLocation = 0;
 
-        geo->DrawArgs["grid"] = submesh;
+    geo->DrawArgs["grid"] = submesh;
 
-        mGeometries["landGeo"] = std::move(geo);
+    mGeometries["landGeo"] = std::move(geo);
     
 }
 
@@ -720,7 +691,6 @@ void GameApp::BuildPSO()
         mShaders["opaquePS"]->GetBufferSize()
     };
     opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-    //opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
     opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
     opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     opaquePsoDesc.SampleMask = UINT_MAX;
@@ -731,7 +701,6 @@ void GameApp::BuildPSO()
     opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
     opaquePsoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
-
 
     //
     // PSO for opaque wireframe objects.
@@ -782,7 +751,7 @@ void GameApp::BuildRenderItems()
     wavesRitem->ObjCBIndex = 0;
     wavesRitem->Mat = mMaterials["water"].get();
     wavesRitem->Geo = mGeometries["waterGeo"].get();
-    wavesRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    wavesRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     wavesRitem->IndexCount = wavesRitem->Geo->DrawArgs["grid"].IndexCount;
     wavesRitem->StartIndexLocation = wavesRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     wavesRitem->BaseVertexLocation = wavesRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
@@ -796,7 +765,7 @@ void GameApp::BuildRenderItems()
     gridRitem->ObjCBIndex = 1;
     gridRitem->Mat = mMaterials["grass"].get();
     gridRitem->Geo = mGeometries["landGeo"].get();
-    gridRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    gridRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
     gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
