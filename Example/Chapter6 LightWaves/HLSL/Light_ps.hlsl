@@ -1,19 +1,19 @@
-#include"Basic.hlsli"
+#include "Basic.hlsli"
 float4 ps(VertexOut pin) : SV_Target
 {
- // Interpolating normal can unnormalize it, so renormalize it.
-      // ¶Ô·¨Ïß²åÖµ¿ÉÄÜµ¼ÖÂÆä·Ç¹æ·¶»¯£¬Òò´ËĞèÒªÔÙ´Î¶ÔËü½øĞĞ¹æ·¶»¯´¦Àí
+    // Interpolating normal can unnormalize it, so renormalize it.
+    // å¯¹æ³•çº¿æ’å€¼å¯èƒ½å¯¼è‡´å…¶éè§„èŒƒåŒ–ï¼Œå› æ­¤éœ€è¦å†æ¬¡å¯¹å®ƒè¿›è¡Œè§„èŒƒåŒ–å¤„ç†
     pin.NormalW = normalize(pin.NormalW);
 
     // Vector from point being lit to eye. 
-    // ¹âÏß¾­±íÃæÉÏÒ»µã·´Éäµ½¹Û²ìµãÕâÒ»·½ÏòÉÏµÄÏòÁ¿
+    // å…‰çº¿ç»è¡¨é¢ä¸Šä¸€ç‚¹åå°„åˆ°è§‚å¯Ÿç‚¹è¿™ä¸€æ–¹å‘ä¸Šçš„å‘é‡
     float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
 	// Indirect lighting.
-    // ¼ä½Ó¹âÕÕ
+    // é—´æ¥å…‰ç…§
     float4 ambient = gAmbientLight * gDiffuseAlbedo;
 
-    // Ö±½Ó¹âÕÕ
+    // ç›´æ¥å…‰ç…§
     const float shininess = 1.0f - gRoughness;
     Material mat = { gDiffuseAlbedo, gFresnelR0, shininess };
     float3 shadowFactor = 1.0f;
@@ -23,8 +23,9 @@ float4 ps(VertexOut pin) : SV_Target
     float4 litColor = ambient + directLight;
 
     // Common convention to take alpha from diffuse material.
-    // ´ÓÂş·´Éä²ÄÖÊ»ñÈ¡alphaÖµ
+    // ä»æ¼«åå°„æè´¨è·å–alphaå€¼
     litColor.a = gDiffuseAlbedo.a;
 
     return litColor;
+    
 }

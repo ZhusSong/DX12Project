@@ -1,4 +1,4 @@
-#include"Basic.hlsli"
+#include "Basic.hlsli"
 
 VertexOut vs(VertexIn vin)
 {
