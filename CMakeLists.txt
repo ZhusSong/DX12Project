@@ -83,9 +83,10 @@ include_directories(DX12API/MathHelper)
 # 设置文件目录
 
  set (HLSL_Files
- HLSL/07_basic.hlsli
-  HLSL/07_color_PS.hlsl
-  HLSL/07_color_VS.hlsl
+ HLSL/Basic.hlsli
+  HLSL/LightHelper.hlsli
+  HLSL/color_vs.hlsl
+  HLSL/color_ps.hlsl
  )
  #游戏进程相关
 set (SOURCES

@@ -33,6 +33,7 @@ struct RenderItem
     // 描述物体局部空间相对于世界空间的世界矩阵
     // 定义了物体位于世界空间中的位置、朝向与大小
     XMFLOAT4X4 World = MathHelper::Identity4x4();
+    XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
 
     // Dirty flag indicating the object data has changed and we need to update the constant buffer.
     // Because we have an object cbuffer for each FrameResource, we have to apply the
@@ -48,6 +49,7 @@ struct RenderItem
     UINT ObjCBIndex = -1;
 
     // 此轩然项参与绘制的几何体，绘制一个几何体可能会用到多个渲染项
+    Material* Mat = nullptr;
     MeshGeometry* Geo = nullptr;
 
     // Primitive topology.
@@ -87,8 +89,11 @@ private:
     void OnMouseUp();
     void OnMouseMove();
 
+    void OnKeyBoardInput(const DXGameTimer& gt);
+
     void UpdateCamera(const DXGameTimer& gt);
     void UpdateObjectCBs(const DXGameTimer& gt);
+    void UpdateMaterialCBs(const DXGameTimer& gt);
     void UpdateMainPassCB(const DXGameTimer& gt);
     void UpdateWaves(const DXGameTimer& gt);
 
@@ -107,6 +112,8 @@ private:
     void BuildPSO();
     // 创建帧资源
     void BuildFrameResources();
+    //创建材质
+    void BuildMaterials();
     // 创建渲染对象
     void BuildRenderItems();
     // 绘制渲染对象
@@ -120,10 +127,15 @@ private:
     FrameResource* mCurrFrameResource = nullptr;
     int mCurrFrameResourceIndex = 0;
 
+
+    UINT mCbvSrvDescriptorSize = 0;
+
     // 根签名
     ComPtr<ID3D12RootSignature> mRootSignature = nullptr;
 
     std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> mGeometries;
+    std::unordered_map<std::string, std::unique_ptr<Material>> mMaterials;
+    std::unordered_map<std::string, std::unique_ptr<Texture>> mTextures;
     std::unordered_map<std::string, ComPtr<ID3DBlob>> mShaders;
     std::unordered_map<std::string, ComPtr<ID3D12PipelineState>> mPSOs;
 

@@ -37,11 +37,14 @@ struct PassConstants
 	float FarZ = 0.0f;
 	float TotalTime = 0.0f;
 	float DeltaTime = 0.0f;
+
+	DirectX::XMFLOAT4 AmbientLight = {0.0f,0.0f,0.0f,1.0f};
+	Light Lights[MaxLights];
 };
 struct Vertex
 {
 	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT4 Color;
+	DirectX::XMFLOAT3 Normal;
 };
 
 // Stores the resources needed for the CPU to build the command lists for a frame.  
@@ -50,7 +53,7 @@ struct Vertex
 struct FrameResource
 {
 public:
-	FrameResource(ID3D12Device* device, UINT passCount, UINT objectCount, UINT waveVertCount);
+	FrameResource(ID3D12Device* device, UINT passCount, UINT objectCount, UINT materialCount, UINT waveVertCount);
 	FrameResource(const FrameResource& rhs) = delete;
 	FrameResource& operator=(const FrameResource& rhs) = delete;
 	~FrameResource();
@@ -66,6 +69,7 @@ public:
 	// 在GPU执行完引用此常量缓冲区的命令之前，我们不能对其进行重置
 	// 因此每一帧都需要它们自己的常量缓冲区
 	std::unique_ptr<UploadBuffer<PassConstants>> PassCB = nullptr;
+	std::unique_ptr<UploadBuffer<MaterialConstants>> MaterialCB = nullptr;
 	std::unique_ptr<UploadBuffer<ObjectConstants>> ObjectCB = nullptr;
 
 
