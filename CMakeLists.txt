@@ -138,6 +138,12 @@ DX12API/UploadBuffer.h
  )
  #贴图读取
  set (TextureLoader
+DX12API/TextureLoader/DirectXHelpers.h
+DX12API/TextureLoader/LoaderHelpers.h
+DX12API/TextureLoader/pch.h
+DX12API/TextureLoader/PlatformHelpers.h
+DX12API/TextureLoader/ResourceUploadBatch.h
+DX12API/TextureLoader/ResourceUploadBatch.cpp
  DX12API/TextureLoader/DDSTextureLoader.cpp
 DX12API/TextureLoader/DDSTextureLoader.h
 DX12API/TextureLoader/WICTextureLoader.cpp

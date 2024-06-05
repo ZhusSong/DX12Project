@@ -551,10 +551,12 @@ void GameApp::BuildShadersAndInputLayout()
     mShaders["opaquePS"] = d3dUtil::CompileShader(L"HLSL\\Light_ps.hlsl", nullptr, "ps", "ps_5_0");
   /*  mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\Light_vs.cso");
     mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\Light_ps.cso"); */
+    //顶点输入布局，注意要与顶点shader结构体中的成员一一对应
     mInputLayout =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-        { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+        { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
     };
 }
 
