@@ -16,6 +16,12 @@ VertexOut vs(VertexIn vin)
     // Transform to homogeneous clip space.
     // 将顶点变换到齐次裁剪空间
     vout.PosH = mul(posW, gViewProj);
+    
+	// Output vertex attributes for interpolation across triangle.
+    // 为了对三角形进行插值操作而输出的顶点属性
+    float4 texC = mul(float4(vin.TexC, 0.0f, 1.0f), gTexTransform);
+    vout.TexC = mul(texC, gMatTransform).xy;
+    
 
     return vout;
 }

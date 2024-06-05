@@ -85,20 +85,28 @@ private:
     virtual void Update(const DXGameTimer& gt)override;
     virtual void Draw(const DXGameTimer& gt)override;
 
+    // 使用ImGui处理鼠标与键盘事件
     void OnMouseDown();
     void OnMouseUp();
     void OnMouseMove();
-
     void OnKeyBoardInput(const DXGameTimer& gt);
 
+    // 更新摄像机
     void UpdateCamera(const DXGameTimer& gt);
+    // 纹理动画
+    void AnimateMaterials(const DXGameTimer& gt);
+    // 更新物体常量缓冲区
     void UpdateObjectCBs(const DXGameTimer& gt);
+    // 更新材质常量缓冲区
     void UpdateMaterialCBs(const DXGameTimer& gt);
+    // 更新渲染过程常量缓冲区
     void UpdateMainPassCB(const DXGameTimer& gt);
     void UpdateWaves(const DXGameTimer& gt);
 
     void DrawGame();
 
+    //读取贴图
+    void LoadTextures();
     //创建根签名
     void BuildRootSignature();
     //创建Shader与输入布局

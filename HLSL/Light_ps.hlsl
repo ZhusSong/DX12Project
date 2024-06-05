@@ -1,6 +1,9 @@
 #include "Basic.hlsli"
 float4 ps(VertexOut pin) : SV_Target
 {
+    //从纹理中提取此像素的漫反射反照率，并将其与常量缓冲区中的反照率相乘
+    float4 diffuseAlbedo = gDiffuseMap.Sample(gsamAnisotropicWrap,pin.TexC)*gDiffuseAlbedo;
+   
     // Interpolating normal can unnormalize it, so renormalize it.
     // 对法线插值可能导致其非规范化，因此需要再次对它进行规范化处理
     pin.NormalW = normalize(pin.NormalW);

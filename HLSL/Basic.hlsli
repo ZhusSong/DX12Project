@@ -5,7 +5,7 @@
 // Defaults for number of lights.
 // 光源数量的默认值
 #ifndef NUM_DIR_LIGHTS
-#define NUM_DIR_LIGHTS 1
+#define NUM_DIR_LIGHTS 3
 #endif
 
 #ifndef NUM_POINT_LIGHTS
@@ -20,24 +20,26 @@
 // 包含了光照所用的结构体和函数
 #include "LightHelper.hlsli"
 
+//定义纹理对象并分配给特定的纹理寄存器
+Texture2D gDiffuseMap : register(t0);
+
+SamplerState gsamPointWrap : register(s0);
+SamplerState gsamPointClamp : register(s1);
+SamplerState gsamLinearWrap : register(s2);
+SamplerState gsamLinearClamp : register(s3);
+SamplerState gsamAnisotropicWrap : register(s4);
+SamplerState gsamAnisotropicClamp : register(s5);
 // Constant data that varies per frame.
 // 每帧都会变化的常量数据
 cbuffer cbPerObject : register(b0)
 {
     float4x4 gWorld;
-}
-// 每种材质的不同常量数据
-cbuffer cbMaterial : register(b1)
-{
-    float4 gDiffuseAlbedo;
-    float3 gFresnelR0;
-    float gRoughness;
-    float4x4 gMatTransform;
+    float4x4 gTexTransform;
 }
 
 // Constant data that varies per material.
 // 绘制过程中所用的杂项常量数据
-cbuffer cbPass : register(b2)
+cbuffer cbPass : register(b1)
 {
     float4x4 gView;
     float4x4 gInvView;
@@ -64,14 +66,25 @@ cbuffer cbPass : register(b2)
     // 索引[NUM_DIR_LIGHTS+NUM_POINT_LIGHTS,NUM_DIR_LIGHTS+NUM_POINT_LIGHT+NUM_SPOT_LIGHTS]表示的是聚光灯光源
     Light gLights[MaxLights];
 }
+// 每种材质的不同常量数据
+cbuffer cbMaterial : register(b2)
+{
+    float4 gDiffuseAlbedo;
+    float3 gFresnelR0;
+    float gRoughness;
+    float4x4 gMatTransform;
+}
+
 struct VertexIn
 {
     float3 PosL    : POSITION;
     float3 NormalL : NORMAL;
+    float2 TexC : TEXCOORD;
 };
 struct VertexOut
 {
     float4 PosH : SV_POSITION;
     float3 PosW : POSITION;
     float3 NormalW : NORMAL;
+    float2 TexC : TEXCOORD;
 };

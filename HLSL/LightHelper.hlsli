@@ -3,11 +3,11 @@
 struct Light
 {
     float3 Strength;
-    float FalloffStart;
-    float3 Direction;
-    float FalloffEnd;
-    float3 Position;
-    float SpotPower;
+    float FalloffStart; // point/spot light only
+    float3 Direction; // directional/spot light only
+    float FalloffEnd; // point/spot light only
+    float3 Position; // point light only
+    float SpotPower; // spot light only
 };
 struct Material
 {
@@ -26,8 +26,8 @@ float CalcAttenuation(float d,float falloffStart,float falloffEnd)
 // Schlick gives an approximation to Fresnel reflectance (see pg. 233 "Real-Time Rendering 3rd Ed.").
 // R0 = ( (n-1)/(n+1) )^2, where n is the index of refraction.
 // 使用石里克近似法计算反射率
-//参见Real-Time Rndering 3rd Ed page233
-//R0=((n-1)/(n+1))^2,n为折射率
+// 参见Real-Time Rndering 3rd Ed page233
+// R0=((n-1)/(n+1))^2,n为折射率
 float3 SchlickFrensnel(float3 R0,float3 normal,float3 lightVec)
 {
     float cosIncidentAngle = saturate(dot(normal, lightVec));
