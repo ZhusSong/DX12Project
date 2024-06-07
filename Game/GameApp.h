@@ -67,6 +67,8 @@ struct RenderItem
 enum class RenderLayer : int
 {
     Opaque = 0,
+    Transparent,
+    AlphaTested,
     Count
 };
 
@@ -116,6 +118,9 @@ private:
     //创建Shader与输入布局
     void BuildShadersAndInputLayout();
 
+    //创建波浪几何体
+    void BuildWavesGeometry();
+
     //创建形状几何体
     void BuildShapeGeometry();
 
@@ -138,8 +143,8 @@ private:
     // 创建静态采样器
     std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 
-   /* float GetHillsHeight(float x, float z)const;
-    XMFLOAT3 GetHillsNormal(float x, float z)const;*/
+    float GetHillsHeight(float x, float z)const;
+    XMFLOAT3 GetHillsNormal(float x, float z)const;
 private:
     std::vector<std::unique_ptr<FrameResource>> mFrameResources;
     FrameResource* mCurrFrameResource = nullptr;
@@ -169,11 +174,14 @@ private:
     // 待渲染的成员
     std::vector<std::unique_ptr<RenderItem>> mAllRitems;
 
-    // Render items divided by PSO.
-    std::vector<RenderItem*> mOpaqueRitems;
-    //std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
+    RenderItem* mWavesRitem = nullptr;
 
-    //std::unique_ptr<Waves> mWaves;
+    //// Render items divided by PSO.
+    //std::vector<RenderItem*> mOpaqueRitems;
+
+    std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
+
+    std::unique_ptr<Waves> mWaves;
 
     PassConstants mMainPassCB;
 

@@ -29,13 +29,15 @@ bool GameApp::Init()
     // 获取该堆类型中描述符的增量大小，这是硬件特性，因此我们必须获取该信息
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-
+    mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
 
     LoadTextures();
     BuildRootSignature();
     BuildDescriptorHeaps();
 
     BuildShadersAndInputLayout();
+
+    BuildWavesGeometry();
     BuildShapeGeometry();
 
     BuildMaterials();
@@ -93,9 +95,15 @@ void GameApp::Update(const DXGameTimer& gt)
         CloseHandle(eventHandle);
     }
     // 更新常量缓冲区等在mCurrFrameResource内的资源
+
+    AnimateMaterials(gt);
+
     UpdateObjectCBs(gt);
     UpdateMaterialCBs(gt);
     UpdateMainPassCB(gt);
+
+
+    UpdateWaves(gt);
 }
 
 void GameApp::Draw(const DXGameTimer& gt)
@@ -126,7 +134,7 @@ void GameApp::Draw(const DXGameTimer& gt)
 
     // Clear the back buffer and depth buffer.
     // 清空后台缓冲区与深度缓冲区
-    mCommandList->ClearRenderTargetView(CurrentBackBufferView(), Colors::LightSteelBlue, 0, nullptr);
+    mCommandList->ClearRenderTargetView(CurrentBackBufferView(), (float*)&mMainPassCB.FogColor, 0, nullptr);
     mCommandList->ClearDepthStencilView(DepthStencilView(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
     // Specify the buffers we are going to render to.
@@ -149,8 +157,14 @@ void GameApp::Draw(const DXGameTimer& gt)
 
     // Draw all items
     // 进行绘制
-    DrawRenderItems(mCommandList.Get(), mOpaqueRitems);
 
+    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);
+
+    mCommandList->SetPipelineState(mPSOs["alphaTested"].Get());
+    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::AlphaTested]);
+
+    mCommandList->SetPipelineState(mPSOs["transparent"].Get());
+    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Transparent]);
     // Draw ImGui
     // 绘制ImGui
     DrawGame();
@@ -398,12 +412,51 @@ void GameApp::DrawGame()
     mCommandList->SetDescriptorHeaps(1, mSrvHeap.GetAddressOf());
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
 }
+void GameApp::UpdateWaves(const DXGameTimer& gt)
+{
+    // Every quarter second, generate a random wave.
+    static float t_base = 0.0f;
+    if ((mTimer.GetTotalTime() - t_base) >= 0.25f)
+    {
+        t_base += 0.25f;
+
+        int i = MathHelper::Rand(4, mWaves->RowCount() - 5);
+        int j = MathHelper::Rand(4, mWaves->ColumnCount() - 5);
+
+        float r = MathHelper::RandF(0.2f, 0.5f);
+
+        mWaves->Disturb(i, j, r);
+    }
+
+    // Update the wave simulation.
+    mWaves->Update(gt.GetDeltaTime());
+
+    // Update the wave vertex buffer with the new solution.
+    auto currWavesVB = mCurrFrameResource->WavesVB.get();
+    for (int i = 0; i < mWaves->VertexCount(); ++i)
+    {
+        Vertex v;
+
+        v.Pos = mWaves->Position(i);
+        v.Normal = mWaves->Normal(i);
+
+        // Derive tex-coords from position by 
+        // mapping [-w/2,w/2] --> [0,1]
+        v.TexC.x = 0.5f + v.Pos.x / mWaves->Width();
+        v.TexC.y = 0.5f - v.Pos.z / mWaves->Depth();
+
+        currWavesVB->CopyData(i, v);
+    }
+
+    // Set the dynamic VB of the wave renderitem to the current frame VB.
+    mWavesRitem->Geo->VertexBufferGPU = currWavesVB->Resource();
+}
 void GameApp::BuildDescriptorHeaps()
 {
     // Create the SRV heap.
     // 创建SRV描述符堆
     D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
-    srvHeapDesc.NumDescriptors = 3;
+    srvHeapDesc.NumDescriptors = 4;
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&mSrvDescriptorHeap)));
@@ -416,6 +469,7 @@ void GameApp::BuildDescriptorHeaps()
     auto bricksTex = mTextures["brickTex"]->Resource;
     auto stoneTex = mTextures["stoneTex"]->Resource;
     auto tileTex = mTextures["tileTex"]->Resource;
+    auto waterTex= mTextures["waterTex"]->Resource;
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -439,6 +493,14 @@ void GameApp::BuildDescriptorHeaps()
     srvDesc.Format =tileTex->GetDesc().Format;
     srvDesc.Texture2D.MipLevels = tileTex->GetDesc().MipLevels;
     md3dDevice->CreateShaderResourceView(tileTex.Get(), &srvDesc, hDescriptor);
+
+    // next descriptor
+    hDescriptor.Offset(1, mCbvSrvDescriptorSize);
+
+    srvDesc.Format = waterTex->GetDesc().Format;
+    md3dDevice->CreateShaderResourceView(waterTex.Get(), &srvDesc, hDescriptor);
+
+
 }
 //
 //void GameApp::BuildConstantBuffersViews()
@@ -505,7 +567,7 @@ void GameApp::LoadTextures()
 {
     auto brickTex = std::make_unique<Texture>();
     brickTex->Name = "brickTex";
-    brickTex->Filename = L"asset\\bricks.dds";
+    brickTex->Filename = L"asset\\WireFence.dds";
     ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
         mCommandList.Get(), brickTex->Filename.c_str(),
         brickTex->Resource, brickTex->UploadHeap));
@@ -524,9 +586,17 @@ void GameApp::LoadTextures()
         mCommandList.Get(), tileTex->Filename.c_str(),
         tileTex->Resource, tileTex->UploadHeap));
 
+    auto waterTex = std::make_unique<Texture>();
+    waterTex->Name = "waterTex";
+    waterTex->Filename = L"asset\\water1.dds";
+    ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+        mCommandList.Get(), waterTex->Filename.c_str(),
+        waterTex->Resource, waterTex->UploadHeap));
+
     mTextures[brickTex->Name] = std::move(brickTex);
     mTextures[stoneTex->Name] = std::move(stoneTex);
     mTextures[tileTex->Name] = std::move(tileTex);
+    mTextures[waterTex->Name] = std::move(waterTex);
 }
 void GameApp::BuildRootSignature()
 {
@@ -547,18 +617,19 @@ void GameApp::BuildRootSignature()
 
     // Root parameter can be a table, root descriptor or root constants.
     // 根签名可以是描述符表、根描述符或根常量
-    CD3DX12_ROOT_PARAMETER slotRootParameter[4];
+    CD3DX12_ROOT_PARAMETER slotRootParameter[5];
     // 指向描述符区域数组的指针
     slotRootParameter[0].InitAsDescriptorTable(1, &texTable, D3D12_SHADER_VISIBILITY_PIXEL);
     slotRootParameter[1].InitAsConstantBufferView(0);
     slotRootParameter[2].InitAsConstantBufferView(1);
     slotRootParameter[3].InitAsConstantBufferView(2);
+    slotRootParameter[4].InitAsConstantBufferView(3);
 
     auto staticSamplers = GetStaticSamplers();
 
     // A root signature is an array of root parameters.
     // 根签名由一组根参数构成
-    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(4, slotRootParameter,
+    CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(5, slotRootParameter,
         (UINT)staticSamplers.size(), staticSamplers.data(),
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -583,11 +654,26 @@ void GameApp::BuildRootSignature()
 }
 void GameApp::BuildShadersAndInputLayout()
 {
+    const D3D_SHADER_MACRO defines[] =
+    {
+        "FOG", "1",
+        NULL, NULL
+    };
 
-   /* mShaders["standardVS"] = d3dUtil::CompileShader(L"HLSL\\Material_vs.hlsl", nullptr, "vs", "vs_5_0");
-    mShaders["opaquePS"] = d3dUtil::CompileShader(L"HLSL\\Material_ps.hlsl", nullptr, "ps", "ps_5_0");*/
-    mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_vs.cso");
-    mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_ps.cso"); 
+    const D3D_SHADER_MACRO alphaTestDefines[] =
+    {
+        "FOG", "1",
+        "ALPHA_TEST", "1",
+        NULL, NULL
+    };
+
+    mShaders["standardVS"] = d3dUtil::CompileShader(L"HLSL\\Material_vs.hlsl", nullptr, "vs", "vs_5_0");
+    mShaders["opaquePS"] = d3dUtil::CompileShader(L"HLSL\\Material_ps.hlsl", nullptr, "ps", "ps_5_0");	
+    mShaders["alphaTestedPS"] = d3dUtil::CompileShader(L"HLSL\\Material_ps.hlsl", alphaTestDefines, "ps", "ps_5_0");
+
+  /*  mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_vs.cso");
+    mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_ps.cso"); */
+
     //顶点输入布局，注意要与顶点shader结构体中的成员一一对应
     mInputLayout =
     {
@@ -596,7 +682,61 @@ void GameApp::BuildShadersAndInputLayout()
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
     };
 }
+void GameApp::BuildWavesGeometry()
+{
+    std::vector<std::uint16_t> indices(3 * mWaves->TriangleCount()); // 3 indices per face
+    assert(mWaves->VertexCount() < 0x0000ffff);
 
+    // Iterate over each quad.
+    int m = mWaves->RowCount();
+    int n = mWaves->ColumnCount();
+    int k = 0;
+    for (int i = 0; i < m - 1; ++i)
+    {
+        for (int j = 0; j < n - 1; ++j)
+        {
+            indices[k] = i * n + j;
+            indices[k + 1] = i * n + j + 1;
+            indices[k + 2] = (i + 1) * n + j;
+
+            indices[k + 3] = (i + 1) * n + j;
+            indices[k + 4] = i * n + j + 1;
+            indices[k + 5] = (i + 1) * n + j + 1;
+
+            k += 6; // next quad
+        }
+    }
+
+    UINT vbByteSize = mWaves->VertexCount() * sizeof(Vertex);
+    UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+
+    auto geo = std::make_unique<MeshGeometry>();
+    geo->Name = "waterGeo";
+
+    // Set dynamically.
+    geo->VertexBufferCPU = nullptr;
+    geo->VertexBufferGPU = nullptr;
+
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
+    CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+    geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+
+    geo->VertexByteStride = sizeof(Vertex);
+    geo->VertexBufferByteSize = vbByteSize;
+    geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+    geo->IndexBufferByteSize = ibByteSize;
+
+    SubmeshGeometry submesh;
+    submesh.IndexCount = (UINT)indices.size();
+    submesh.StartIndexLocation = 0;
+    submesh.BaseVertexLocation = 0;
+
+    geo->DrawArgs["grid"] = submesh;
+
+    mGeometries["waterGeo"] = std::move(geo);
+}
 void GameApp::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
@@ -734,17 +874,17 @@ void GameApp::BuildPSO()
     opaquePsoDesc.pRootSignature = mRootSignature.Get();
     opaquePsoDesc.VS =
     {
-        reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
-        mvsByteCode->GetBufferSize()
-      /*  reinterpret_cast<BYTE*>(mShaders["standardVS"]->GetBufferPointer()),
-        mShaders["standardVS"]->GetBufferSize()*/
+      /*  reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
+        mvsByteCode->GetBufferSize()*/
+        reinterpret_cast<BYTE*>(mShaders["standardVS"]->GetBufferPointer()),
+        mShaders["standardVS"]->GetBufferSize()
     };
     opaquePsoDesc.PS =
     {
-        reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
-        mpsByteCode->GetBufferSize()
-        /* reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
-        mShaders["opaquePS"]->GetBufferSize()*/
+       /* reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
+        mpsByteCode->GetBufferSize()*/
+         reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
+        mShaders["opaquePS"]->GetBufferSize()
     };
     opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -757,14 +897,36 @@ void GameApp::BuildPSO()
     opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
     opaquePsoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
-    //
-    // PSO for opaque wireframe objects.
-    // 非透明线框对象的PSO
+    
+    // PSO for transparent objects
+    // 创建开启了混合功能的PSO
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
 
-    //D3D12_GRAPHICS_PIPELINE_STATE_DESC opaqueWireframePsoDesc = opaquePsoDesc;
-    //opaqueWireframePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
-    //ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaqueWireframePsoDesc, IID_PPV_ARGS(&mPSOs["opaque_wireframe"])));
+    D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+    transparencyBlendDesc.BlendEnable = true;
+    transparencyBlendDesc.LogicOpEnable = false;
+    transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+    transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+    transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+    transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+    transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+    transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+    transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+    transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
+    transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&mPSOs["transparent"])));
+
+    // PSO for alpha tested objects
+    // 创建alpha测试物体的PSO
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC alphaTestedPsoDesc = opaquePsoDesc;
+    alphaTestedPsoDesc.PS =
+    {
+        reinterpret_cast<BYTE*>(mShaders["alphaTestedPS"]->GetBufferPointer()),
+        mShaders["alphaTestedPS"]->GetBufferSize()
+    };
+    alphaTestedPsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&alphaTestedPsoDesc, IID_PPV_ARGS(&mPSOs["alphaTested"])));
 }
 
 
@@ -773,7 +935,7 @@ void GameApp::BuildFrameResources()
     for (int i = 0; i < gNumFrameResources; ++i)
     {
         mFrameResources.push_back(std::make_unique<FrameResource>(md3dDevice.Get(),
-            1, (UINT)mAllRitems.size(), (UINT)mMaterials.size()));
+            1, (UINT)mAllRitems.size(), (UINT)mMaterials.size(), mWaves->VertexCount()));
     }
 }
 
@@ -805,9 +967,18 @@ void GameApp::BuildMaterials()
     tile->FresnelR0 = XMFLOAT3(0.02f, 0.02f, 0.02f);
     tile->Roughness = 0.3f;
 
+    auto water = std::make_unique<Material>();
+    water->Name = "water";
+    water->MatCBIndex = 1;
+    water->DiffuseSrvHeapIndex = 1;
+    water->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f);
+    water->FresnelR0 = XMFLOAT3(0.1f, 0.1f, 0.1f);
+    water->Roughness = 0.0f;
+
     mMaterials["bricks0"] = std::move(bricks);
     mMaterials["stone0"] = std::move(stone);
     mMaterials["tile0"] = std::move(tile);
+    mMaterials["water"] = std::move(water);
 
 }
 void GameApp::BuildRenderItems()
@@ -823,8 +994,10 @@ void GameApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+
+    mRitemLayer[(int)RenderLayer::AlphaTested].push_back(boxRitem.get());
     mAllRitems.push_back(std::move(boxRitem));
-  
+
 
     auto gridRitem = std::make_unique<RenderItem>();
     gridRitem->World = MathHelper::Identity4x4();
@@ -836,6 +1009,8 @@ void GameApp::BuildRenderItems()
     gridRitem->IndexCount = gridRitem->Geo->DrawArgs["grid"].IndexCount;
     gridRitem->StartIndexLocation = gridRitem->Geo->DrawArgs["grid"].StartIndexLocation;
     gridRitem->BaseVertexLocation = gridRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
+
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(gridRitem.get());
     mAllRitems.push_back(std::move(gridRitem));
 
     //依次绘制圆柱体的各个面
@@ -894,15 +1069,34 @@ void GameApp::BuildRenderItems()
         rightSphereRitem->StartIndexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].StartIndexLocation;
         rightSphereRitem->BaseVertexLocation = rightSphereRitem->Geo->DrawArgs["sphere"].BaseVertexLocation;
 
+        mRitemLayer[(int)RenderLayer::Opaque].push_back(leftCylRitem.get());
+        mRitemLayer[(int)RenderLayer::Opaque].push_back(rightCylRitem.get());
+        mRitemLayer[(int)RenderLayer::Opaque].push_back(leftSphereRitem.get());
+        mRitemLayer[(int)RenderLayer::Opaque].push_back(rightSphereRitem.get());
+
         mAllRitems.push_back(std::move(leftCylRitem));
         mAllRitems.push_back(std::move(rightCylRitem));
         mAllRitems.push_back(std::move(leftSphereRitem));
         mAllRitems.push_back(std::move(rightSphereRitem));
     }
 
-    // All the render items are opaque.
-    for (auto& e : mAllRitems)
-        mOpaqueRitems.push_back(e.get());
+    auto wavesRitem = std::make_unique<RenderItem>();
+    wavesRitem->World = MathHelper::Identity4x4();
+    XMStoreFloat4x4(&wavesRitem->TexTransform, XMMatrixScaling(5.0f, 5.0f, 1.0f));
+    wavesRitem->ObjCBIndex = 3;
+    wavesRitem->Mat = mMaterials["water"].get();
+    wavesRitem->Geo = mGeometries["waterGeo"].get();
+    wavesRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    wavesRitem->IndexCount = wavesRitem->Geo->DrawArgs["grid"].IndexCount;
+    wavesRitem->StartIndexLocation = wavesRitem->Geo->DrawArgs["grid"].StartIndexLocation;
+    wavesRitem->BaseVertexLocation = wavesRitem->Geo->DrawArgs["grid"].BaseVertexLocation;
+    mWavesRitem = wavesRitem.get();
+
+    mRitemLayer[(int)RenderLayer::Transparent].push_back(wavesRitem.get());
+
+    mAllRitems.push_back(std::move(wavesRitem));
+
+
  
 }
 

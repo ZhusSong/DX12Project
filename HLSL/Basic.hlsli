@@ -58,6 +58,14 @@ cbuffer cbPass : register(b1)
     float gDeltaTime;
     float4 gAmbientLight;
 
+    // Allow application to change fog parameters once per frame.
+	// For example, we may only use fog for certain times of day.
+    // 允许程序在每一帧都能改变雾效参数
+    // 例如，我们可能只在一天中的特定时间才使用雾效
+    float4 gFogColor;
+    float gFogStart;
+    float gFogRange;
+    float2 cbPerObjectPad2;
     
     // Indices [0, NUM_DIR_LIGHTS) are directional lights;
     // indices [NUM_DIR_LIGHTS, NUM_DIR_LIGHTS+NUM_POINT_LIGHTS) are point lights;
