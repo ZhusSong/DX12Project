@@ -63,11 +63,14 @@ struct RenderItem
     UINT StartIndexLocation = 0;
     int BaseVertexLocation = 0;
 };
-
+// 渲染层级
 enum class RenderLayer : int
 {
     Opaque = 0,
+    Mirrors,
+    Reflected,
     Transparent,
+    Shadow,
     AlphaTested,
     Count
 };
@@ -104,8 +107,10 @@ private:
     void UpdateMaterialCBs(const DXGameTimer& gt);
     // 更新渲染过程常量缓冲区
     void UpdateMainPassCB(const DXGameTimer& gt);
+    // 更新反射过程常量缓冲区
+    void UpdateReflectedPassCB(const DXGameTimer& gt);
 
-    void UpdateWaves(const DXGameTimer& gt);
+   // void UpdateWaves(const DXGameTimer& gt);
 
     void DrawGame();
 
@@ -117,11 +122,14 @@ private:
     void BuildDescriptorHeaps();
     //创建Shader与输入布局
     void BuildShadersAndInputLayout();
+    // 创建房间与骷髅头
+    void BuildRoomGeometry();
+    void BuildSkullGeometry();
 
-    void BuildLandGeometry();
-    void BuildBoxGeometry();
+   /* void BuildLandGeometry();
+    void BuildBoxGeometry();*/
     //创建波浪几何体
-    void BuildWavesGeometry();
+    //void BuildWavesGeometry();
 
     //创建形状几何体
     //void BuildShapeGeometry();
@@ -172,27 +180,35 @@ private:
     ComPtr<ID3DBlob> mvsByteCode = nullptr;
     ComPtr<ID3DBlob> mpsByteCode = nullptr;
 
-    //RenderItem* mWavesRitem = nullptr;
-    // 待渲染的成员
+    // Cache render items of interest.
+    // 待渲染物体的缓存
+    RenderItem* mSkullRitem = nullptr;
+    RenderItem* mReflectedSkullRitem = nullptr;
+    RenderItem* mShadowedSkullRitem = nullptr;
+    XMFLOAT3 mSkullTranslation = { 0.0f, 1.0f, -5.0f };
+
+    // List of all the render items.
+    // 所有待渲染的成员列表
     std::vector<std::unique_ptr<RenderItem>> mAllRitems;
 
-    RenderItem* mWavesRitem = nullptr;
+    //RenderItem* mWavesRitem = nullptr;
 
     //// Render items divided by PSO.
     std::vector<RenderItem*> mRitemLayer[(int)RenderLayer::Count];
 
-    std::unique_ptr<Waves> mWaves;
+    //std::unique_ptr<Waves> mWaves;
 
     PassConstants mMainPassCB;
+    PassConstants mReflectedPassCB;
 
 
     XMFLOAT3 mEyePos = { 0.0f, 0.0f, 0.0f };
     XMFLOAT4X4 mView = MathHelper::Identity4x4();
     XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
-    float mTheta = 1.5f * XM_PI;
-    float mPhi = XM_PIDIV4;
-    float mRadius = 50.0f;
+    float mTheta = 1.24f * XM_PI;
+    float mPhi = 0.42f * XM_PI;
+    float mRadius = 12.0f;
 
     float mSunTheta = 1.25f * XM_PI;
     float mSunPhi = XM_PIDIV4;
