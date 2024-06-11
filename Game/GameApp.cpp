@@ -32,7 +32,7 @@ bool GameApp::Init()
     //mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
 
     LoadTextures();
-    BuildRootSignature();  
+    BuildRootSignature();
     BuildDescriptorHeaps();
 
     BuildShadersAndInputLayout();
@@ -40,6 +40,7 @@ bool GameApp::Init()
     BuildRoomGeometry();
     BuildSkullGeometry();
     //BuildLandGeometry();
+    BuildFloorGeometry();
     //BuildWavesGeometry();
     //BuildBoxGeometry();
     //BuildShapeGeometry();
@@ -67,7 +68,7 @@ void GameApp::OnResize()
     DX12App::OnResize();
     // The window resized, so update the aspect ratio and recompute the projection matrix.
     // 若窗口尺寸被调整，则更新纵横比并重新计算投影矩阵
-    XMMATRIX P=XMMatrixPerspectiveFovLH(0.25f*MathHelper::Pi,AspectRatio(), 1.0f, 1000.0f);
+    XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * MathHelper::Pi, AspectRatio(), 1.0f, 1000.0f);
     XMStoreFloat4x4(&mProj, P);
 
 }
@@ -191,7 +192,7 @@ void GameApp::Draw(const DXGameTimer& gt)
     // 绘制阴影
     mCommandList->SetPipelineState(mPSOs["shadow"].Get());
     DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Shadow]);
-    
+
     // Draw ImGui
     // 绘制ImGui
     DrawGame();
@@ -232,7 +233,7 @@ void GameApp::Draw(const DXGameTimer& gt)
 
 void GameApp::OnMouseDown()
 {
-    if (ImGui::IsMouseDown((ImGuiMouseButton_Left))&&!ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    if (ImGui::IsMouseDown((ImGuiMouseButton_Left)) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
     {
         mLastMousePos.x = ImGui::GetIO().MousePos.x;
         mLastMousePos.y = ImGui::GetIO().MousePos.y;
@@ -256,7 +257,7 @@ void GameApp::OnMouseMove()
     {
         // Make each pixel correspond to a quarter of a degree.
         float dx = XMConvertToRadians(0.25f * static_cast<float>(ImGui::GetIO().MousePos.x - mLastMousePos.x));
-        float dy = XMConvertToRadians(0.25f * static_cast<float>(ImGui::GetIO().MousePos.y- mLastMousePos.y));
+        float dy = XMConvertToRadians(0.25f * static_cast<float>(ImGui::GetIO().MousePos.y - mLastMousePos.y));
 
         // Update angles based on input to orbit camera around box.
         mTheta += dx;
@@ -281,7 +282,7 @@ void GameApp::OnMouseMove()
     mLastMousePos.x = ImGui::GetIO().MousePos.x;
     mLastMousePos.y = ImGui::GetIO().MousePos.y;
 
-   
+
 }
 
 void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
@@ -328,7 +329,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
     mShadowedSkullRitem->NumFramesDirty = gNumFrameResources;
 }
 void GameApp::UpdateCamera(const DXGameTimer& gt)
-{	
+{
     // Convert Spherical to Cartesian coordinates.
     // 球面坐标转笛卡尔坐标
     mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
@@ -338,7 +339,7 @@ void GameApp::UpdateCamera(const DXGameTimer& gt)
 
     // Build the view matrix.
     // 构建观察矩阵
-    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y+20, mEyePos.z, 1.0f);
+    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
     XMVECTOR target = XMVectorZero();
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -378,7 +379,7 @@ void GameApp::UpdateMaterialCBs(const DXGameTimer& gt)
 {
     auto currMaterialCB = mCurrFrameResource->MaterialCB.get();
     for (auto& e : mMaterials)
-    { 
+    {
         // Only update the cbuffer data if the constants have changed.  If the cbuffer
         // data changes, it needs to be updated for each FrameResource.
         // 若材质常量数据有了变化旧更新常量缓冲区数据。
@@ -429,15 +430,12 @@ void GameApp::UpdateMainPassCB(const DXGameTimer& gt)
 
     //设置灯光
     mMainPassCB.Lights[0].Direction = { 0.57735f, -0.57735f, 0.57735f };
-    mMainPassCB.Lights[0].Strength = { 0.7f, 0.7f, 0.7f };
-    mMainPassCB.Lights[0].Position = { 0.0f,3.0f,0.0f };
-
-    mMainPassCB.Lights[1].Direction = { 0.57735f, -0.57735f, 0.57735f };
-    mMainPassCB.Lights[1].Strength = { 0.7f,  0.7f, 0.7f };
-    mMainPassCB.Lights[1].Position = { 2.0f,3.0f,3.0f };
-
+    mMainPassCB.Lights[0].Strength = { 0.6f, 0.6f, 0.6f };
+    mMainPassCB.Lights[1].Direction = { -0.57735f, -0.57735f, 0.57735f };
+    mMainPassCB.Lights[1].Strength = { 0.3f, 0.3f, 0.3f };
     mMainPassCB.Lights[2].Direction = { 0.0f, -0.707f, -0.707f };
-    mMainPassCB.Lights[2].Strength = { 0.0f, 0.0f, 0.0f };
+    mMainPassCB.Lights[2].Strength = { 0.15f, 0.15f, 0.15f };
+
 
     //XMVECTOR lightDir = -MathHelper::SphericalToCartesian(1.0f, mSunTheta, mSunPhi);
 
@@ -695,10 +693,10 @@ void GameApp::BuildShadersAndInputLayout()
     mShaders["opaquePS"] = d3dUtil::CompileShader(L"HLSL\\Material_ps.hlsl", defines, "ps", "ps_5_0");
     mShaders["alphaTestedPS"] = d3dUtil::CompileShader(L"HLSL\\Material_ps.hlsl", alphaTestDefines, "ps", "ps_5_0");
 
-  /*  mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_vs.cso");
-    mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_ps.cso"); */
+    /*  mvsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_vs.cso");
+      mpsByteCode = d3dUtil::LoadBinary(L"HLSL\\Material_ps.cso"); */
 
-    //顶点输入布局，注意要与顶点shader结构体中的成员一一对应
+      //顶点输入布局，注意要与顶点shader结构体中的成员一一对应
     mInputLayout =
     {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -722,15 +720,8 @@ void GameApp::BuildRoomGeometry()
     //   /--------------/
     //  /   Floor      /
     // /--------------/
-    std::array<Vertex, 20> vertices =
+    std::array<Vertex, 16> vertices =
     {
-        // Floor: Observe we tile texture coordinates.
-        // 地板顶点信息 位置(3) 法线(3) uv(2)
-        Vertex(-3.5f, 0.0f, -10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 
-        Vertex(-3.5f, 0.0f,   0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-        Vertex(7.5f, 0.0f,   0.0f, 0.0f, 1.0f, 0.0f, 4.0f, 0.0f),
-        Vertex(7.5f, 0.0f, -10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 4.0f),
-
         // Wall: Observe we tile texture coordinates, and that we
         // leave a gap in the middle for the mirror.
         // 墙面顶点信息 位置(3) 法线(3) uv(2)
@@ -756,39 +747,31 @@ void GameApp::BuildRoomGeometry()
         Vertex(2.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f),
         Vertex(2.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f)
     };
-    std::array<std::int16_t, 30> indices =
+    std::array<std::int16_t, 24> indices =
     {
-        // Floor
+        // Walls
         0, 1, 2,
         0, 2, 3,
 
-        // Walls
         4, 5, 6,
         4, 6, 7,
 
         8, 9, 10,
         8, 10, 11,
 
-        12, 13, 14,
-        12, 14, 15,
-
         // Mirror
-        16, 17, 18,
-        16, 18, 19
+        12, 13, 14,
+        12, 14, 15
     };
-    SubmeshGeometry floorSubmesh;
-    floorSubmesh.IndexCount = 6;
-    floorSubmesh.StartIndexLocation = 0;
-    floorSubmesh.BaseVertexLocation = 0;
 
     SubmeshGeometry wallSubmesh;
     wallSubmesh.IndexCount = 18;
-    wallSubmesh.StartIndexLocation = 6;
+    wallSubmesh.StartIndexLocation = 0;
     wallSubmesh.BaseVertexLocation = 0;
 
     SubmeshGeometry mirrorSubmesh;
     mirrorSubmesh.IndexCount = 6;
-    mirrorSubmesh.StartIndexLocation = 24;
+    mirrorSubmesh.StartIndexLocation = 18;
     mirrorSubmesh.BaseVertexLocation = 0;
 
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
@@ -814,7 +797,6 @@ void GameApp::BuildRoomGeometry()
     geo->IndexFormat = DXGI_FORMAT_R16_UINT;
     geo->IndexBufferByteSize = ibByteSize;
 
-    geo->DrawArgs["floor"] = floorSubmesh;
     geo->DrawArgs["wall"] = wallSubmesh;
     geo->DrawArgs["mirror"] = mirrorSubmesh;
 
@@ -900,6 +882,56 @@ void GameApp::BuildSkullGeometry()
     mGeometries[geo->Name] = std::move(geo);
 }
 
+void GameApp::BuildFloorGeometry()
+{
+    std::array<Vertex, 4> vertices =
+    {
+
+        // Floor: Observe we tile texture coordinates.
+          // 地板顶点信息 位置(3) 法线(3) uv(2)
+        Vertex(-3.5f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 
+            Vertex(-3.5f, 0.1f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+            Vertex(7.5f, 0.1f, 0.0f, 0.0f, 1.0f, 0.0f, 4.0f, 0.0f),
+            Vertex(7.5f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 4.0f)
+    };
+    std::array<std::int16_t, 6> indices =
+    {
+        // Floor
+        0, 1, 2,
+        0, 2, 3 };
+
+    SubmeshGeometry floorSubmesh;
+    floorSubmesh.IndexCount = 6;
+    floorSubmesh.StartIndexLocation = 0;
+    floorSubmesh.BaseVertexLocation = 0;
+
+    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+    const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+    auto geo = std::make_unique<MeshGeometry>();
+    geo->Name = "floorGeo";
+
+    ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
+    CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
+    CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+    geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
+
+    geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+
+    geo->VertexByteStride = sizeof(Vertex);
+    geo->VertexBufferByteSize = vbByteSize;
+    geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+    geo->IndexBufferByteSize = ibByteSize;
+
+    geo->DrawArgs["floor"] = floorSubmesh;
+
+    mGeometries[geo->Name] = std::move(geo);
+}
+
 void GameApp::BuildPSO()
 {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
@@ -912,17 +944,17 @@ void GameApp::BuildPSO()
     opaquePsoDesc.pRootSignature = mRootSignature.Get();
     opaquePsoDesc.VS =
     {
-      /*  reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
-        mvsByteCode->GetBufferSize()*/
-        reinterpret_cast<BYTE*>(mShaders["standardVS"]->GetBufferPointer()),
-        mShaders["standardVS"]->GetBufferSize()
+        /*  reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
+          mvsByteCode->GetBufferSize()*/
+          reinterpret_cast<BYTE*>(mShaders["standardVS"]->GetBufferPointer()),
+          mShaders["standardVS"]->GetBufferSize()
     };
     opaquePsoDesc.PS =
     {
-       /* reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
-        mpsByteCode->GetBufferSize()*/
-         reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
-        mShaders["opaquePS"]->GetBufferSize()
+        /* reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
+         mpsByteCode->GetBufferSize()*/
+          reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
+         mShaders["opaquePS"]->GetBufferSize()
     };
     // 创建正常物体的PSO
     opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
@@ -936,7 +968,7 @@ void GameApp::BuildPSO()
     opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
     opaquePsoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
-    
+
     // PSO for transparent objects
     // 创建开启了混合功能的PSO
     D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
@@ -1017,7 +1049,7 @@ void GameApp::BuildPSO()
 
     // PSO for shadow objects
     // 阴影部分的PSO
-    
+
     // We are going to draw shadows with transparency, so base it off the transparency description.
     // 将绘制带有透明度的阴影，因此要以透明度描述为基础。
     D3D12_DEPTH_STENCIL_DESC shadowDSS;
@@ -1111,7 +1143,7 @@ void GameApp::BuildRenderItems()
     floorRitem->TexTransform = MathHelper::Identity4x4();
     floorRitem->ObjCBIndex = 0;
     floorRitem->Mat = mMaterials["checkertile"].get();
-    floorRitem->Geo = mGeometries["roomGeo"].get();
+    floorRitem->Geo = mGeometries["floorGeo"].get();
     floorRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     floorRitem->IndexCount = floorRitem->Geo->DrawArgs["floor"].IndexCount;
     floorRitem->StartIndexLocation = floorRitem->Geo->DrawArgs["floor"].StartIndexLocation;
@@ -1186,7 +1218,7 @@ void GameApp::BuildRenderItems()
     mAllRitems.push_back(std::move(reflectedFloorRitem));
     mAllRitems.push_back(std::move(shadowedSkullRitem));
     mAllRitems.push_back(std::move(mirrorRitem));
- 
+
 }
 
 
