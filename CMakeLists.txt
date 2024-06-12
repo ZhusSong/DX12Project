@@ -32,7 +32,7 @@ file(COPY ${HLSL_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # 将asset文件夹中的内容添加到build过程
 file(COPY ${ASSET_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-#file(GLOB ${ASSET_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB ${ASSET_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # 添加所有.hlsl文件和.h文件到指定文件夹中
 file(GLOB HLSL_FILES ${HLSL_DIR}/*.hlsl)
@@ -101,6 +101,12 @@ Game/GameApp.h
 Game/Wave.cpp
 Game/Wave.h
  )
+ 
+ set(GameObject
+Game/GameObject.cpp
+Game/GameObject.h
+ )
+
 
  #DX12API
  set (DX12API
@@ -111,7 +117,16 @@ DX12API/DX12App.cpp
 DX12API/DX12App.h
 DX12API/UploadBuffer.h
  )
-
+  #摄像机类
+ set(Camera
+DX12API/Camera.cpp
+DX12API/Camera.h
+ )
+ #Transform类
+ set(Transform
+DX12API/Transform.cpp
+DX12API/Transform.h
+ )
 #程序时间
  set(GameTimer
  DX12API/DXGameTimer.cpp
@@ -139,21 +154,16 @@ DX12API/UploadBuffer.h
  DX12API/FrameResource.cpp
  DX12API/FrameResource.h
  )
+ 
+ #初始化渲染状态
+ set(RenderAndEffects
+ DX12API/RenderState.cpp
+ DX12API/RenderState.h
+ )
  #贴图读取
  set (TextureLoader
-#DX12API/TextureLoader/DirectXHelpers.h
-#DX12API/TextureLoader/LoaderHelpers.h
-#DX12API/TextureLoader/pch.h
-#DX12API/TextureLoader/PlatformHelpers.h
-#DX12API/TextureLoader/ResourceUploadBatch.h
-#DX12API/TextureLoader/ResourceUploadBatch.cpp
  DX12API/TextureLoader/DDSTextureLoader.cpp
 DX12API/TextureLoader/DDSTextureLoader.h
-#DX12API/TextureLoader/WICTextureLoader.cpp
-#DX12API/TextureLoader/WICTextureLoader.h
-#DX12API/TextureLoader/DDS.h
-#DX12API/TextureLoader/GraphicsMemory.h
-#DX12API/TextureLoader/GraphicsMemory.cpp
  )
  #HLSL文件分组
  source_group(HLSL FILES ${HLSL_Files})
@@ -169,11 +179,16 @@ DX12API/TextureLoader/DDSTextureLoader.h
  source_group(DX12API\\FrameResource FILES ${FrameResource})
  source_group(DX12API\\GameTimer FILES ${GameTimer})
  source_group(DX12API\\UtilityAPI FILES ${UtilityAPI})
+ source_group(DX12API\\Transform FILES ${Transform})
+ source_group(DX12API\\Camera FILES ${Camera})
+ source_group(DX12API\\RenderAndEffects FILES ${RenderAndEffects})
+ source_group(Game\\GameObject FILES ${GameObject})
 
  #添加可执行文件
  #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
-${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${BasicGeometry} ${FrameResource}
+${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${BasicGeometry} ${FrameResource} ${Transform} ${Camera} ${RenderAndEffects}
+${GameObject}
 ${HLSL_Files})
 # 添加链接库
 target_link_libraries(${TARGET_NAME}  d3d12.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib d2d1.lib dwrite.lib winmm.lib legacy_stdio_definitions.lib)

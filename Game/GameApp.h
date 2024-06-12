@@ -13,6 +13,7 @@
 #include "UploadBuffer.h"
 #include "FrameResource.h"
 #include "GeometryGenerator.h"
+#include "Camera.h"
 
 #include"Wave.h"
 
@@ -217,6 +218,7 @@ private:
 
     POINT mLastMousePos;
 
+    std::shared_ptr<Camera> mCamera;
 
 };
 
