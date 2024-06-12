@@ -1,0 +1,136 @@
+
+//--------------------------------------------------------------------------------------
+//	コントローラ記述
+#ifndef	CONTROLLER_NAME
+#define	CONTROLLER_NAME	"Grass-Controller-R.pmx"
+
+static float	s_fHitRange			= 1.0;
+static float	s_fHitHeight		= 1.0;
+
+#endif
+
+#define	DECL_OFFSCREEN_RT( name, w, h, cc, cd, fmt, fx )	texture2D name	: OFFSCREENRENDERTARGET
+#define	DECL_SAMPLER( _name, _texture, _filter, _address )	\
+sampler _name = sampler_state {								\
+	Texture		= <_texture>;							\
+	Filter		= _filter;									\
+	AddressU	= _address;									\
+	AddressV	= _address;									\
+}
+
+shared	DECL_OFFSCREEN_RT( RT_NormalDepthMap4Grass##ID,		WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, float4(0,0,1,1), 1, FMT_NDMAP,	RT_NMLDEPTH_FX );
+DECL_SAMPLER( smpHeightMap, RT_NormalDepthMap4Grass##ID, POINT, CLAMP );
+
+#include "MMxCompatible.h"
+
+bool			s_bCtrlExist		: CONTROLOBJECT < string name = CONTROLLER_NAME; >;
+float4x4		s_mtxBase			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成基準位置"; >;
+float3			s_vRange			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成範囲"; >;
+float3			s_vDepth			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成深度"; >;
+
+static float	s_fWidthX			= s_bCtrlExist ? 2.0*abs( dot( s_vRange-s_mtxBase._41_42_43, s_mtxBase._11_12_13 ) ) : 100.0;
+static float	s_fWidthZ			= s_bCtrlExist ? 2.0*abs( dot( s_vRange-s_mtxBase._41_42_43, s_mtxBase._31_32_33 ) ) : 100.0;
+static float	s_fDepth			= s_bCtrlExist ? distance( s_vDepth, s_mtxBase._41_42_43 ) : 256.0;
+
+float4x4		s_mtxOwnerWorld			: CONTROLOBJECT < string name = "(OffscreenOwner)"; >;
+static float4x4	s_mtxOwnerView			= float4x4	(
+														float4( +normalize( s_mtxOwnerWorld._11_21_31 ), 0.0 ),
+														float4( +normalize( s_mtxOwnerWorld._12_22_32 ), 0.0 ),
+														float4( +normalize( s_mtxOwnerWorld._13_23_33 ), 0.0 ),
+														float4(	-dot( normalize( s_mtxOwnerWorld._11_12_13 ), s_mtxOwnerWorld._41_42_43 ),
+																-dot( normalize( s_mtxOwnerWorld._21_22_23 ), s_mtxOwnerWorld._41_42_43 ),
+																-dot( normalize( s_mtxOwnerWorld._31_32_33 ), s_mtxOwnerWorld._41_42_43 ),
+																1.0 )
+													);
+
+static float4x4	s_mtxBaseView			= float4x4	(
+														float4( +normalize( s_mtxBase._11_21_31 ), 0.0 ),
+														float4( +normalize( s_mtxBase._12_22_32 ), 0.0 ),
+														float4( +normalize( s_mtxBase._13_23_33 ), 0.0 ),
+														float4(	-dot( normalize( s_mtxBase._11_12_13 ), s_mtxBase._41_42_43 ),
+																-dot( normalize( s_mtxBase._21_22_23 ), s_mtxBase._41_42_43 ),
+																-dot( normalize( s_mtxBase._31_32_33 ), s_mtxBase._41_42_43 ),
+																1.0 )
+													);
+
+float4x4		s_mtxAdjust				= float4x4(	float4( +1, 0, 0, 0 ),
+													float4(  0, 0,-1, 0 ),
+													float4(  0,+1, 0, 0 ),
+													float4(  0, 0, 0, 1 ) );
+
+static float4x4	s_mtxView					= s_bCtrlExist ? mul( s_mtxBaseView, s_mtxAdjust ) : mul( s_mtxOwnerView, s_mtxAdjust );
+
+
+float4x4		MakeProjection( float w, float h, float zn, float zf ) {
+	float4	l0, l1, l2, l3;
+	l0		= float4( 2.0/w,     0,           0, 0 );
+	l1		= float4(     0, 2.0/h,           0, 0 );
+	l2		= float4(     0,     0, 1.0/(zf-zn), 0 );
+	l3		= float4(     0,     0, -zn/(zf-zn), 1 );
+	return	float4x4( l0, l1, l2, l3 );
+}
+
+static float4x4	s_mtxProj					= MakeProjection( s_fWidthX, s_fWidthZ, 0.0, s_fDepth );
+static float4x4	s_mtxViewProj				= mul( s_mtxView, s_mtxProj );
+
+//	座法変換行列
+float4x4		WorldMatrix					: WORLD;
+static float4x4	ViewMatrix					= s_mtxView;
+static float4x4	WorldViewMatrix				= mul( WorldMatrix, s_mtxView );
+static float4x4	WorldViewProjMatrix			= mul( WorldMatrix, s_mtxViewProj );
+
+
+#define			DEPTH_NEAR					(0.0)
+#define			DEPTH_FAR					(s_fDepth)
+
+struct VS_OUTPUT {
+	float4	vPosition	: POSITION;
+	float4	vView		: TEXCOORD0;
+	float2	vUV			: TEXCOORD1;
+};
+
+VS_OUTPUT	VS( MM_INPUT Input ) {
+	MM_LOCAL	Local	= MMTransform( Input );
+	VS_OUTPUT	Out;
+
+	Out.vPosition	= mul( Local.Position, WorldViewProjMatrix );
+	Out.vView		= mul( Local.Position, WorldViewMatrix );
+	Out.vUV			= Out.vPosition.xy * 0.5 + 0.5;
+
+	return Out;
+}
+
+float4	PS( VS_OUTPUT IN ) : COLOR0
+{
+	float	h	= tex2D( smpHeightMap, IN.vUV ).w*(DEPTH_FAR-DEPTH_NEAR)+DEPTH_NEAR;
+	float	z	= abs( IN.vView.z + s_fHitHeight - h );
+	clip( s_fHitRange - z );
+	return	smoothstep( s_fHitRange, 0.0, z );
+}
+
+//	上書きじゃなくてブレンドしたほうがいいかね？ MAXとかで
+
+technique TechNS < string MMDPass = "object"; > {
+	pass DrawObject {
+		AlphaBlendEnable	= FALSE;
+		AlphaTestEnable		= FALSE;
+		CullMode			= NONE;
+		VertexShader		= compile vs_3_0 VS();
+		PixelShader			= compile ps_3_0 PS();
+	}
+}
+
+technique TechBS < string MMDPass = "object_ss"; > {
+	pass DrawObject {
+		AlphaBlendEnable	= FALSE;
+		AlphaTestEnable		= FALSE;
+		CullMode			= NONE;
+		VertexShader		= compile vs_3_0 VS();
+		PixelShader			= compile ps_3_0 PS();
+	}
+}
+
+technique EdgeTec	< string MMDPass = "edge"; >	{	}	//	輪郭描画用テクニック
+technique ShadowTec	< string MMDPass = "shadow"; >	{	}	//	影描画用テクニック
+technique ZplotTec	< string MMDPass = "zplot"; >	{	}	//	Z値プロット用テクニック
+

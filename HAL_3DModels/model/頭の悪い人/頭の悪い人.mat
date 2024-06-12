@@ -1,0 +1,84 @@
+{
+    "value0": {
+        "Name": "Šç",
+        "Diffuse": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+        },
+        "SpecularPower": 50.0,
+        "Ambient": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 30,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": -1,
+        "SphereTextureIndex": -1,
+        "SphereMode": 0,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 1,
+        "FaceNum": 636
+    },
+    "value1": {
+        "Name": "‘Ì",
+        "Diffuse": {
+            "r": 0.8549790978431702,
+            "g": 0.8549790978431702,
+            "b": 0.8549790978431702,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.3343243896961212,
+            "g": 0.3343243896961212,
+            "b": 0.3343243896961212
+        },
+        "SpecularPower": 6.0,
+        "Ambient": {
+            "r": 0.3419916033744812,
+            "g": 0.3419916033744812,
+            "b": 0.3419916033744812
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 30,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": -1,
+        "SphereTextureIndex": -1,
+        "SphereMode": 0,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 1,
+        "FaceNum": 21390
+    }
+}

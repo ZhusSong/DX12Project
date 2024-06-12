@@ -1,0 +1,1191 @@
+{
+    "value0": {
+        "Name": "肌",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.7329999804496765,
+            "g": 0.17599999904632569,
+            "b": 0.17599999904632569,
+            "a": 1.0
+        },
+        "EdgeSize": 0.4000000059604645,
+        "TextureIndex": 0,
+        "SphereTextureIndex": 1,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 2,
+        "FaceNum": 20094
+    },
+    "value1": {
+        "Name": "顔",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 0.9999899864196777,
+            "b": 0.9999899864196777,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5370000004768372,
+        "DrawFlag": 29,
+        "EdgeColor": {
+            "r": 0.7329999804496765,
+            "g": 0.17599999904632569,
+            "b": 0.17599999904632569,
+            "a": 1.0
+        },
+        "EdgeSize": 0.4000000059604645,
+        "TextureIndex": 0,
+        "SphereTextureIndex": 1,
+        "SphereMode": 2,
+        "ToonFlag": 2,
+        "ToonTextureIndex": 3,
+        "FaceNum": 9960
+    },
+    "value2": {
+        "Name": "肌エッジ無",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 11,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.6000000238418579
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 0,
+        "SphereTextureIndex": -1,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 3,
+        "FaceNum": 3270
+    },
+    "value3": {
+        "Name": "瞳",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 7,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.6000000238418579
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 0,
+        "SphereTextureIndex": 4,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 3,
+        "FaceNum": 384
+    },
+    "value4": {
+        "Name": "肌エッジ無2",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 3,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.6000000238418579
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 0,
+        "SphereTextureIndex": -1,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 3,
+        "FaceNum": 504
+    },
+    "value5": {
+        "Name": "服黒",
+        "Diffuse": {
+            "r": 0.05098038911819458,
+            "g": 0.05098038911819458,
+            "b": 0.05098038911819458,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 0.699999988079071,
+        "TextureIndex": 5,
+        "SphereTextureIndex": 6,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 9156
+    },
+    "value6": {
+        "Name": "服2",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.3370000123977661,
+            "g": 0.7450000047683716,
+            "b": 0.7369999885559082,
+            "a": 1.0
+        },
+        "EdgeSize": 0.699999988079071,
+        "TextureIndex": 8,
+        "SphereTextureIndex": 9,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 10,
+        "FaceNum": 3606
+    },
+    "value7": {
+        "Name": "服エッジ無2",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 15,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.6000000238418579
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 11,
+        "SphereTextureIndex": 12,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 13,
+        "FaceNum": 204
+    },
+    "value8": {
+        "Name": "材質0",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.4000000059604645,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 14,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 3882
+    },
+    "value9": {
+        "Name": "材質1",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 16,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 2964
+    },
+    "value10": {
+        "Name": "材質2",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 17,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 6504
+    },
+    "value11": {
+        "Name": "材質3",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.4000000059604645,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 18,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 1380
+    },
+    "value12": {
+        "Name": "材質4",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.4000000059604645,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 19,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 1392
+    },
+    "value13": {
+        "Name": "材質5",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 20,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 1440
+    },
+    "value14": {
+        "Name": "材質6",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 13,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 21,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 5286
+    },
+    "value15": {
+        "Name": "材質7",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 22,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 9,
+        "FaceNum": 480
+    },
+    "value16": {
+        "Name": "材質8",
+        "Diffuse": {
+            "r": 0.2549019753932953,
+            "g": 0.2549019753932953,
+            "b": 0.2549019753932953,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.06666667014360428,
+            "g": 0.06666667014360428,
+            "b": 0.06666667014360428
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.4000000059604645,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 16,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 2160
+    },
+    "value17": {
+        "Name": "材質9",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 23,
+        "SphereTextureIndex": 24,
+        "SphereMode": 2,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 3336
+    },
+    "value18": {
+        "Name": "材質10",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 21,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 6732
+    },
+    "value19": {
+        "Name": "材質11",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.36500000953674319,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 25,
+        "SphereTextureIndex": 15,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 7,
+        "FaceNum": 7560
+    },
+    "value20": {
+        "Name": "材質12",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 12,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 26,
+        "SphereTextureIndex": -1,
+        "SphereMode": 0,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 3108
+    },
+    "value21": {
+        "Name": "材質13",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.30000001192092898,
+        "DrawFlag": 12,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 27,
+        "SphereTextureIndex": -1,
+        "SphereMode": 0,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 13140
+    },
+    "value22": {
+        "Name": "材質14",
+        "Diffuse": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.800000011920929,
+            "g": 0.800000011920929,
+            "b": 0.800000011920929
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 12,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 28,
+        "SphereTextureIndex": -1,
+        "SphereMode": 0,
+        "ToonFlag": 1,
+        "ToonTextureIndex": 0,
+        "FaceNum": 1902
+    },
+    "value23": {
+        "Name": "ねこみみ外",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 30,
+        "EdgeColor": {
+            "r": 0.11699999868869782,
+            "g": 0.3919999897480011,
+            "b": 0.4580000042915344,
+            "a": 1.0
+        },
+        "EdgeSize": 0.5,
+        "TextureIndex": 29,
+        "SphereTextureIndex": 30,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 31,
+        "FaceNum": 672
+    },
+    "value24": {
+        "Name": "ねこみみ内",
+        "Diffuse": {
+            "r": 0.9686275124549866,
+            "g": 0.8627451062202454,
+            "b": 0.7333332896232605,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 5.0,
+        "Ambient": {
+            "r": 0.26274511218070986,
+            "g": 0.2235293984413147,
+            "b": 0.10588239878416062
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 0,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 1.0
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": -1,
+        "SphereTextureIndex": 30,
+        "SphereMode": 2,
+        "ToonFlag": 2,
+        "ToonTextureIndex": -1,
+        "FaceNum": 432
+    },
+    "value25": {
+        "Name": "ねこみみ内毛",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 99.0,
+        "Ambient": {
+            "r": 0.7529411911964417,
+            "g": 0.7529411911964417,
+            "b": 0.7529411911964417
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 27,
+        "EdgeColor": {
+            "r": 0.7529411911964417,
+            "g": 0.7529411911964417,
+            "b": 0.7529411911964417,
+            "a": 1.0
+        },
+        "EdgeSize": 0.5,
+        "TextureIndex": 32,
+        "SphereTextureIndex": 30,
+        "SphereMode": 2,
+        "ToonFlag": 2,
+        "ToonTextureIndex": -1,
+        "FaceNum": 1860
+    },
+    "value26": {
+        "Name": "髪",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 0.9960784316062927,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.45600003004074099,
+        "DrawFlag": 31,
+        "EdgeColor": {
+            "r": 0.11699999868869782,
+            "g": 0.3919999897480011,
+            "b": 0.4580000042915344,
+            "a": 1.0
+        },
+        "EdgeSize": 0.5,
+        "TextureIndex": 29,
+        "SphereTextureIndex": 30,
+        "SphereMode": 2,
+        "ToonFlag": 2,
+        "ToonTextureIndex": 31,
+        "FaceNum": 29871
+    },
+    "value27": {
+        "Name": "髪影",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 15,
+        "EdgeColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.6000000238418579
+        },
+        "EdgeSize": 1.0,
+        "TextureIndex": 0,
+        "SphereTextureIndex": -1,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 3,
+        "FaceNum": 366
+    },
+    "value28": {
+        "Name": "髪裏",
+        "Diffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0,
+            "a": 1.0
+        },
+        "Specular": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "SpecularPower": 0.0,
+        "Ambient": {
+            "r": 0.5,
+            "g": 0.5,
+            "b": 0.5
+        },
+        "Emissive": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+        },
+        "Metallic": 0.0,
+        "Roughness": 0.5,
+        "DrawFlag": 27,
+        "EdgeColor": {
+            "r": 0.11699999868869782,
+            "g": 0.3919999897480011,
+            "b": 0.4580000042915344,
+            "a": 1.0
+        },
+        "EdgeSize": 0.5,
+        "TextureIndex": 29,
+        "SphereTextureIndex": -1,
+        "SphereMode": 2,
+        "ToonFlag": 0,
+        "ToonTextureIndex": 31,
+        "FaceNum": 2940
+    }
+}

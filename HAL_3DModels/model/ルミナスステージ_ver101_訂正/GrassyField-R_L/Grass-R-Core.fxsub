@@ -1,0 +1,1219 @@
+
+//--------------------------------------------------------------------------------------
+//	わかる人はここからも触っていいよゾーン
+
+float4x4		s_mtxOrgWorld		: WORLD;
+float			s_fTime				: TIME;
+float			s_fElapsedTime		: ELAPSEDTIME;
+float4			MaterialDiffuse		: DIFFUSE			< string Object = "Geometry"; >;
+float3			s_vCameraPosition	: POSITION			< string Object = "Camera"; >;
+float3			s_vCameraDirection	: DIRECTION			< string Object = "Camera"; >;
+float3			s_vLightDirection	: DIRECTION			< string Object = "Light"; >;
+float4x4		s_mtxViewProj		: VIEWPROJECTION;
+float4x4		s_mtxLightViewProj	: VIEWPROJECTION	< string Object = "Light"; >;
+
+float3			s_vLightDiffuse		: DIFFUSE			< string Object = "Light"; >;
+float3			s_vLightAmbient		: AMBIENT			< string Object = "Light"; >;
+float3			s_vLightSpecular	: SPECULAR			< string Object = "Light"; >;
+
+bool			s_bCtrlExist		: CONTROLOBJECT < string name = CONTROLLER_NAME; >;
+float4x4		s_mtxBase			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成基準位置"; >;
+float3			s_vRange			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成範囲"; >;
+float3			s_vDepth			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成深度"; >;
+float3			s_vNoize			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "ゆらぎ"; >;
+float3			s_vFadeDistance		: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "フェード距離"; >;
+float3			s_vLightBoost		: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "明るさブースト"; >;
+float3			s_vSpan				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "生成スパン"; >;
+float3			s_vSize				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "サイズ"; >;
+float3			s_vSize2			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "サイズ2"; >;
+
+float3			s_vGrScroll			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "草スクロール"; >;
+float3			s_vWdScroll			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "風スクロール"; >;
+float4x4		s_vGrPose			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "草姿勢"; >;
+float3			s_vTxPivot			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "基準点"; >;
+float			s_fCount			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "数"; >;
+float			s_fColorR			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "赤"; >;
+float			s_fColorG			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "緑"; >;
+float			s_fColorB			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "青"; >;
+
+float			s_fSpcR				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "反射赤"; >;
+float			s_fSpcG				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "反射緑"; >;
+float			s_fSpcB				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "反射青"; >;
+float			s_fSpcPow			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "反射強度"; >;
+float			s_fAmbR				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "環境赤"; >;
+float			s_fAmbG				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "環境緑"; >;
+float			s_fAmbB				: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "環境青"; >;
+
+float			s_fFitNormal		: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "地面法線"; >;
+float			s_fARBillboard		: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "最大面積"; >;
+float			s_fFixPose			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "姿勢固定"; >;
+
+float			s_fAL_CutA			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "AL_CutA"; >;
+float			s_fAL_Lumi			: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "AL_Lumi"; >;
+
+float			s_fRandomRoll		: CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "乱数回転"; >;
+
+static float	s_fRandomRoll_Min	= -180.0 * s_fRandomRoll * (3.1415926 / 180.0);
+static float	s_fRandomRoll_Max	= +180.0 * s_fRandomRoll * (3.1415926 / 180.0);
+
+float			IfZeroThen( float value, float ifzero ) {
+	if( (abs( value ) > 0.00001) ) {
+		return	value;
+	}
+	else {
+		return	ifzero;
+	}
+}
+
+float4			s_vPrePosTex[1][1]	: TEXTUREVALUE < string TextureName = "texSavePosition"ID_STRING; >;
+float4			s_vPreAxXTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveAxisX"ID_STRING; >;
+float4			s_vPreAxYTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveAxisY"ID_STRING; >;
+float4			s_vPreAxZTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveAxisZ"ID_STRING; >;
+float4			s_vPreRngTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveRange"ID_STRING; >;
+float4			s_vPreDptTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveDepth"ID_STRING; >;
+
+static float4	s_vPrePosition		= s_vPrePosTex[0][0];
+static float4	s_vPreAxisX			= s_vPreAxXTex[0][0];
+static float4	s_vPreAxisY			= s_vPreAxYTex[0][0];
+static float4	s_vPreAxisZ			= s_vPreAxZTex[0][0];
+static float4	s_vPreRange			= s_vPreRngTex[0][0];
+static float4	s_vPreDepth			= s_vPreDptTex[0][0];
+
+float4x4		SelectMtxWorld( void ) {
+	float4x4	ret;
+	if( dot( s_vPreAxisX, s_vPreAxisX ) > 0.00001 ) {
+		ret._11_21_31_41	= s_vPreAxisX;
+		ret._12_22_32_42	= s_vPreAxisY;
+		ret._13_23_33_43	= s_vPreAxisZ;
+		ret._14_24_34_44	= float4( 0.0.xxx, 1.0 );
+	}
+	else {
+		ret		= s_mtxBase;
+	}
+	return	ret;
+}
+static float4x4	s_mtxWorld			= SelectMtxWorld();
+
+static float	s_fWidthX			= IfZeroThen( 2.0*abs( dot( s_vPreRange.xyz-s_mtxWorld._41_42_43, s_mtxWorld._11_12_13 ) ), 100.0 );
+static float	s_fWidthZ			= IfZeroThen( 2.0*abs( dot( s_vPreRange.xyz-s_mtxWorld._41_42_43, s_mtxWorld._31_32_33 ) ), 100.0 );
+static float	s_fDepth			= s_bCtrlExist ? distance( s_vPreDepth, s_mtxWorld._41_42_43 )					: 256.0;
+
+
+static float	s_fPtclCount		= s_bCtrlExist ? 15000 * s_fCount														: 10000;
+static float3	s_vPtclColor		= s_bCtrlExist ? float3( s_fColorR, s_fColorG, s_fColorB )								: 1.0.xxx;
+static float2	s_vPtclSize			= s_bCtrlExist ? s_vSize.xy																: float2(3,6);
+static float2	s_vPtclSize2		= s_bCtrlExist ? s_vSize2.xy															: float2(3,6);
+static float	s_fSpawnSpan		= s_bCtrlExist ? length( s_vSpan )*0.1													: 0.0;
+static float3	s_vLBoost			= s_bCtrlExist ? s_vLightBoost+1.0.xxx													: 1.0.xxx;
+static float3	s_vNoizeLevel		= s_bCtrlExist ? s_vNoize * 0.1															: 0.0.xxx;
+static float	s_fFadeDistance		= s_bCtrlExist ? length( s_vFadeDistance )												: 200.0;
+
+static float3	s_vWindMapScroll	= s_bCtrlExist ? s_vWdScroll * float3( -1.0/s_fWidthX, 1.0, +1.0/s_fWidthZ )			: float3( 0.005, 2.0, 0.005 );
+static float3	s_vGrassScroll		= s_bCtrlExist ? s_vGrScroll * float3( +1.0/s_fWidthX, 0.0, +1.0/s_fWidthZ )			: float3( 0.0, 0.0, 0.0 );
+
+static float3	s_vInf				= frac( float3(	dot( s_mtxWorld._41_42_43, s_mtxWorld._11_12_13 ),
+													dot( s_mtxWorld._41_42_43, s_mtxWorld._21_22_23 ),
+													dot( s_mtxWorld._41_42_43, s_mtxWorld._31_32_33 ) ) / float3( s_fWidthX, 1.0, s_fWidthZ ) );
+
+static float	s_fMoveShiftMax		= s_fDepth;
+
+//static float4	s_vLightColor		= float4( s_vLightSpecular, 1.0 );
+static float4	s_vLightColor		= float4( max(max(max(s_vLightDiffuse,s_vLightAmbient),s_vLightSpecular),0), 1.0 );
+static float4	s_vDiffuseColor		= float4( s_fColorR, s_fColorG, s_fColorB, 1.0 )		* s_vLightColor;
+static float3	s_vAmbientColor		= float3( s_fAmbR, s_fAmbG, s_fAmbB )					* s_vLightColor.rgb;
+static float4	s_vSpecularColor	= float4( s_fSpcR, s_fSpcG, s_fSpcB, s_fSpcPow*100.0 )	* s_vLightColor;
+
+
+#if	!IS_LUMINOUS
+
+#define	DECL_OFFSCREEN_RT( name, w, h, cc, cd, fmt, fx )		\
+texture2D name	: OFFSCREENRENDERTARGET <						\
+	string	Description		= "RenderTarget for wwwww";			\
+	int		Width			= w;								\
+	int		Height			= h;								\
+	string	Format			= fmt;								\
+	float4	ClearColor		= cc;								\
+	float	ClearDepth		= cd;								\
+	bool	AntiAlias		= false;							\
+	string	DefaultEffect	=									\
+		"self=hide;"											\
+		CONTROLLER_NAME"=hide;"									\
+		"*="fx";";												\
+>
+
+#define	DECL_RCT( _name, _w, _h, _fmt )		\
+texture _name	: RenderColorTarget <		\
+	int		Width	= _w;					\
+	int		Height	= _h;					\
+	string	Format	= _fmt;					\
+>
+
+#else
+
+#define	DECL_OFFSCREEN_RT( name, w, h, cc, cd, fmt, fx )	texture2D name	: OFFSCREENRENDERTARGET
+#define	DECL_RCT( _name, _w, _h, _fmt )						texture _name	: RenderColorTarget
+
+#endif
+
+
+#define	DECL_SAMPLER( _name, _texture, _filter, _address )	\
+sampler _name = sampler_state {								\
+	Texture		= <_texture>;								\
+	Filter		= _filter;									\
+	AddressU	= _address;									\
+	AddressV	= _address;									\
+}
+#define	DECL_SAMPLER2( _name, _texture, _MinFilter, _MagFilter, _MipFilter, _address )	\
+sampler _name = sampler_state {								\
+	Texture		= <_texture>;								\
+	MinFilter	= _MinFilter;								\
+	MagFilter	= _MagFilter;								\
+	MipFilter	= _MipFilter;								\
+	AddressU	= _address;									\
+	AddressV	= _address;									\
+}
+
+#define	DECL_SAMPLER3( _name, _texture, _MinFilter, _MagFilter, _MipFilter, _addressU, _addressV )	\
+sampler _name = sampler_state {								\
+	Texture		= <_texture>;								\
+	MinFilter	= _MinFilter;								\
+	MagFilter	= _MagFilter;								\
+	MipFilter	= _MipFilter;								\
+	AddressU	= _addressU;								\
+	AddressV	= _addressV;								\
+}
+
+
+texture2D	s_texPtcl	< string ResourceName = PTCL_TEX_NAME; int MipLevels = 0; >;	//	パーティクルテクスチャ
+
+#if	NUM_DUPLICATE < 4
+//	乱数テクスチャサイズ
+#define	RNDTEX_WIDTH	(256.0)
+#define	RNDTEX_HEIGHT	(256.0)
+texture2D	s_texRandom	< string ResourceName = "Sub/RandSetupXZ256.png"; int MipLevels = 1; >;		//	乱数テクスチャ
+#else
+//	乱数テクスチャサイズ
+#define	RNDTEX_WIDTH	(512.0)
+#define	RNDTEX_HEIGHT	(512.0)
+texture2D	s_texRandom	< string ResourceName = "Sub/RandSetupXZ512.png"; int MipLevels = 1; >;		//	乱数テクスチャ
+#endif
+
+DECL_SAMPLER( smpParticle, s_texPtcl, LINEAR, CLAMP );
+//DECL_SAMPLER( smpRandom, s_texRandom, NONE, WRAP );
+DECL_SAMPLER2( smpRandom, s_texRandom, POINT, POINT, NONE, WRAP );
+
+#ifdef	WCOL_TEX_NAME
+texture2D	s_texColorMap	< string ResourceName = WCOL_TEX_NAME; >;
+DECL_SAMPLER( smpColorMap, s_texColorMap, LINEAR, WRAP );
+#endif
+
+#if	ENABLE_WAVE
+#ifdef	WIND_TEX_NAME
+texture2D	s_texWindMap	< string ResourceName = WIND_TEX_NAME; >;
+DECL_SAMPLER( smpWindMap, s_texWindMap, LINEAR, WRAP );
+#endif
+#endif
+
+#ifdef	NRML_TEX_NAME
+texture2D	s_texNormalMap	< string ResourceName = NRML_TEX_NAME; >;
+DECL_SAMPLER( smpNormalMap, s_texNormalMap, LINEAR, WRAP );
+#endif
+
+#ifdef	SEQ_RGBA_TEX
+texture2D	s_texSeqRGBAMap	< string ResourceName = SEQ_RGBA_TEX; >;
+DECL_SAMPLER3( smpSeqRGBAMap, s_texSeqRGBAMap, LINEAR, LINEAR, LINEAR, CLAMP, WRAP );
+#endif
+
+#ifdef	SIZE_TEX_NAME
+texture2D	s_texSizeMap	< string ResourceName = SIZE_TEX_NAME; >;
+DECL_SAMPLER( smpSizeMap, s_texSizeMap, LINEAR, WRAP );
+#else
+#ifdef	SEQ_SZMV_TEX
+texture2D	s_texSeqSZMVMap	< string ResourceName = SEQ_SZMV_TEX; >;
+DECL_SAMPLER( smpSeqSZMVMap, s_texSeqSZMVMap, LINEAR, WRAP );
+#endif
+#endif
+
+#if	!IS_LUMINOUS
+
+	#define	FMT_NDMAP	"A32B32G32R32F"
+	//#define	FMT_NDMAP	"A16B16G16R16F"
+
+
+	shared DECL_OFFSCREEN_RT( RT_NormalDepthMap4Grass##ID,		WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, float4(0,0,1,1), 1, FMT_NDMAP,	RT_NMLDEPTH_FX );
+	shared DECL_RCT( RCT_NormalDepthMap##ID,					WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, FMT_NDMAP );
+	DECL_SAMPLER( smpOrgNormalDepthMap, RT_NormalDepthMap4Grass##ID,	POINT, CLAMP );
+	#if	USE_SMOOTH_HEIGHT_MAP
+		DECL_SAMPLER( smpHeightMap, RCT_NormalDepthMap##ID,	LINEAR, CLAMP );
+	#else
+		DECL_SAMPLER( smpHeightMap,	RCT_NormalDepthMap##ID,	POINT, CLAMP );
+	#endif
+
+	texture	s_texWaveDepthBuffer	: RenderDepthStencilTarget <
+		int		Width	= WAVE_BUFFER_SIZE_X;
+		int		Height	= WAVE_BUFFER_SIZE_Z;
+		string	Format	= "D24S8";
+	>;
+
+	#if	ENABLE_WAVE
+		shared DECL_OFFSCREEN_RT( RT_HitMap4Grass##ID,		WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, float4(0,0,0,0), 1, "R16F",		RT_HIT_FX );
+				DECL_SAMPLER( smpHitMap,	RT_HitMap4Grass##ID,	POINT, CLAMP );
+
+		DECL_RCT( texWaveVH,		WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, "G16R16F" );
+		DECL_RCT( texWaveVHBack,	WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, "G16R16F" );
+		DECL_RCT( texWaveGaussHX,	WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, "R16F" );
+		DECL_RCT( texWaveGaussHY,	WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, "R16F" );
+		shared DECL_RCT( RCT_WaveNormal##ID,	WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, "A8R8G8B8" );
+		DECL_SAMPLER( smpWaveVH,		texWaveVH,		POINT,  WRAP );
+		DECL_SAMPLER( smpWaveVH2,		texWaveVHBack,	POINT,  WRAP );
+		DECL_SAMPLER( smpWaveGaussHX,	texWaveGaussHX,	LINEAR, WRAP );
+		DECL_SAMPLER( smpWaveGaussHY,	texWaveGaussHY,	LINEAR, WRAP );
+		DECL_SAMPLER( smpWaveNormal,	RCT_WaveNormal##ID,	LINEAR, WRAP );
+	#endif
+
+	shared	DECL_RCT( texSavePosition##ID,	1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveAxisX##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveAxisY##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveAxisZ##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveRange##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveDepth##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveWGScroll##ID,	1, 1, "A32B32G32R32F" );
+	texture	s_tex1CellDepthBuffer	: RenderDepthStencilTarget <
+		int		Width	= 1;
+		int		Height	= 1;
+		string	Format	= "D24S8";
+	>;
+
+	float3			MakeVScroll( void ) {
+		if( abs( s_fWidthX ) > 0.00001 && abs( s_fWidthZ ) > 0.00001 ) {
+			return	float3(	dot( s_mtxWorld._41_42_43-s_vPrePosition.xyz, s_mtxWorld._11_12_13 ),
+							dot( s_mtxWorld._41_42_43-s_vPrePosition.xyz, s_mtxWorld._21_22_23 ),
+							dot( s_mtxWorld._41_42_43-s_vPrePosition.xyz, s_mtxWorld._31_32_33 )
+						) / float3( s_fWidthX, 1.0, -s_fWidthZ );
+		}
+		else {
+			return	float3( 0.0, 0.0, 0.0 );
+		}
+	}
+
+	static float3	s_vScroll			= MakeVScroll();
+	float4			s_vWGScrTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveWGScroll"ID_STRING; >;
+	static float2	s_vWScroll			= float2(	s_vWGScrTex[0][0].x,
+													s_vWGScrTex[0][0].y );
+	static float2	s_vGScroll			= float2(	s_vWGScrTex[0][0].z,
+													s_vWGScrTex[0][0].w );
+
+#else
+
+	shared DECL_RCT( RCT_NormalDepthMap##ID,					WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, FMT_NDMAP );
+	#if	USE_SMOOTH_HEIGHT_MAP
+		DECL_SAMPLER( smpHeightMap, RCT_NormalDepthMap##ID,	LINEAR, CLAMP );
+	#else
+		DECL_SAMPLER( smpHeightMap,	RCT_NormalDepthMap##ID,	POINT, CLAMP );
+	#endif
+
+
+	#if	ENABLE_WAVE
+		shared DECL_RCT( RCT_WaveNormal##ID,	WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z, "A8R8G8B8" );
+		DECL_SAMPLER( smpWaveNormal,	RCT_WaveNormal##ID,	LINEAR, WRAP );
+	#endif
+
+	shared	DECL_RCT( texSavePosition##ID,	1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveAxisX##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveAxisY##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveAxisZ##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveRange##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveDepth##ID,		1, 1, "A32B32G32R32F" );
+	shared	DECL_RCT( texSaveWGScroll##ID,	1, 1, "A32B32G32R32F" );
+
+	float4			s_vWGScrTex[1][1]	: TEXTUREVALUE < string TextureName = "texSaveWGScroll"ID_STRING; >;
+	static float2	s_vWScroll			= float2(	s_vWGScrTex[0][0].x,
+													s_vWGScrTex[0][0].y );
+	static float2	s_vGScroll			= float2(	s_vWGScrTex[0][0].z,
+													s_vWGScrTex[0][0].w );
+
+#endif
+
+
+
+
+
+//	乱数取得
+float4	GetRand08( float rindex ) {
+	float2	tpos;
+	tpos.y	= trunc( rindex / (RNDTEX_WIDTH-1) );
+	tpos.x	= rindex - (tpos.y * (RNDTEX_WIDTH-1));
+	tpos	= (tpos+0.4998) / float2( RNDTEX_WIDTH, RNDTEX_HEIGHT );
+	return tex2Dlod( smpRandom, float4( tpos, 1, 1 ) );
+}
+
+float4	GetRand16( float rindex ) {
+	float4	r	= GetRand08( rindex+0 ) * (65535-255)
+				+ GetRand08( rindex+1 ) * (255);
+	return	r / 65536.0;
+}
+
+float4	GetRand24( float rindex ) {
+	float4	r	= GetRand08( rindex+0 ) * (16777215-65535-255)
+				+ GetRand08( rindex+1 ) * (65535-255)
+				+ GetRand08( rindex+2 ) * (255);
+	return	r / 16777216.0;
+}
+
+
+#if	NUM_DUPLICATE > 0
+int		s_nLoopDraw		= NUM_DUPLICATE+1;
+int		s_iLoopDraw		= 0;
+#endif
+
+float4	VS(	float4				Pos			: POSITION,
+			float2				Tex			: TEXCOORD0,
+			out float2			o_vTexUV	: TEXCOORD0,
+			out float4			o_vScrPos	: TEXCOORD1,
+			out float4			o_vZCalcTex	: TEXCOORD2,
+			out float2			o_vMapUV	: TEXCOORD3,
+#ifdef	NRML_TEX_NAME
+			out float3			o_vNormalZ	: TEXCOORD4,
+			out float3			o_vNormalX	: TEXCOORD5,
+			out float3			o_vNormalY	: TEXCOORD6,
+			out float3			o_vEye		: TEXCOORD7,
+#endif
+#ifdef	SEQ_RGBA_TEX
+			out float2			o_vSeqUV	: TEXCOORD8,
+#endif
+			out float4			o_vColor	: COLOR0,
+			uniform float4x4	mtxViewProj
+			) : POSITION {
+	float	index		= round( Pos.z );					//	ポリゴンのZ座標をインデックスとして利用
+
+	if( index >= s_fPtclCount ) {
+		o_vTexUV	= 0;
+		o_vZCalcTex	= 0;
+		o_vMapUV	= 0;
+#ifdef	NRML_TEX_NAME
+		o_vNormalZ	= 0;
+		o_vNormalX	= 0;
+		o_vNormalY	= 0;
+		o_vEye		= 0;
+#endif
+#ifdef	SEQ_RGBA_TEX
+		o_vSeqUV	= 0;
+#endif
+		o_vScrPos	= 0;
+		o_vColor	= 0;
+		return	-1;
+	}
+	else {
+#if	NUM_DUPLICATE > 0
+		index	+= s_iLoopDraw * s_fPtclCount;
+#endif
+		float4	vRandom		= GetRand16( index );				//	ランダム配置
+		float3	vCenter		= vRandom.xyz;						//	ランダム配置
+		float2	fSize2		= 1.0;
+		float	fMoveShift	= 0.0;
+		float	vcY			= vCenter.y;
+
+	//	vCenter.xz		= frac( vCenter.xz + s_vGrassScroll.xz * s_fTime );
+		vCenter.xz		= frac( vCenter.xz + s_vGScroll.xy );
+
+	#ifdef	SEQ_RGBA_TEX
+		o_vSeqUV		= float2( 0.0, index );
+	#endif
+		o_vColor		= 1;
+		vCenter.xz		= frac( vCenter.xz - s_vInf.xz ) - 0.5;
+		if( s_fSpawnSpan > 0.0001 ) {
+			vCenter.y		= frac( vCenter.y + s_fTime / s_fSpawnSpan );
+
+	#ifdef	SEQ_RGBA_TEX
+			o_vSeqUV		= float2( vCenter.y, (index+0.5) / SEQ_RGBA_PATTERN_NUM );
+	#else
+			o_vColor.a		= smoothstep( 0.0,  3.0 / 60.0, vCenter.y )		//	0～3/60までかけてフェードイン
+							* smoothstep( 1.0, 50.0 / 60.0, vCenter.y );	//	50/60～1までかけてフェードアウト
+	#endif
+	#ifdef	SIZE_TEX_NAME
+	#else
+	#ifdef	SEQ_SZMV_TEX
+			float4	vSZMV	= tex2Dlod( smpSeqSZMVMap, float4( vCenter.y, 0.5, 0, 1 ) );
+
+			fSize2		= vSZMV.xy;
+			fMoveShift	= vSZMV.z * s_fMoveShiftMax;
+	#endif
+	#endif
+		}
+
+
+		//	領域変更
+		vCenter			*= float3( s_fWidthX, 1.0, s_fWidthZ );
+
+		//	ノイズ付加
+		vCenter.xz		+= (sin(s_fTime * 0.2 + index)
+						+   cos(s_fTime * 0.5 + index) * 0.5)
+						*	s_vNoizeLevel.xz;
+
+		o_vMapUV		= vCenter.xz / (float2( s_fWidthX, -s_fWidthZ )) + 0.5;
+		float4	vNrmD	= tex2Dlod( smpHeightMap, float4( o_vMapUV, 0, 1 ) );
+
+		#ifdef	SIZE_TEX_NAME
+			fSize2			= dot( tex2Dlod( smpSizeMap, float4( o_vMapUV, 0, 1 ) ).xyz, 1 ) * 0.33333;
+			if( fSize2.x < 1.0 / 256.0 ) {
+				vNrmD.w	= 1.0;
+			}
+		#endif
+
+		if( vNrmD.w > 0.9875) {
+			o_vTexUV	= 0;
+			o_vZCalcTex	= 0;
+			o_vMapUV	= 0;
+	#ifdef	NRML_TEX_NAME
+			o_vNormalZ	= 0;
+			o_vNormalX	= 0;
+			o_vNormalY	= 0;
+			o_vEye		= 0;
+	#endif
+	#ifdef	SEQ_RGBA_TEX
+			o_vSeqUV	= 0;
+	#endif
+			o_vScrPos	= 0;
+			o_vColor	= 0;
+			return	-1;
+		}
+		else {
+			vCenter.y		= -vNrmD.w * s_fDepth;
+			vCenter			= mul( float4( vCenter, 1.0 ), s_mtxWorld ).xyz;
+
+		#if	ENABLE_WAVE
+			float3	vRN		= (tex2Dlod( smpWaveNormal, float4( o_vMapUV, 0, 1 ) ).xyz * 2.0 - 1.0) / s_fRippleBoost;
+		#endif
+			float3	vNormal	= float3( 0, 1, 0 );
+			float3	vSide	= float3( 1, 0, 0 );
+			float3	vShift	= float3( 0, 1, 0 );
+
+		#if	USE_RANDOM_ROLL
+			{
+				float2		sc;
+				sc.x	= lerp( s_fRandomRoll_Min, s_fRandomRoll_Max, vcY );
+				sc.y	= sc.x + 3.1415926 * 0.5;
+				sc		= sin( sc );
+				vNormal.xy	= float2( sc.x, sc.y );
+				vSide.xy	= float2( sc.y,-sc.x );
+			}
+		#endif
+
+			vNormal			= mul( vNormal, (float3x3)s_vGrPose );
+			vSide			= mul( vSide, (float3x3)s_vGrPose );
+
+		#if	ENABLE_WAVE
+			if( any( abs( vRN.xz ) > 0.0001 ) ) {
+				float		RNy		= sqrt( 1.0 - dot( vRN.xz, vRN.xz ) );
+				float		fAngle	= acos( abs( RNy ) );
+				if( fAngle > 0.0001 ) {
+					float3		vAxis	= float3( vRN.z, 0.0, vRN.x );
+					float3		a	= normalize( vAxis );
+					float3		sq	= a * a;
+					float3		sc	= sin( float3( fAngle, fAngle + 90.0 * 3.1415926 / 180.0, fAngle - 90.0 * 3.1415926 / 180.0 ) );
+					sc.z	= 1.0-sc.y;
+
+					float3x3	r;
+					r._11_21_31		= float3( sq.x + sq.z * sc.y,	-a.z * sc.x,			+a.x * a.z * sc.z	);
+					r._12_22_32		= float3( a.z * sc.x,			(sq.x + sq.z) * sc.y,	-a.x * sc.x         );
+					r._13_23_33		= float3( a.x * a.z * sc.z,		a.x * sc.x,				+sq.z + sq.x * sc.y );
+
+					vNormal		= mul( vNormal, r );
+					vSide		= mul( vSide, r );
+				}
+			}
+		#endif
+
+		#if	USE_FIT_NORMAL
+			if( any( abs( vNrmD.xyz ) > 0.0001 ) ) {
+				float		fAngle	= acos( abs( vNrmD.z ) ) * s_fFitNormal;
+				if( fAngle > 0.0001 ) {
+					float3		a	= normalize( float3( vNrmD.y, 0.0, -vNrmD.x ) );
+					float3		sq	= a * a;
+					float3		sc	= sin( float3( fAngle, fAngle + 90.0 * 3.1415926 / 180.0, fAngle - 90.0 * 3.1415926 / 180.0 ) );
+					sc.z	= 1.0-sc.y;
+
+					float3x3	r;
+					r._11_21_31		= float3( sq.x + sq.z * sc.y,	-a.z * sc.x,			+a.x * a.z * sc.z	);
+					r._12_22_32		= float3( a.z * sc.x,			(sq.x + sq.z) * sc.y,	-a.x * sc.x         );
+					r._13_23_33		= float3( a.x * a.z * sc.z,		a.x * sc.x,				+sq.z + sq.x * sc.y );
+
+					vNormal		= mul( vNormal, r );
+					vSide		= mul( vSide,   r );
+					vShift		= mul( vShift,  r );
+				}
+			}
+		#endif
+
+			vNormal			= mul( vNormal, (float3x3)s_mtxWorld );
+			vSide			= mul( vSide, (float3x3)s_mtxWorld );
+			vShift			= mul( vShift, (float3x3)s_mtxWorld );
+			vNormal			= normalize( vNormal );
+
+		#if	USE_AR_BILLBOARD
+			{
+				float3	vSNormal;
+				float3	vSDir	= normalize( vCenter - s_vCameraPosition );
+				vSNormal		= normalize( vNormal - vSDir * dot(vNormal, vSDir) );
+				vNormal			= normalize( lerp( vNormal, vSNormal, s_fARBillboard ) );
+			}
+		#endif
+
+			vSide			= normalize( lerp( normalize( cross( vNormal, vCenter - s_vCameraPosition ) ), vSide, s_fFixPose ) );
+		//	vSide			= normalize( cross( vNormal, vCenter - s_vCameraPosition ) );
+
+			float2		vSize	= lerp( s_vPtclSize, s_vPtclSize2, vcY );
+
+			Pos.xyz			= vSide * (lerp( -vSize.x, vSize.x, Tex.x ) + s_vTxPivot.x*vSize.x) * fSize2.x
+							+ vNormal * ((vSize.y * (1-Tex.y)) + s_vTxPivot.y*vSize.y) * fSize2.y;
+			Pos.xyz			+= vShift * s_vGrPose._42 + vShift * fMoveShift;
+
+			Pos.xyz			+= vCenter;
+
+		#ifdef	NRML_TEX_NAME
+			o_vNormalZ		= normalize( cross( vNormal, vSide ) );
+			o_vNormalX		= -vSide;
+			o_vNormalY		= -vNormal;
+			o_vEye			= s_vCameraPosition - Pos.xyz;
+		#endif
+
+			//	ビュー射影変換
+			float4	oPos	= mul( float4( Pos.xyz, 1.0 ), mtxViewProj );
+			o_vZCalcTex		= mul( float4( Pos.xyz, 1.0 ), s_mtxLightViewProj );
+
+		#ifndef	OPAQUE_CLIP_ALPHA
+			//	遠方は薄く
+			o_vColor.a		*= (0.3 + 0.7 * smoothstep( s_fFadeDistance, 0, oPos.z )) * MaterialDiffuse.a;
+		#endif
+
+		#ifdef	NRML_TEX_NAME
+			o_vColor.rgb	= s_vLBoost;
+		#else
+			o_vColor.rgb	= s_vPtclColor * s_vLBoost;
+		#endif
+
+			//	てくっちゃ
+			float4	vTexUV	= s_vaTexBase[ index % PTCL_TEX_UV_NUM ];
+			o_vTexUV		= lerp( vTexUV.xy, vTexUV.zw, Tex );
+
+			o_vScrPos	= oPos;
+			return	oPos;
+		}
+	}
+}
+
+float4	PS_Clip( float2 vTexUV : TEXCOORD0, float4 vColor : COLOR0, uniform float fClipA ) : COLOR0 {
+	float4	c	= tex2D( smpParticle, vTexUV ) * vColor;
+	clip( c.a - fClipA );
+	return	0.0;	//	このPSはＺだけ書けばいいんだけどColorUpdate = FALSE;とかってあったっけ？
+}
+
+
+//	頂点シェーダで４つ使いたいからシャドウマップはピクセルシェーダのみで。
+sampler	smpShadow	: register( ps, s0 );
+bool	parthf;		//	シャドウマップフラグ
+#define SKII1    1500
+#define SKII2    8000
+
+static float	s_fInvShadowParam	= 1.0 - ShadowParam;
+
+float4	PS(	float2	vTexUV		: TEXCOORD0,
+			float4	vScrPos		: TEXCOORD1,
+			float4	vZCalcTex	: TEXCOORD2,
+			float2	vMapUV		: TEXCOORD3,
+#ifdef	NRML_TEX_NAME
+			float3	vNormalZ	: TEXCOORD4,
+			float3	vNormalX	: TEXCOORD5,
+			float3	vNormalY	: TEXCOORD6,
+			float3	vEye		: TEXCOORD7,
+#endif
+#ifdef	SEQ_RGBA_TEX
+			float2	vSeqUV		: TEXCOORD8,
+#endif
+			float4	vColor		: COLOR0,
+			uniform bool bShadowMap
+			) : COLOR0 {
+	float	ss	= 1.0;
+	if( bShadowMap ) {
+		vZCalcTex	/= vZCalcTex.w;
+		float2	TransTexCoord	= vZCalcTex.xy * float2( 0.5, -0.5 ) + 0.5;
+
+		if( all( saturate( TransTexCoord ) == TransTexCoord ) ) {
+			float	Skill	= parthf ? SKII2 * TransTexCoord.y : SKII1;
+	#if USE_SOFTSHADOW
+			ss		= (1-saturate( max( vZCalcTex.z - tex2D( smpShadow, TransTexCoord ).r, 0.0f ) * Skill - 0.3f ));
+	#else
+			static const float3	UV	= float3( SoftShadowParam / SHADOWMAP_SIZE, -SoftShadowParam / SHADOWMAP_SIZE, 0.0 );
+			float4	c1;
+			float4	c2;
+			c1.x	= tex2D( smpShadow, TransTexCoord + UV.xz ).r;
+			c1.y	= tex2D( smpShadow, TransTexCoord + UV.yz ).r;
+			c1.z	= tex2D( smpShadow, TransTexCoord + UV.zx ).r;
+			c1.w	= tex2D( smpShadow, TransTexCoord + UV.zy ).r;
+			c2.x	= tex2D( smpShadow, TransTexCoord + UV.xx ).r;
+			c2.y	= tex2D( smpShadow, TransTexCoord + UV.yx ).r;
+			c2.z	= tex2D( smpShadow, TransTexCoord + UV.yy ).r;
+			c2.w	= tex2D( smpShadow, TransTexCoord + UV.xy ).r;
+
+			ss		= saturate( max( vZCalcTex.z - tex2D( smpShadow, TransTexCoord ).r , 0 ) * Skill - 0.3f );
+			ss		+= dot( 1, saturate( max( vZCalcTex.z - c1, 0 ) * Skill - 0.3f ) );
+			ss		+= dot( 1, saturate( max( vZCalcTex.z - c2, 0 ) * Skill - 0.3f ) );
+			ss		= 1.0-saturate( ss / 9.0 );
+	#endif
+		}
+		ss		= saturate( s_fInvShadowParam + ss * ShadowParam );
+	}
+
+#ifdef	SEQ_RGBA_TEX
+	if( s_fSpawnSpan > 0.0001 ) {
+		vColor		*= tex2D( smpSeqRGBAMap, vSeqUV );
+	}
+#endif
+
+#ifdef	WCOL_TEX_NAME
+	vColor.rgb	*= tex2D( smpColorMap, vMapUV + s_vInf.xz*float2(1,-1) ).rgb;
+#endif
+
+	float4	vTexColor	= tex2D( smpParticle, vTexUV );
+
+#ifdef	NRML_TEX_NAME
+	float3	vNormal	= tex2D( smpNormalMap, vTexUV ).xyz * 2.0 - 1.0;
+	vNormal	= normalize(	+ vNormal.x * vNormalX
+							+ vNormal.y * vNormalY
+							+ vNormal.z * vNormalZ );
+	float3	vLightHalf	= normalize( normalize(vEye) + -s_vLightDirection );
+	float3	vLSpecular	= pow( max(0,dot( vNormal, vLightHalf ) ), s_vSpecularColor.w ) * s_vSpecularColor.rgb;
+	float3	vLColor;
+
+	float	l;
+#if	HALF_LAMBERT
+	l	= dot( vNormal, -s_vLightDirection ) * 0.5 + 0.5;
+//	l	*= l;
+#else
+	l	= max( 0, dot( vNormal, -s_vLightDirection ) );
+#endif
+#if	SIMPLE_LERP_LIGHTING
+	vLColor		= lerp( s_vAmbientColor, s_vDiffuseColor.rgb, l * ss );
+#else
+	vLColor		= lerp( s_vAmbientColor, saturate( s_vAmbientColor+s_vDiffuseColor.rgb), l * ss );
+#endif
+//	vLColor		+= max( 0, dot( vNormal, -s_vLightDirection ) ) * s_vDiffuseColor.rgb * ss;
+	vColor		*= vTexColor;
+	vColor.rgb	*= saturate( vLColor );
+	vColor.rgb	+= vLSpecular * ss;
+#else
+	vColor		*= vTexColor;
+	vColor.rgb	*= ss;
+#endif
+
+#ifdef	OPAQUE_CLIP_ALPHA
+	clip( vColor.a - OPAQUE_CLIP_ALPHA );
+#endif
+
+#if	IS_LUMINOUS
+	clip( vTexColor.a - s_fAL_CutA );
+	vColor.a	*= s_fAL_Lumi;
+#endif
+
+	return	vColor;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+#if	!IS_LUMINOUS
+
+float4	VS_Standard( float4 Pos : POSITION, inout float2 vTex : TEXCOORD0, out float4 vTexLT : TEXCOORD1, out float4 vTexRB : TEXCOORD2, uniform float2 vBufferSize ) : POSITION {
+	vTex	+= float2( 0.4999, 0.4999 ) / vBufferSize;
+
+	vTexLT	= vTex.xyxy - float4( 1, 0, 0, 1 ) / vBufferSize.xyxy;
+	vTexRB	= vTex.xyxy + float4( 1, 0, 0, 1 ) / vBufferSize.xyxy;
+
+	return	Pos;
+}
+
+float4	PS_SavePosition( float2 vTex : TEXCOORD, uniform float4 vPosition ) : COLOR {
+	return	vPosition;
+}
+
+float4	PS_WGScroll( float2 vTex : TEXCOORD ) : COLOR {
+	return	float4(	s_vWScroll + s_vWindMapScroll.xz * s_fElapsedTime,
+					s_vGScroll + s_vGrassScroll.xz * s_fElapsedTime );
+}
+
+float4	PS_Save( float2 vTex : TEXCOORD, uniform sampler smpVH ) : COLOR {
+	return	tex2D( smpVH, vTex );
+}
+
+#if	ENABLE_WAVE
+float4	PS_WaveProc( float2 vTex : TEXCOORD0, float4 vTexLT : TEXCOORD1, float4 vTexRB : TEXCOORD2, uniform sampler smpVH ) : COLOR {
+	vTex	+= s_vScroll.xz;
+	vTexLT	+= s_vScroll.xzxz;
+	vTexRB	+= s_vScroll.xzxz;
+
+	float2	vh			= tex2D( smpVH, vTex ).xy;
+	float4	HeightTbl	= {
+		tex2D( smpVH, vTexLT.xy ).y,
+		tex2D( smpVH, vTexRB.xy ).y,
+		tex2D( smpVH, vTexLT.zw ).y,
+		tex2D( smpVH, vTexRB.zw ).y,
+	};
+	vh.x	= vh.x	+ dot( (HeightTbl - vh.y), WaveSpeed );
+	vh.y	= (vh.y	+ vh.x + (tex2D( smpHitMap, vTex.xy ).r * WavePow)) * DownPow;
+
+	if( s_fTime == 0 )vh.xy	= 0.0;
+
+	return	vh.xyxy;
+}
+
+float4	PS_Normal( float4 vTexLT : TEXCOORD1, float4 vTexRB : TEXCOORD2, uniform sampler smpH, uniform float4 elem, uniform float2 vBufferSize ) : COLOR {
+	float	dx		= dot(tex2D( smpH, vTexRB.xy ) - tex2D( smpH, vTexLT.xy ), elem );
+	float	dy		= dot(tex2D( smpH, vTexRB.zw ) - tex2D( smpH, vTexLT.zw ), elem );
+
+#ifdef	WIND_TEX_NAME
+//	float4	vAdd	= frac( s_vInf.xzxz*float2(1,-1).xyxy + s_vWindMapScroll.xzxz * s_fTime );
+	float4	vAdd	= frac( s_vInf.xzxz*float2(1,-1).xyxy + s_vWScroll.xyxy );
+	float4	vRB	= vTexRB + vAdd;
+	float4	vLT	= vTexLT + vAdd;
+	dx		+= (dot(tex2D( smpWindMap, vRB.xy ) - tex2D( smpWindMap, vLT.xy ), elem )) * s_vWindMapScroll.y;
+	dy		+= (dot(tex2D( smpWindMap, vRB.zw ) - tex2D( smpWindMap, vLT.zw ), elem )) * s_vWindMapScroll.y;
+#endif
+
+	float	ssx		= (float)s_fWidthX / vBufferSize.x;
+	float	ssy		= (float)s_fWidthZ / vBufferSize.y;
+
+	return	float4( normalize( cross( float3( 0.0, dy, ssy ),
+									  float3( ssx, dx, 0.0 ) ) ).xyz, 1.0 ) * s_fRippleBoost * 0.5 + 0.5;
+}
+
+
+
+float			s_fGaussXstep		= 1.0;
+float			s_fGaussD			= 5.0;
+
+static float	s_fGaussRevGD		= (s_fGaussXstep*s_fGaussXstep) / (2.0*s_fGaussD*s_fGaussD);
+static float4	s_fGaussWeight03	= exp( float4(   0.0,  -1.0,  -4.0,  -9.0 ) * s_fGaussRevGD );
+static float4	s_fGaussWeight47	= exp( float4( -16.0, -25.0, -36.0, -49.0 ) * s_fGaussRevGD );
+static float	s_fGaussNormal		= 1.0 / (dot( s_fGaussWeight03, float4( 1.0, 2.0.xxx ) ) + dot( s_fGaussWeight47, 2.0 ));
+static float4	s_fGauss_nwg03		= s_fGaussWeight03 * s_fGaussNormal;
+static float4	s_fGauss_nwg47		= s_fGaussWeight47 * s_fGaussNormal;
+
+float4	VS_G(	float4			Pos			: POSITION,
+				inout float2	Tex			: TEXCOORD0,
+				out float4		vaTex[7]	: TEXCOORD1,
+				uniform float2	vStep,
+				uniform float2	vBufferSize
+			) : POSITION {
+
+	Tex		+= 0.5 / vBufferSize;
+	vStep	*= PushGauss / vBufferSize;
+
+	vaTex[0]	= Tex.xyxy + float4( vStep, -vStep ) * 1.0;
+	vaTex[1]	= Tex.xyxy + float4( vStep, -vStep ) * 2.0;
+	vaTex[2]	= Tex.xyxy + float4( vStep, -vStep ) * 3.0;
+	vaTex[3]	= Tex.xyxy + float4( vStep, -vStep ) * 4.0;
+	vaTex[4]	= Tex.xyxy + float4( vStep, -vStep ) * 5.0;
+	vaTex[5]	= Tex.xyxy + float4( vStep, -vStep ) * 6.0;
+	vaTex[6]	= Tex.xyxy + float4( vStep, -vStep ) * 7.0;
+
+	return Pos;
+}
+
+float4	PS_G(	float2	vTex		: TEXCOORD0,
+				float4	vaTex[7]	: TEXCOORD1,
+				uniform sampler	smpVH,
+				uniform float4	elem
+			) : COLOR {   
+
+	float4	c03;
+	float4	c47;
+
+	c03.x	= dot( tex2D( smpVH, vTex ), elem );
+	c03.y	= dot( tex2D( smpVH, vaTex[0].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[0].zw ), elem );
+	c03.z	= dot( tex2D( smpVH, vaTex[1].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[1].zw ), elem );
+	c03.w	= dot( tex2D( smpVH, vaTex[2].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[2].zw ), elem );
+	c47.x	= dot( tex2D( smpVH, vaTex[3].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[3].zw ), elem );
+	c47.y	= dot( tex2D( smpVH, vaTex[4].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[4].zw ), elem );
+	c47.z	= dot( tex2D( smpVH, vaTex[5].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[5].zw ), elem );
+	c47.w	= dot( tex2D( smpVH, vaTex[6].xy ), elem );
+			+ dot( tex2D( smpVH, vaTex[6].zw ), elem );
+
+	return	(dot( c03, s_fGauss_nwg03 ) + dot( c47, s_fGauss_nwg47 )).rrrr;
+}
+
+#endif	//	!IS_LUMINOUS
+
+#endif	//	ENABLE_WAVE
+
+
+#define	BUFFER_STATE					\
+		ALPHABLENDENABLE	= FALSE;	\
+		ALPHATESTENABLE		= FALSE;	\
+		ZENABLE				= FALSE;	\
+		ZWRITEENABLE		= FALSE;
+
+
+float4	ClearColor	= {0,0,0,1};
+float	ClearDepth	= 1.0;
+float2	fWaveBufferSize	= float2( WAVE_BUFFER_SIZE_X, WAVE_BUFFER_SIZE_Z );
+
+technique MainTecNS <
+	string MMDPass = "object";
+	string Script = 
+		"ClearSetColor=ClearColor;"
+		"ClearSetDepth=ClearDepth;"
+
+		"RenderColorTarget0=;"
+		"RenderDepthStencilTarget=;"
+
+#if	NUM_DUPLICATE > 0
+
+#ifndef	OPAQUE_CLIP_ALPHA
+		"LoopByCount=s_nLoopDraw;"
+			"LoopGetIndex=s_iLoopDraw;"
+			"Pass=FlowerFieldClip;"
+		"LoopEnd=;"
+#endif
+		"LoopByCount=s_nLoopDraw;"
+			"LoopGetIndex=s_iLoopDraw;"
+			"Pass=FlowerField;"
+		"LoopEnd=;"
+#else
+
+#ifndef	OPAQUE_CLIP_ALPHA
+		"Pass=FlowerFieldClip;"
+#endif
+		"Pass=FlowerField;"
+
+#endif
+
+#if	!IS_LUMINOUS
+#if	ENABLE_WAVE
+		"RenderDepthStencilTarget=s_texWaveDepthBuffer;"
+		"RenderColorTarget0=texWaveVH;"						"Pass=WaveProc;"
+		"RenderColorTarget0=texWaveVHBack;"					"Pass=WaveSave;"
+		"RenderColorTarget0=texWaveGaussHX;"				"Pass=Gaussian_X;"
+		"RenderColorTarget0=texWaveGaussHY;"				"Pass=Gaussian_Y;"
+		"RenderColorTarget0=RCT_WaveNormal"ID_STRING";"		"Pass=WaveNormal;"
+		"RenderDepthStencilTarget=s_tex1CellDepthBuffer;"
+		"RenderColorTarget0=texSaveWGScroll"ID_STRING";"	"Pass=WGScroll;"
+#endif
+		"RenderDepthStencilTarget=s_texWaveDepthBuffer;"
+		"RenderColorTarget0=RCT_NormalDepthMap"ID_STRING";"	"Pass=SaveNormalDepth;"
+
+		"RenderDepthStencilTarget=s_tex1CellDepthBuffer;"
+		"RenderColorTarget0=texSavePosition"ID_STRING";"	"Pass=SavePosition;"
+		"RenderColorTarget0=texSaveAxisX"ID_STRING";"		"Pass=SaveAxisX;"
+		"RenderColorTarget0=texSaveAxisY"ID_STRING";"		"Pass=SaveAxisY;"
+		"RenderColorTarget0=texSaveAxisZ"ID_STRING";"		"Pass=SaveAxisZ;"
+		"RenderColorTarget0=texSaveRange"ID_STRING";"		"Pass=SaveRange;"
+		"RenderColorTarget0=texSaveDepth"ID_STRING";"		"Pass=SaveDepth;"
+#endif
+		"RenderColorTarget0=;"
+		"RenderDepthStencilTarget=;"
+		;
+> {
+#if	!IS_LUMINOUS
+#if	ENABLE_WAVE
+	pass WaveProc < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_WaveProc( smpWaveVH2 );
+	}
+	pass WaveSave < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_Save( smpWaveVH );
+	}
+	pass Gaussian_X < string Script= "Draw=Buffer;"; > {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_G( float2(1,0), fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_G( smpWaveVH, float4(0,1,0,0) );
+	}
+	pass Gaussian_Y < string Script= "Draw=Buffer;"; > {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_G( float2(0,1), fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_G( smpWaveGaussHX, float4(1,0,0,0) );
+	}
+	pass WaveNormal < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_Normal( smpWaveGaussHY, float4(1,0,0,0), fWaveBufferSize );
+	}
+	pass WGScroll < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_WGScroll();
+	}
+#endif
+	pass SaveNormalDepth < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_Save( smpOrgNormalDepthMap );
+	}
+
+	pass SavePosition < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_bCtrlExist ? s_mtxBase._41_42_43_44 : s_mtxOrgWorld._41_42_43_44 );
+	}
+	pass SaveAxisX < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_mtxBase._11_21_31_41 );
+	}
+	pass SaveAxisY < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_mtxBase._12_22_32_42 );
+	}
+	pass SaveAxisZ < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_mtxBase._13_23_33_43 );
+	}
+	pass SaveRange < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( float4( s_vRange.xyz, 1 ) );
+	}
+	pass SaveDepth < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( float4( s_vDepth.xyz, 1 ) );
+	}
+#endif
+
+
+#ifndef	OPAQUE_CLIP_ALPHA
+	pass FlowerFieldClip < string Script = "Draw=Geometry;";> {
+		ZENABLE				= TRUE;
+		ZWRITEENABLE		= TRUE;
+		ALPHATESTENABLE		= FALSE;
+		CULLMODE			= NONE;
+		VertexShader		= compile vs_3_0 VS( s_mtxViewProj );
+		PixelShader			= compile ps_3_0 PS_Clip( 0.9 );
+	}
+#endif
+	pass FlowerField < string Script = "Draw=Geometry;";> {
+		ZENABLE				= TRUE;
+#ifdef	OPAQUE_CLIP_ALPHA
+		ZWRITEENABLE		= TRUE;
+		ALPHABLENDENABLE	= FALSE;
+#else
+		ZWRITEENABLE		= FALSE;
+		ALPHABLENDENABLE	= TRUE;
+#endif
+		ALPHATESTENABLE		= TRUE;
+		CULLMODE			= NONE;
+		VertexShader		= compile vs_3_0 VS( s_mtxViewProj );
+		PixelShader			= compile ps_3_0 PS( false );
+	}
+}
+
+technique MainTec_BS <
+	string MMDPass = "object_ss";
+	string Script = 
+		"ClearSetColor=ClearColor;"
+		"ClearSetDepth=ClearDepth;"
+
+		"RenderColorTarget0=;"
+		"RenderDepthStencilTarget=;"
+
+#if	NUM_DUPLICATE > 0
+
+#ifndef	OPAQUE_CLIP_ALPHA
+		"LoopByCount=s_nLoopDraw;"
+			"LoopGetIndex=s_iLoopDraw;"
+			"Pass=FlowerFieldClip;"
+		"LoopEnd=;"
+#endif
+		"LoopByCount=s_nLoopDraw;"
+			"LoopGetIndex=s_iLoopDraw;"
+			"Pass=FlowerField;"
+		"LoopEnd=;"
+#else
+
+#ifndef	OPAQUE_CLIP_ALPHA
+		"Pass=FlowerFieldClip;"
+#endif
+		"Pass=FlowerField;"
+
+#endif
+
+#if	!IS_LUMINOUS
+#if	ENABLE_WAVE
+		"RenderDepthStencilTarget=s_texWaveDepthBuffer;"
+		"RenderColorTarget0=texWaveVH;"						"Pass=WaveProc;"
+		"RenderColorTarget0=texWaveVHBack;"					"Pass=WaveSave;"
+		"RenderColorTarget0=texWaveGaussHX;"				"Pass=Gaussian_X;"
+		"RenderColorTarget0=texWaveGaussHY;"				"Pass=Gaussian_Y;"
+		"RenderColorTarget0=RCT_WaveNormal"ID_STRING";"		"Pass=WaveNormal;"
+		"RenderDepthStencilTarget=s_tex1CellDepthBuffer;"
+		"RenderColorTarget0=texSaveWGScroll"ID_STRING";"	"Pass=WGScroll;"
+#endif
+		"RenderDepthStencilTarget=s_texWaveDepthBuffer;"
+		"RenderColorTarget0=RCT_NormalDepthMap"ID_STRING";"	"Pass=SaveNormalDepth;"
+
+		"RenderDepthStencilTarget=s_tex1CellDepthBuffer;"
+		"RenderColorTarget0=texSavePosition"ID_STRING";"	"Pass=SavePosition;"
+		"RenderColorTarget0=texSaveAxisX"ID_STRING";"		"Pass=SaveAxisX;"
+		"RenderColorTarget0=texSaveAxisY"ID_STRING";"		"Pass=SaveAxisY;"
+		"RenderColorTarget0=texSaveAxisZ"ID_STRING";"		"Pass=SaveAxisZ;"
+		"RenderColorTarget0=texSaveRange"ID_STRING";"		"Pass=SaveRange;"
+		"RenderColorTarget0=texSaveDepth"ID_STRING";"		"Pass=SaveDepth;"
+#endif
+		"RenderColorTarget0=;"
+		"RenderDepthStencilTarget=;"
+		;
+> {
+#if	!IS_LUMINOUS
+#if	ENABLE_WAVE
+	pass WaveProc < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_WaveProc( smpWaveVH2 );
+	}
+	pass WaveSave < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_Save( smpWaveVH );
+	}
+	pass Gaussian_X < string Script= "Draw=Buffer;"; > {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_G( float2(1,0), fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_G( smpWaveVH, float4(0,1,0,0) );
+	}
+	pass Gaussian_Y < string Script= "Draw=Buffer;"; > {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_G( float2(0,1), fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_G( smpWaveGaussHX, float4(1,0,0,0) );
+	}
+	pass WaveNormal < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_Normal( smpWaveGaussHY, float4(1,0,0,0), fWaveBufferSize );
+	}
+	pass WGScroll < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_WGScroll();
+	}
+#endif
+	pass SaveNormalDepth < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( fWaveBufferSize );
+		PixelShader			= compile ps_3_0 PS_Save( smpOrgNormalDepthMap );
+	}
+
+	pass SavePosition < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_bCtrlExist ? s_mtxBase._41_42_43_44 : s_mtxOrgWorld._41_42_43_44 );
+	}
+	pass SaveAxisX < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_mtxBase._11_21_31_41 );
+	}
+	pass SaveAxisY < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_mtxBase._12_22_32_42 );
+	}
+	pass SaveAxisZ < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( s_mtxBase._13_23_33_43 );
+	}
+	pass SaveRange < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( float4( s_vRange.xyz, 1 ) );
+	}
+	pass SaveDepth < string Script = "Draw=Buffer;";> {
+		BUFFER_STATE
+		VertexShader		= compile vs_3_0 VS_Standard( float2( 1, 1 ) );
+		PixelShader			= compile ps_3_0 PS_SavePosition( float4( s_vDepth.xyz, 1 ) );
+	}
+#endif
+
+
+#ifndef	OPAQUE_CLIP_ALPHA
+	pass FlowerFieldClip < string Script = "Draw=Geometry;";> {
+		ZENABLE				= TRUE;
+		ZWRITEENABLE		= TRUE;
+		ALPHATESTENABLE		= FALSE;
+		CULLMODE			= NONE;
+		VertexShader		= compile vs_3_0 VS( s_mtxViewProj );
+		PixelShader			= compile ps_3_0 PS_Clip( 0.9 );
+	}
+#endif
+	pass FlowerField < string Script = "Draw=Geometry;";> {
+		ZENABLE				= TRUE;
+#ifdef	OPAQUE_CLIP_ALPHA
+		ZWRITEENABLE		= TRUE;
+		ALPHABLENDENABLE	= FALSE;
+#else
+		ZWRITEENABLE		= FALSE;
+		ALPHABLENDENABLE	= TRUE;
+#endif
+		ALPHATESTENABLE		= TRUE;
+		CULLMODE			= NONE;
+		VertexShader		= compile vs_3_0 VS( s_mtxViewProj );
+		PixelShader			= compile ps_3_0 PS( true );
+	}
+}
+
+
+//	影や輪郭は描画しない
+technique EdgeTec	< string MMDPass = "edge"; >	{}
+technique ShadowTec	< string MMDPass = "shadow"; >	{}
+
+
+#if	USE_SHADOW_PLOT && !IS_LUMINOUS
+float4	PS_ZPlot( float2 vTexUV : TEXCOORD0, float4 vZCalc : TEXCOORD1 ) : COLOR0 {
+	float4	vTexColor	= tex2D( smpParticle, vTexUV );
+	clip( vTexColor.a - 0.25 );
+
+    return float4( vZCalc.z / vZCalc.w, 0, 0, 1 );
+}
+
+technique ZplotTec <
+	string MMDPass = "zplot";
+	string Script = 
+		"ClearSetColor=ClearColor;"
+		"ClearSetDepth=ClearDepth;"
+		"RenderColorTarget0=;"
+		"RenderDepthStencilTarget=;"
+
+#if	NUM_DUPLICATE > 0
+
+		"LoopByCount=s_nLoopDraw;"
+			"LoopGetIndex=s_iLoopDraw;"
+			"Pass=ZValuePlot;"
+		"LoopEnd=;"
+#else
+		"Pass=ZValuePlot;"
+#endif
+		;
+> {
+	pass ZValuePlot {
+		AlphaBlendEnable	= FALSE;
+		CULLMODE			= NONE;
+		VertexShader		= compile vs_3_0 VS( s_mtxLightViewProj );
+		PixelShader			= compile ps_3_0 PS_ZPlot();
+	}
+}
+#else
+technique ZplotTec	< string MMDPass = "zplot"; >	{}
+#endif
+
+

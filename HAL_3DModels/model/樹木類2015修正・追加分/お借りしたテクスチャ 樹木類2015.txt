@@ -1,0 +1,101 @@
+
+以下のテクスチャお借りしました
+
+ShareCg --http://www.sharecg.com/より
+
+24dif.png        --24diffuse.tga変換
+34diff.png       --34diffuse.png変換
+ALB30.png        --ALB 030.TIF変換
+BasicBrick-a.jpg --BasicBrick.jpg改変
+Bush04.png       --Bush04.jpg変換
+
+
+
+CGtextures.com --http://www.cgtextures.com/index.phpより
+
+Bd146_5m.jpg     --BarkDecidious0146_5_S.jpg改変
+BarkD163a.png    --BarkDecidious0163_5_S.jpg変換
+BarkD164.png     --BarkDecidious0164_5_S.jpg変換
+BarkD164b.png    --BarkDecidious0164_5_S.jpg改変
+BarkD164c.png    --BarkDecidious0164_5_S.jpg改変
+BarkD164d.png    --BarkDecidious0164_5_S.jpg改変
+BarkD164d2.png   --BarkDecidious0164_5_S.jpg改変
+BarkD174.png     --BarkDecidious0174_9_S.jpg変換
+BarkP18.png      --BarkPalm0018_5_S.jpg変換
+BarkP28.png      --BarkPalm0028_S.jpg変換
+BarkP14.png      --BarkPine0014_7_S.jpg変換
+BarkP53b.png     --BarkPalm0053_2_S.jpg改変
+BarkP53t.png     --BarkPalm0053_2_S.jpg改変
+Branch12.png     --Branches0012_1_S.png変換
+Branch18.png     --Branches0018_1_S.png変換
+Branch25.png     --Branches0025_1_Sb.png変換
+Branch25b.png    --Branches0025_1_Sb.png改変
+Branch30.png     --Branches0030_1_S.png変換
+Branch31.png     --Branches0031_1_S.png変換
+Branch31L.png    --Branches0031_1_S.png改変
+Branch33.png     --Branches0033_1_S.png変換
+Branch34.png     --Branches0034_1_S.png変換
+Branch37.png     --Branches0037_1_S.png変換
+Branch37x.png    --Branches0037_1_S.png改変
+Branch39.png     --Branches0039_1_S.png変換
+Branch39b.png     --Branches0039_1_S.png改変
+Gras59m.png      --Grass0059_5_S.jpg改変
+NPlant04.png     --NaturePlants0004_1_S.png変換
+NPlant10.png     --NaturePlants0010_1_S.png変換
+NPlant10a.png    --NaturePlants0010_1_S.png変換
+NPlant10b.png    --NaturePlants0010_1_S.png変換
+NPlant13.png     --NaturePlants0013_1_S.png変換
+NPlant29.png     --NaturePlants0029_1_S.png変換
+NPlant32.png     --NaturePlants0032_1_S.png変換
+NPlant33.png     --NaturePlants0033_1_S.png変換
+tree29s.png      --Trees0029_S.png改変
+tree40.png       --Trees0040_S.png改変
+Tree43.png       --Trees0043_S.png改変
+Tree43b.png      --Trees0043_S.png改変
+Tree43c.png      --Trees0043_S.png改変
+Tree58.png       --Trees0058_1_S.png改変
+Tree58b.png      --Trees0058_1_S.png改変
+Tree58c.png      --Trees0058_1_S.png改変
+Ivy21_5.jpg      --Ivy0021_5_S.jpg変換
+Bric14_5.png     --BrickSmallNew0014_5_S.jpg改変
+Fl05_13.png      --Farmland0005_13_S.jpg変換
+WoodE23.png      --WoodEnds0023_1_S.jpg改変
+
+
+
+tree[d] --http://www.frecle.net/index.php（閉鎖されたようです・・・）より
+
+Wood03.png
+Wood03r.png     --Wood03.png改変
+Wood03r2.png    --Wood03.png改変
+
+
+
+
+
+
+
+CIMG～～.png 自前デジカメ写真加工
+ki-ce-2.png  自前デジカメ写真加工
+zyu1s.png    自前デジカメ写真加工
+zyu1s2.png   自前デジカメ写真加工
+zyu1kaku.png 自前デジカメ写真加工
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
