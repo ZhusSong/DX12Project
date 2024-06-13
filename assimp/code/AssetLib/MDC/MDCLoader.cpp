@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -60,7 +60,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace Assimp;
 using namespace Assimp::MDC;
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Return To Castle Wolfenstein Mesh Importer",
     "",
     "",
@@ -100,12 +100,6 @@ MDCImporter::MDCImporter() :
         pcHeader(),
         mBuffer(),
         fileSize() {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-MDCImporter::~MDCImporter() {
     // empty
 }
 
@@ -201,7 +195,7 @@ void MDCImporter::InternReadFile(
     std::unique_ptr<IOStream> file(pIOHandler->Open(pFile));
 
     // Check whether we can read from the file
-    if (file.get() == nullptr) {
+    if (file == nullptr) {
         throw DeadlyImportError("Failed to open MDC file ", pFile, ".");
     }
 
@@ -271,13 +265,13 @@ void MDCImporter::InternReadFile(
             pcMesh->mMaterialIndex = (unsigned int)aszShaders.size();
 
             // create a new shader
-            aszShaders.push_back(std::string(pcShader->ucName,
-                    ::strnlen(pcShader->ucName, sizeof(pcShader->ucName))));
+            aszShaders.emplace_back(pcShader->ucName,
+                    ::strnlen(pcShader->ucName, sizeof(pcShader->ucName)));
         }
         // need to create a default material
         else if (UINT_MAX == iDefaultMatIndex) {
             pcMesh->mMaterialIndex = iDefaultMatIndex = (unsigned int)aszShaders.size();
-            aszShaders.push_back(std::string());
+            aszShaders.emplace_back();
         }
         // otherwise assign a reference to the default material
         else

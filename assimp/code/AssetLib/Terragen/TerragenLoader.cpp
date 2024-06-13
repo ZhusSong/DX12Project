@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -51,9 +51,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 
-using namespace Assimp;
+namespace Assimp {
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Terragen Heightmap Importer",
     "",
     "",
@@ -70,12 +70,6 @@ static const aiImporterDesc desc = {
 // Constructor to be privately used by Importer
 TerragenImporter::TerragenImporter() :
         configComputeUVs(false) {
-    // empty
-}
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-TerragenImporter::~TerragenImporter() {
     // empty
 }
 
@@ -232,8 +226,8 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
         }
 
         // Get to the next chunk (4 byte aligned)
-        unsigned dtt = reader.GetCurrentPos();
-        if (dtt & 0x3) {
+        unsigned dtt = reader.GetCurrentPos() & 0x3;
+        if (dtt) {
             reader.IncPtr(4 - dtt);
         }
     }
@@ -245,5 +239,7 @@ void TerragenImporter::InternReadFile(const std::string &pFile,
     // Set the AI_SCENE_FLAGS_TERRAIN bit
     pScene->mFlags |= AI_SCENE_FLAGS_TERRAIN;
 }
+
+} // namespace Assimp
 
 #endif // !! ASSIMP_BUILD_NO_TERRAGEN_IMPORTER

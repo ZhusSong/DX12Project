@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2022, assimp team
+Copyright (c) 2006-2024, assimp team
 
 All rights reserved.
 
@@ -52,7 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/scene.h>
 #include <openddlparser/OpenDDLParser.h>
 
-static const aiImporterDesc desc = {
+static constexpr aiImporterDesc desc = {
     "Open Game Engine Exchange",
     "",
     "",
@@ -66,42 +66,42 @@ static const aiImporterDesc desc = {
 };
 
 namespace Grammar {
-    static const char* MetricType = "Metric";
-    static const char *Metric_DistanceType = "distance";
-    static const char *Metric_AngleType = "angle";
-    static const char *Metric_TimeType = "time";
-    static const char *Metric_UpType = "up";
-    static const char *NameType = "Name";
-    static const char *ObjectRefType = "ObjectRef";
-    static const char *MaterialRefType = "MaterialRef";
-    static const char *MetricKeyType = "key";
-    static const char *GeometryNodeType = "GeometryNode";
-    static const char *CameraNodeType = "CameraNode";
-    static const char *LightNodeType = "LightNode";
-    static const char *GeometryObjectType = "GeometryObject";
-    static const char *CameraObjectType = "CameraObject";
-    static const char *LightObjectType = "LightObject";
-    static const char *TransformType = "Transform";
-    static const char *MeshType = "Mesh";
-    static const char *VertexArrayType = "VertexArray";
-    static const char *IndexArrayType = "IndexArray";
-    static const char *MaterialType = "Material";
-    static const char *ColorType = "Color";
-    static const char *ParamType = "Param";
-    static const char *TextureType = "Texture";
-    static const char *AttenType = "Atten";
+    static constexpr char MetricType[] = "Metric";
+    static constexpr char Metric_DistanceType[] = "distance";
+    static constexpr char Metric_AngleType[] = "angle";
+    static constexpr char Metric_TimeType[] = "time";
+    static constexpr char Metric_UpType[] = "up";
+    static constexpr char NameType[] = "Name";
+    static constexpr char ObjectRefType[] = "ObjectRef";
+    static constexpr char MaterialRefType[] = "MaterialRef";
+    static constexpr char MetricKeyType[] = "key";
+    static constexpr char GeometryNodeType[] = "GeometryNode";
+    static constexpr char CameraNodeType[] = "CameraNode";
+    static constexpr char LightNodeType[] = "LightNode";
+    static constexpr char GeometryObjectType[] = "GeometryObject";
+    static constexpr char CameraObjectType[] = "CameraObject";
+    static constexpr char LightObjectType[] = "LightObject";
+    static constexpr char TransformType[] = "Transform";
+    static constexpr char MeshType[] = "Mesh";
+    static constexpr char VertexArrayType[] = "VertexArray";
+    static constexpr char IndexArrayType[] = "IndexArray";
+    static constexpr char MaterialType[] = "Material";
+    static constexpr char ColorType[] = "Color";
+    static constexpr char ParamType[] = "Param";
+    static constexpr char TextureType[] = "Texture";
+    static constexpr char AttenType[] = "Atten";
 
-    static const char *DiffuseColorToken = "diffuse";
-    static const char *SpecularColorToken = "specular";
-    static const char *EmissionColorToken = "emission";
+    static constexpr char DiffuseColorToken[] = "diffuse";
+    static constexpr char SpecularColorToken[] = "specular";
+    static constexpr char EmissionColorToken[] = "emission";
 
-    static const char *DiffuseTextureToken = "diffuse";
-    static const char *DiffuseSpecularTextureToken = "specular";
-    static const char *SpecularPowerTextureToken = "specular_power";
-    static const char *EmissionTextureToken = "emission";
-    static const char *OpacyTextureToken = "opacity";
-    static const char *TransparencyTextureToken = "transparency";
-    static const char *NormalTextureToken = "normal";
+    static constexpr char DiffuseTextureToken[] = "diffuse";
+    static constexpr char DiffuseSpecularTextureToken[] = "specular";
+    static constexpr char SpecularPowerTextureToken[] = "specular_power";
+    static constexpr char EmissionTextureToken[] = "emission";
+    static constexpr char OpacyTextureToken[] = "opacity";
+    static constexpr char TransparencyTextureToken[] = "transparency";
+    static constexpr char NormalTextureToken[] = "normal";
 
     enum TokenType {
         NoneType = -1,
@@ -139,7 +139,7 @@ namespace Grammar {
             return false;
         }
 
-        int idx(-1);
+        int idx = -1;
         for (size_t i = 0; i < 4; i++) {
             if (ValidMetricToken[i] == token) {
                 idx = (int)i;
@@ -151,45 +151,46 @@ namespace Grammar {
     }
 
     static TokenType matchTokenType(const char *tokenType) {
-        if (MetricType == tokenType) {
+        const size_t len = std::strlen(tokenType);
+        if (0 == strncmp(MetricType, tokenType, len)) {
             return MetricToken;
-        } else if (NameType == tokenType) {
+        } else if (0 == strncmp(NameType, tokenType, len)) {
             return NameToken;
-        } else if (ObjectRefType == tokenType) {
+        } else if (0 == strncmp(ObjectRefType, tokenType, len)) {
             return ObjectRefToken;
-        } else if (MaterialRefType == tokenType) {
+        } else if (0 == strncmp(MaterialRefType, tokenType, len)) {
             return MaterialRefToken;
-        } else if (MetricKeyType == tokenType) {
+        } else if (0 == strncmp(MetricKeyType, tokenType, len)) {
             return MetricKeyToken;
-        } else if (GeometryNodeType == tokenType) {
+        } else if (0 == strncmp(GeometryNodeType, tokenType, len)) {
             return GeometryNodeToken;
-        } else if (CameraNodeType == tokenType) {
+        } else if (0 == strncmp(CameraNodeType, tokenType, len)) {
             return CameraNodeToken;
-        } else if (LightNodeType == tokenType) {
+        } else if (0 == strncmp(LightNodeType, tokenType, len)) {
             return LightNodeToken;
-        } else if (GeometryObjectType == tokenType) {
+        } else if (0 == strncmp(GeometryObjectType, tokenType, len)) {
             return GeometryObjectToken;
-        } else if (CameraObjectType == tokenType) {
+        } else if (0 == strncmp(CameraObjectType, tokenType, len)) {
             return CameraObjectToken;
-        } else if (LightObjectType == tokenType) {
+        } else if (0 == strncmp(LightObjectType, tokenType, len)) {
             return LightObjectToken;
-        } else if (TransformType == tokenType) {
+        } else if (0 == strncmp(TransformType, tokenType, len)) {
             return TransformToken;
-        } else if (MeshType == tokenType) {
+        } else if (0 == strncmp(MeshType, tokenType, len)) {
             return MeshToken;
-        } else if (VertexArrayType == tokenType) {
+        } else if (0 == strncmp(VertexArrayType, tokenType, len)) {
             return VertexArrayToken;
-        } else if (IndexArrayType == tokenType) {
+        } else if (0 == strncmp(IndexArrayType, tokenType, len)) {
             return IndexArrayToken;
-        } else if (MaterialType == tokenType) {
+        } else if (0 == strncmp(MaterialType, tokenType, len)) {
             return MaterialToken;
-        } else if (ColorType == tokenType) {
+        } else if (0 == strncmp(ColorType, tokenType, len)) {
             return ColorToken;
-        } else if (ParamType == tokenType) {
+        } else if (0 == strncmp(ParamType, tokenType, len)) {
             return ParamToken;
-        } else if (TextureType == tokenType) {
+        } else if (0 == strncmp(TextureType, tokenType, len)) {
             return TextureToken;
-        } else if (AttenType == tokenType) {
+        } else if (0 == strncmp(AttenType, tokenType, len)) {
             return AttenToken;
         }
 
@@ -257,15 +258,9 @@ OpenGEXImporter::RefInfo::RefInfo(aiNode *node, Type type, std::vector<std::stri
 }
 
 //------------------------------------------------------------------------------------------------
-OpenGEXImporter::RefInfo::~RefInfo() {
-    // empty
-}
-
-//------------------------------------------------------------------------------------------------
 OpenGEXImporter::OpenGEXImporter() :
         m_root(nullptr),
         m_nodeChildMap(),
-        m_meshCache(),
         m_mesh2refMap(),
         m_material2refMap(),
         m_ctx(nullptr),
@@ -283,10 +278,6 @@ OpenGEXImporter::OpenGEXImporter() :
         m_nodeStack(),
         m_unresolvedRefStack() {
     // empty
-}
-
-//------------------------------------------------------------------------------------------------
-OpenGEXImporter::~OpenGEXImporter() {
 }
 
 //------------------------------------------------------------------------------------------------
@@ -469,14 +460,12 @@ void OpenGEXImporter::handleMetricNode(DDLNode *node, aiScene * /*pScene*/) {
 void OpenGEXImporter::handleNameNode(DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No current node for name.");
-        return;
     }
 
     Value *val(node->getValue());
     if (nullptr != val) {
         if (Value::ValueType::ddl_string != val->m_type) {
             throw DeadlyImportError("OpenGEX: invalid data type for value in node name.");
-            return;
         }
 
         const std::string name(val->getString());
@@ -517,7 +506,6 @@ static void getRefNames(DDLNode *node, std::vector<std::string> &names) {
 void OpenGEXImporter::handleObjectRefNode(DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     std::vector<std::string> objRefNames;
@@ -541,7 +529,6 @@ void OpenGEXImporter::handleObjectRefNode(DDLNode *node, aiScene * /*pScene*/) {
 void OpenGEXImporter::handleMaterialRefNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     std::vector<std::string> matRefNames;
@@ -681,14 +668,12 @@ static void setMatrix(aiNode *node, DataArrayList *transformData) {
 void OpenGEXImporter::handleTransformNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == m_currentNode) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     DataArrayList *transformData(node->getDataArrayList());
     if (nullptr != transformData) {
         if (transformData->m_numItems != 16) {
             throw DeadlyImportError("Invalid number of data for transform matrix.");
-            return;
         }
         setMatrix(m_currentNode, transformData);
     }
@@ -844,7 +829,6 @@ static void copyColor4DArray(size_t numItems, DataArrayList *vaList, aiColor4D *
 void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == node) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     Property *prop = node->getProperties();
@@ -885,12 +869,10 @@ void OpenGEXImporter::handleVertexArrayNode(ODDLParser::DDLNode *node, aiScene *
 void OpenGEXImporter::handleIndexArrayNode(ODDLParser::DDLNode *node, aiScene * /*pScene*/) {
     if (nullptr == node) {
         throw DeadlyImportError("No parent node for name.");
-        return;
     }
 
     if (nullptr == m_currentMesh) {
         throw DeadlyImportError("No current mesh for index data found.");
-        return;
     }
 
     DataArrayList *vaList = node->getDataArrayList();

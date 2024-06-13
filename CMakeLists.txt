@@ -17,7 +17,7 @@ set(USE_IMGUI ON)
 
 # 使用Assimp时设置为ON
 # 需要将解压的assimp文件夹内CMakeList.txt所在的全部文件复制到当前项目的Assimp文件夹内
-set(USE_ASSIMP OFF)
+set(USE_ASSIMP ON)
 
 # 设置C++标准为C++17
 set(CMAKE_CXX_STANDARD 17)
@@ -144,9 +144,11 @@ DX12API/Transform.h
  DX12API/MathHelper/MathHelper.h
  )
  #基础几何体相关
- set(BasicGeometry
+ set(ModelsAndGeometry
  DX12API/GeometryGenerator.cpp
  DX12API/GeometryGenerator.h
+ DX12API/ModelManager.cpp
+ DX12API/ModelManager.h
  )
  
  #帧资源处理
@@ -175,7 +177,7 @@ DX12API/TextureLoader/DDSTextureLoader.h
  source_group(DX12API FILES ${DX12API})
  source_group(DX12API\\TextureLoader FILES ${TextureLoader})
  source_group(DX12API\\MathHelper FILES ${MathHelper})
- source_group(DX12API\\BasicGeometry FILES ${BasicGeometry})
+ source_group(DX12API\\ModelsAndGeometry FILES ${ModelsAndGeometry})
  source_group(DX12API\\FrameResource FILES ${FrameResource})
  source_group(DX12API\\GameTimer FILES ${GameTimer})
  source_group(DX12API\\UtilityAPI FILES ${UtilityAPI})
@@ -187,7 +189,7 @@ DX12API/TextureLoader/DDSTextureLoader.h
  #添加可执行文件
  #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
-${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${BasicGeometry} ${FrameResource} ${Transform} ${Camera} ${RenderAndEffects}
+${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${ModelsAndGeometry} ${FrameResource} ${Transform} ${Camera} ${RenderAndEffects}
 ${GameObject}
 ${HLSL_Files})
 # 添加链接库
@@ -215,4 +217,5 @@ if (${USE_ASSIMP})
     set(ASSIMP_INJECT_DEBUG_POSTFIX OFF)
     add_subdirectory("assimp")
     target_link_libraries(${TARGET_NAME} assimp)
+    set_target_properties(${TARGET_NAME} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=${ASSIMP_LIBRARY_OUTPUT_DIRECTORY}/$<IF:$<CONFIG:Debug>,Debug,Release>")
 endif()
