@@ -14,6 +14,7 @@
 #include "FrameResource.h"
 #include "GeometryGenerator.h"
 #include "Camera.h"
+#include "WinAPISetting.h"
 
 #include"Wave.h"
 

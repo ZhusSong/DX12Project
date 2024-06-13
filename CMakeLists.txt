@@ -101,12 +101,12 @@ Game/GameApp.h
 Game/Wave.cpp
 Game/Wave.h
  )
- 
+ #游戏对象
  set(GameObject
 Game/GameObject.cpp
 Game/GameObject.h
  )
-
+ 
 
  #DX12API
  set (DX12API
@@ -159,6 +159,9 @@ DX12API/Transform.h
  
  #初始化渲染状态
  set(RenderAndEffects
+ DX12API/BasicEffect.cpp
+ DX12API/Effect.h
+ DX12API/EffectHelper.h
  DX12API/RenderState.cpp
  DX12API/RenderState.h
  )
@@ -190,7 +193,7 @@ DX12API/TextureLoader/DDSTextureLoader.h
  #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
 ${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${ModelsAndGeometry} ${FrameResource} ${Transform} ${Camera} ${RenderAndEffects}
-${GameObject}
+${GameObject} 
 ${HLSL_Files})
 # 添加链接库
 target_link_libraries(${TARGET_NAME}  d3d12.lib dxgi.lib dxguid.lib D3DCompiler.lib winmm.lib d2d1.lib dwrite.lib winmm.lib legacy_stdio_definitions.lib)
