@@ -117,15 +117,13 @@ DX12API/DX12App.cpp
 DX12API/DX12App.h
 DX12API/UploadBuffer.h
  )
-  #摄像机类
- set(Camera
-DX12API/Camera.cpp
-DX12API/Camera.h
- )
- #Transform类
+ #Transform与摄像机类
  set(Transform
 DX12API/Transform.cpp
 DX12API/Transform.h
+DX12API/Camera.cpp
+DX12API/Camera.h
+
  )
 #程序时间
  set(GameTimer
@@ -158,12 +156,14 @@ DX12API/Transform.h
  )
  
  #初始化渲染状态
- set(RenderAndEffects
+ set(ResourcesAndRenders
  DX12API/BasicEffect.cpp
  DX12API/Effect.h
  DX12API/EffectHelper.h
  DX12API/RenderState.cpp
  DX12API/RenderState.h
+ DX12API/BuildResource.cpp
+ DX12API/BuildResource.h
  )
  #贴图读取
  set (TextureLoader
@@ -185,14 +185,13 @@ DX12API/TextureLoader/DDSTextureLoader.h
  source_group(DX12API\\GameTimer FILES ${GameTimer})
  source_group(DX12API\\UtilityAPI FILES ${UtilityAPI})
  source_group(DX12API\\Transform FILES ${Transform})
- source_group(DX12API\\Camera FILES ${Camera})
- source_group(DX12API\\RenderAndEffects FILES ${RenderAndEffects})
+ source_group(DX12API\\RenderAndEffects FILES ${ResourcesAndRenders})
  source_group(Game\\GameObject FILES ${GameObject})
 
  #添加可执行文件
  #新增文件时需在此处添加分组
 add_executable(${TARGET_NAME} ${SOURCES}  
-${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${ModelsAndGeometry} ${FrameResource} ${Transform} ${Camera} ${RenderAndEffects}
+${DX12API}  ${GameTimer}  ${UtilityAPI} ${TextureLoader} ${MathHelper} ${ModelsAndGeometry} ${FrameResource} ${Transform}  ${ResourcesAndRenders}
 ${GameObject} 
 ${HLSL_Files})
 # 添加链接库
