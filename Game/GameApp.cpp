@@ -1,5 +1,6 @@
 #include "GameApp.h"
 
+#include "MessageLogger.h"
 const int gNumFrameResources = 3;
 
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
@@ -50,6 +51,7 @@ bool GameApp::Init()
     BuildFrameResources();
     BuildPSO();
 
+    
 
     // Execute the initialization commands.
     // 执行初始化命令
@@ -562,7 +564,7 @@ void GameApp::LoadTextures()
 
     auto white1x1Tex = std::make_unique<Texture>();
     white1x1Tex->Name = "white1x1Tex";
-    white1x1Tex->Filename = L"asset\\stone.dds";
+    white1x1Tex->Filename = L"asset\\bricks3.dds";
     ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
         mCommandList.Get(), white1x1Tex->Filename.c_str(),
         white1x1Tex->Resource, white1x1Tex->UploadHeap));
@@ -889,10 +891,10 @@ void GameApp::BuildFloorGeometry()
 
         // Floor: Observe we tile texture coordinates.
           // 地板顶点信息 位置(3) 法线(3) uv(2)
-        Vertex(-3.5f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 
-            Vertex(-3.5f, 0.1f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-            Vertex(7.5f, 0.1f, 0.0f, 0.0f, 1.0f, 0.0f, 4.0f, 0.0f),
-            Vertex(7.5f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 4.0f)
+        Vertex(-10.0f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 
+            Vertex(-10.0f, 0.1f, 10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+            Vertex(10.0f, 0.1f, 10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 0.0f),
+            Vertex(10.0f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 4.0f)
     };
     std::array<std::int16_t, 6> indices =
     {
@@ -1138,6 +1140,19 @@ void GameApp::BuildMaterials()
 }
 void GameApp::BuildRenderItems()
 {
+    auto skullRitem = std::make_unique<RenderItem>();
+    skullRitem->World = MathHelper::Identity4x4();
+    skullRitem->TexTransform = MathHelper::Identity4x4();
+    skullRitem->ObjCBIndex = 2;
+    skullRitem->Mat = mMaterials["skullMat"].get();
+    skullRitem->Geo = mGeometries["skullGeo"].get();
+    skullRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    skullRitem->IndexCount = skullRitem->Geo->DrawArgs["skull"].IndexCount;
+    skullRitem->StartIndexLocation = skullRitem->Geo->DrawArgs["skull"].StartIndexLocation;
+    skullRitem->BaseVertexLocation = skullRitem->Geo->DrawArgs["skull"].BaseVertexLocation;
+    mSkullRitem = skullRitem.get();
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(skullRitem.get());
+
     auto floorRitem = std::make_unique<RenderItem>();
     floorRitem->World = MathHelper::Identity4x4();
     floorRitem->TexTransform = MathHelper::Identity4x4();
@@ -1162,18 +1177,7 @@ void GameApp::BuildRenderItems()
     wallsRitem->BaseVertexLocation = wallsRitem->Geo->DrawArgs["wall"].BaseVertexLocation;
     mRitemLayer[(int)RenderLayer::Opaque].push_back(wallsRitem.get());
 
-    auto skullRitem = std::make_unique<RenderItem>();
-    skullRitem->World = MathHelper::Identity4x4();
-    skullRitem->TexTransform = MathHelper::Identity4x4();
-    skullRitem->ObjCBIndex = 2;
-    skullRitem->Mat = mMaterials["skullMat"].get();
-    skullRitem->Geo = mGeometries["skullGeo"].get();
-    skullRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    skullRitem->IndexCount = skullRitem->Geo->DrawArgs["skull"].IndexCount;
-    skullRitem->StartIndexLocation = skullRitem->Geo->DrawArgs["skull"].StartIndexLocation;
-    skullRitem->BaseVertexLocation = skullRitem->Geo->DrawArgs["skull"].BaseVertexLocation;
-    mSkullRitem = skullRitem.get();
-    mRitemLayer[(int)RenderLayer::Opaque].push_back(skullRitem.get());
+  
 
     // Reflected skull will have different world matrix, so it needs to be its own render item.
     // 被反射的模型将有不同的世界矩阵，所以它需要成为它自己的渲染项。

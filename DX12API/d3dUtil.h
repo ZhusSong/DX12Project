@@ -8,7 +8,6 @@
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
-#include <string>
 #include <memory>
 #include <algorithm>
 #include <vector>
