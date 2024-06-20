@@ -51,7 +51,6 @@ bool GameApp::Init()
     BuildFrameResources();
     BuildPSO();
 
-    
 
     // Execute the initialization commands.
     // 执行初始化命令

@@ -1,4 +1,4 @@
-#include "d3dDebug.h"
+#include "Debug.h"
 Debug::~Debug()
 {
 	LogToConsole(stream->logType, stream->context, stream->ss.str());
@@ -27,7 +27,9 @@ void Debug::LogToConsole(LogType type, const MessageLogContext& context, std::st
 	logString.append(context.file);
 	logString.append(" ");
 	logString.append(context.function);
+
 	
-	std::cout << logString << " line: " << context.line << " " << std::endl;
+	std::cout << "111111";
+	//std::cout << logString << " line: " << context.line << " " << std::endl;
 }
 

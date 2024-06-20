@@ -135,11 +135,8 @@ DX12API/Camera.h
  set(UtilityAPI
  DX12API/d3dUtil.cpp
  DX12API/d3dUtil.h
- DX12API/MessageLogger.h
- DX12API/MessageLogger.cpp
- DX12API/MessageLogContext.h
- DX12API/d3dDebug.cpp
- DX12API/d3dDebug.h
+ DX12API/d3dDebugLogger.h
+ DX12API/d3dDebugLogger.cpp
  )
  #辅助数学工具
  set(MathHelper

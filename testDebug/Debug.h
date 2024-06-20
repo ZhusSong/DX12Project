@@ -21,8 +21,6 @@ enum LogType
 	Default,
 };
 
-
-
 // 负责处理Debug信息的类
 class Debug
 {

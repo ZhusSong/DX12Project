@@ -2,6 +2,7 @@
 
 Debug MessageLogger::debug() const
 {
+
 	std::string debug = "debug";
 	Debug dbg = Debug(&debug);
 	MessageLogContext& ctxt = dbg.stream->context;
