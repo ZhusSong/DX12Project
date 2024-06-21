@@ -17,12 +17,13 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <chrono>
+#include <iostream>
 #include "d3dx12.h"
 #include "DDSTextureLoader.h"
 #include "MathHelper.h"
 
 extern const int gNumFrameResources;
-
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
 {
     if (obj)

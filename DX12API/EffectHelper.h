@@ -14,8 +14,9 @@ struct AlignedType
 	{
 		const size_t alignedSize = __alignof(DerivedType);
 
+		//确保对齐要求大于8字节
 		static_assert(alignedSize > 8, "AlignedNew is only useful for types with > 8 byte alignment! Did you forget a __declspec(align) on DerivedType?");
-
+		//以指定方式进行对齐
 		void* ptr = _aligned_malloc(size, alignedSize);
 
 		if (!ptr)
@@ -35,7 +36,6 @@ struct CBufferBase
 {
 	template<class T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
-
 
 
 };

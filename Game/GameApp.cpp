@@ -1,6 +1,7 @@
 #include "GameApp.h"
+#include "d3dDebugLogger.h"
 
-#include "MessageLogger.h"
+#include "d3dDebugLogger.h"
 const int gNumFrameResources = 3;
 
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
@@ -33,6 +34,7 @@ bool GameApp::Init()
     //mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
 
     LoadTextures();
+
     BuildRootSignature();
     BuildDescriptorHeaps();
 
@@ -51,7 +53,13 @@ bool GameApp::Init()
     BuildFrameResources();
     BuildPSO();
 
-
+    initLogger("Logs/LogFile.txt","Logs/WarningFile.txt","Logs/ErrorFile.txt");
+    AllocConsole();
+    Debug(Info, "print test 111111111");
+    LOG(Info) << " test!!!!!!!!!";
+    LOG(Info) << " test2222222!!!!!!!!!";
+    
+   
     // Execute the initialization commands.
     // 执行初始化命令
     ThrowIfFailed(mCommandList->Close());
