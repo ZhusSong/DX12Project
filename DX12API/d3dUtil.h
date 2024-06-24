@@ -167,10 +167,13 @@ struct MeshGeometry
     Microsoft::WRL::ComPtr<ID3D12Resource> IndexBufferUploader = nullptr;
 
     // Data about the buffers.
-    UINT VertexByteStride = 0;
+    UINT VertexBufferOffset = 0;
     UINT VertexBufferByteSize = 0;
-    DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
+    UINT VertexByteStride = 0;
+
+    UINT IndexBufferOffset = 0;
     UINT IndexBufferByteSize = 0;
+    DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
 
     // A MeshGeometry may store multiple geometries in one vertex/index buffer.
     // Use this container to define the Submesh geometries so we can draw

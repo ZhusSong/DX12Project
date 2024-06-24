@@ -2,6 +2,8 @@
 #include <WindowsX.h>
 #include <sstream>
 
+#include "d3dDebugLogger.h"
+
 #pragma warning(disable: 6031)
 using namespace std;
 using namespace DirectX;
@@ -45,6 +47,8 @@ DX12App::DX12App(HINSTANCE hInstance, const std::wstring& windowName, int initWi
     // Only one D3DApp can be constructed.
     assert(mApp == nullptr);
     mApp = this;
+
+    initLogger("Logs/LogFile.txt", "Logs/WarningFile.txt", "Logs/ErrorFile.txt");
 
      mClientWidth= initWidth;
      mClientHeight= initHeight;

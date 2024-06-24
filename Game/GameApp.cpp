@@ -1,8 +1,9 @@
 #include "GameApp.h"
-#include "d3dDebugLogger.h"
-
-#include "d3dDebugLogger.h"
+#include "ModelManager.h"
 const int gNumFrameResources = 3;
+
+// 创建模型
+ModelManager ModelTest("asset\\Models\\player.obj");
 
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
     : DX12App(hInstance, windowName, initWidth, initHeight)
@@ -32,6 +33,8 @@ bool GameApp::Init()
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     //mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
+ 
+
 
     LoadTextures();
 
@@ -47,17 +50,13 @@ bool GameApp::Init()
     //BuildWavesGeometry();
     //BuildBoxGeometry();
     //BuildShapeGeometry();
+    BuildModels();
 
     BuildMaterials();
     BuildRenderItems();
     BuildFrameResources();
     BuildPSO();
 
-    initLogger("Logs/LogFile.txt","Logs/WarningFile.txt","Logs/ErrorFile.txt");
-    AllocConsole();
-    Debug(Info, "print test 111111111");
-    LOG(Info) << " test!!!!!!!!!";
-    LOG(Info) << " test2222222!!!!!!!!!";
     
    
     // Execute the initialization commands.
@@ -939,6 +938,52 @@ void GameApp::BuildFloorGeometry()
     geo->DrawArgs["floor"] = floorSubmesh;
 
     mGeometries[geo->Name] = std::move(geo);
+}
+
+void GameApp::BuildModels()
+{
+    auto ModelVertices = ModelTest.GetVertices();
+    auto ModelIndices = ModelTest.GetIndices();
+    assert(ModelVertices.size() > 0);
+    assert(ModelIndices.size() > 0);
+
+    uint32_t ModelVertexOffset = 0;
+    uint32_t ModelIndexOffset = 0;
+
+    auto ModelDraw = std::make_unique<SubmeshGeometry>();
+    ModelDraw->BaseVertexLocation = ModelVertexOffset;
+    ModelDraw->IndexCount = (UINT)ModelIndices.size();
+    ModelDraw->StartIndexLocation = ModelIndexOffset;
+
+    auto totalVertexCount = ModelVertices.size();
+    std::vector<ModelVertex> localVertices(totalVertexCount);
+
+    uint32_t k = 0;
+    for (size_t i = 0; i < ModelVertices.size();++i,++k)
+    {
+        localVertices[k].position = ModelVertices[i].position;
+        localVertices[k].normal = ModelVertices[i].normal;
+        localVertices[k].tangent = ModelVertices[i].tangent;
+        localVertices[k].texCoord = ModelVertices[i].texCoord;
+    }
+    std::vector<uint32_t> localIndices;
+    localIndices.insert(localIndices.end(), std::begin(ModelIndices), std::end(ModelIndices));
+
+    const uint32_t vbSize = (uint32_t)localVertices.size() * sizeof(ModelVertex);
+    const uint32_t ibSize = (uint32_t)localIndices.size() * sizeof(uint32_t);
+
+
+    auto pModel = std::make_unique <MeshGeometry> ();
+    pModel->Name = "Player";
+    pModel->VertexBufferByteSize = vbSize;
+    pModel->IndexBufferByteSize = ibSize;
+    pModel->VertexByteStride = sizeof(ModelVertex);
+    pModel->IndexFormat = DXGI_FORMAT_R32_UINT;
+
+    ThrowIfFailed(D3DCreateBlob(vbSize, &pModel->VertexBufferCPU));
+    CopyMemory(pModel->VertexBufferCPU->GetBufferPointer(), localVertices.data(), vbSize);
+
+
 }
 
 void GameApp::BuildPSO()

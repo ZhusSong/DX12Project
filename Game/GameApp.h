@@ -129,6 +129,8 @@ private:
     void BuildSkullGeometry();
     void BuildFloorGeometry();
 
+    void BuildModels();
+
    /* void BuildLandGeometry();
     void BuildBoxGeometry();*/
     //创建波浪几何体
