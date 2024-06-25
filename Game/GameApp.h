@@ -190,8 +190,9 @@ private:
     RenderItem* mSkullRitem = nullptr;
     RenderItem* mReflectedSkullRitem = nullptr;
     RenderItem* mReflectedFloorRitem = nullptr;
+    RenderItem* mReflectedModelRitem = nullptr;
     RenderItem* mShadowedSkullRitem = nullptr;
-    XMFLOAT3 mSkullTranslation = { 0.0f, 0.5f, -5.0f };
+    XMFLOAT3 mSkullTranslation = { -5.0f, 0.5f, -5.0f };
 
     // List of all the render items.
     // 所有待渲染的成员列表

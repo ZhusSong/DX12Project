@@ -568,7 +568,7 @@ void GameApp::LoadTextures()
 
     auto white1x1Tex = std::make_unique<Texture>();
     white1x1Tex->Name = "white1x1Tex";
-    white1x1Tex->Filename = L"asset\\bricks3.dds";
+    white1x1Tex->Filename = L"asset\\stone.dds";
     ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
         mCommandList.Get(), white1x1Tex->Filename.c_str(),
         white1x1Tex->Resource, white1x1Tex->UploadHeap));
@@ -897,10 +897,10 @@ void GameApp::BuildFloorGeometry()
 
         // Floor: Observe we tile texture coordinates.
           // 地板顶点信息 位置(3) 法线(3) uv(2)
-        Vertex(-10.0f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 
-            Vertex(-10.0f, 0.1f, 10.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
-            Vertex(10.0f, 0.1f, 10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 0.0f),
-            Vertex(10.0f, 0.1f, -10.0f, 0.0f, 1.0f, 0.0f, 4.0f, 4.0f)
+        Vertex(-8.0f, 0.1f, -8.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 
+            Vertex(-8.0f, 0.1f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f),
+            Vertex(8.0f, 0.1f, 0.0f, 0.0f, 1.0f, 0.0f, 4.0f, 0.0f),
+            Vertex(8.0f, 0.1f, -8.0f, 0.0f, 1.0f, 0.0f, 4.0f, 4.0f)
     };
     std::array<std::int16_t, 6> indices =
     {
@@ -943,7 +943,7 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\player.obj");
+    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
 
     auto ModelVertices = ModelTest.GetVertices();
     auto ModelIndices = ModelTest.GetIndices();
@@ -964,7 +964,7 @@ void GameApp::BuildModels()
     uint32_t k = 0;
     for (size_t i = 0; i < ModelVertices.size();++i,++k)
     {
-        localVertices[k].position = ModelVertices[i].position;
+        localVertices[k].position = { ModelVertices[i].position.x  , ModelVertices[i].position.y, ModelVertices[i].position.z };
         localVertices[k].normal = ModelVertices[i].normal;
         localVertices[k].texCoord = { 0.0f, 0.0f };
 
@@ -1191,7 +1191,7 @@ void GameApp::BuildMaterials()
     auto shadowMat = std::make_unique<Material>();
     shadowMat->Name = "shadowMat";
     shadowMat->MatCBIndex = 4;
-    shadowMat->DiffuseSrvHeapIndex = 4;
+    shadowMat->DiffuseSrvHeapIndex = 3;
     shadowMat->DiffuseAlbedo = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.5f);
     shadowMat->FresnelR0 = XMFLOAT3(0.001f, 0.001f, 0.001f);
     shadowMat->Roughness = 0.0f;
@@ -1252,21 +1252,34 @@ void GameApp::BuildRenderItems()
     wallsRitem->BaseVertexLocation = wallsRitem->Geo->DrawArgs["wall"].BaseVertexLocation;
     mRitemLayer[(int)RenderLayer::Opaque].push_back(wallsRitem.get());
 
-  
+    //创建模型的渲染对象
+    auto modelRitem = std::make_unique<RenderItem>();
+    auto modelWorld = DirectX::XMMatrixTranslation(0.f, 0.f, 4.f) * DirectX::XMMatrixRotationY(MathHelper::Pi);
+    XMStoreFloat4x4(&modelRitem->World, modelWorld);
+    modelRitem->ObjCBIndex = 3;
+    modelRitem->Geo = mGeometries["Player"].get();
+    modelRitem->Mat = mMaterials["icemirror"].get();
+    modelRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    modelRitem->IndexCount = modelRitem->Geo->DrawArgs["Player"].IndexCount;
+    modelRitem->StartIndexLocation = modelRitem->Geo->DrawArgs["Player"].StartIndexLocation;
+    modelRitem->BaseVertexLocation = modelRitem->Geo->DrawArgs["Player"].BaseVertexLocation;
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(modelRitem.get());
 
     // Reflected skull will have different world matrix, so it needs to be its own render item.
     // 被反射的模型将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto reflectedSkullRitem = std::make_unique<RenderItem>();
     *reflectedSkullRitem = *skullRitem;
-    reflectedSkullRitem->ObjCBIndex = 4;
+    reflectedSkullRitem->ObjCBIndex =4;
     mReflectedSkullRitem = reflectedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedSkullRitem.get());
 
-    auto reflectedFloorRitem = std::make_unique<RenderItem>();
-    *reflectedFloorRitem = *floorRitem;
-    reflectedFloorRitem->ObjCBIndex = 5;
-    mReflectedFloorRitem = reflectedFloorRitem.get();
-    mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedFloorRitem.get());
+  
+
+    auto reflectedModelRitem = std::make_unique<RenderItem>();
+    *reflectedModelRitem = *modelRitem;
+    reflectedModelRitem->ObjCBIndex = 5;
+    mReflectedModelRitem = reflectedModelRitem.get();
+    mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedModelRitem.get());
 
     // Shadowed skull will have different world matrix, so it needs to be its own render item.
     // 阴影将有不同的世界矩阵，所以它需要成为它自己的渲染项。
@@ -1291,18 +1304,7 @@ void GameApp::BuildRenderItems()
     mRitemLayer[(int)RenderLayer::Transparent].push_back(mirrorRitem.get());
 
 
-    //创建模型的渲染对象
-    auto modelRitem= std::make_unique<RenderItem>();
-    auto modelWorld=DirectX::XMMatrixTranslation(-10.f,0.f,0.f) * DirectX::XMMatrixRotationY(MathHelper::Pi);
-    XMStoreFloat4x4(&modelRitem->World, modelWorld);
-    modelRitem->ObjCBIndex = 3;
-    modelRitem->Geo = mGeometries["Player"].get();
-    modelRitem->Mat = mMaterials["bricks"].get();
-    modelRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    modelRitem->IndexCount = modelRitem->Geo->DrawArgs["Player"].IndexCount;
-    modelRitem->StartIndexLocation = modelRitem->Geo->DrawArgs["Player"].StartIndexLocation;
-    modelRitem->BaseVertexLocation = modelRitem->Geo->DrawArgs["Player"].BaseVertexLocation;
-    mRitemLayer[(int)RenderLayer::Opaque].push_back(modelRitem.get());
+  
 
     mAllRitems.push_back(std::move(floorRitem));
     mAllRitems.push_back(std::move(wallsRitem));
@@ -1311,7 +1313,8 @@ void GameApp::BuildRenderItems()
     mAllRitems.push_back(std::move(modelRitem));
 
     mAllRitems.push_back(std::move(reflectedSkullRitem));
-    mAllRitems.push_back(std::move(reflectedFloorRitem));
+    //mAllRitems.push_back(std::move(reflectedFloorRitem));
+    mAllRitems.push_back(std::move(reflectedModelRitem));
     mAllRitems.push_back(std::move(shadowedSkullRitem));
     mAllRitems.push_back(std::move(mirrorRitem));
 
