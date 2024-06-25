@@ -23,7 +23,6 @@ struct ModelVertex
 	{
 		this->position = rhs.position;
 		this->normal = rhs.normal;
-		this->tangent = rhs.tangent;
 		this->texCoord = rhs.texCoord;
 	}
 	ModelVertex& operator= (ModelVertex& rhs)
@@ -35,7 +34,6 @@ struct ModelVertex
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 normal;
-	DirectX::XMFLOAT3 tangent;
 	DirectX::XMFLOAT2 texCoord;
 };
 class ModelManager

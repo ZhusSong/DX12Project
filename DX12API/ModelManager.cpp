@@ -68,9 +68,9 @@ Importer mImporter;
 		 localVertex.normal.y = mesh->mNormals[i].y;
 		 localVertex.normal.z = mesh->mNormals[i].z;
 
-		 localVertex.tangent.x = mesh->mTangents[i].x;
+		/* localVertex.tangent.x = mesh->mTangents[i].x;
 		 localVertex.tangent.y = mesh->mTangents[i].y;
-		 localVertex.tangent.z = mesh->mTangents[i].z;
+		 localVertex.tangent.z = mesh->mTangents[i].z;*/
 
 		 // assimp allow one model have 8 different texture coordinates in one vertex, but we just care first texture coordinates because we will not use so many
 		 if (mesh->mTextureCoords[0])
