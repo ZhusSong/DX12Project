@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2023, assimp team
 
 All rights reserved.
 
@@ -54,7 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ObjMaterial.h>
 #include <memory>
 
-static constexpr aiImporterDesc desc = {
+static const aiImporterDesc desc = {
     "Wavefront Object Importer",
     "",
     "",
@@ -78,9 +78,7 @@ using namespace std;
 ObjFileImporter::ObjFileImporter() :
         m_Buffer(),
         m_pRootObject(nullptr),
-        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {
-    // empty
-}
+        m_strAbsPath(std::string(1, DefaultIOSystem().getOsSeparator())) {}
 
 // ------------------------------------------------------------------------------------------------
 //  Destructor.
@@ -103,13 +101,8 @@ const aiImporterDesc *ObjFileImporter::GetInfo() const {
 // ------------------------------------------------------------------------------------------------
 //  Obj-file import implementation
 void ObjFileImporter::InternReadFile(const std::string &file, aiScene *pScene, IOSystem *pIOHandler) {
-    if (m_pRootObject != nullptr) {
-        delete m_pRootObject;
-        m_pRootObject = nullptr;
-    }
-
     // Read file into memory
-    static constexpr char mode[] = "rb";
+    static const std::string mode = "rb";
     auto streamCloser = [&](IOStream *pStream) {
         pIOHandler->Close(pStream);
     };

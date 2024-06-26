@@ -3,7 +3,9 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
+
+
 
 All rights reserved.
 
@@ -45,7 +47,7 @@ using namespace Assimp;
 
 class AssimpAPITest_aiMatrix4x4 : public AssimpMathTest {
 protected:
-    void SetUp() override {
+    virtual void SetUp() {
         result_c = result_cpp = aiMatrix4x4();
     }
 
@@ -61,11 +63,6 @@ protected:
 
     aiMatrix4x4 result_c, result_cpp;
 };
-
-TEST_F(AssimpAPITest_aiMatrix4x4, isIdendityTest) {
-    aiMatrix4x4 m = aiMatrix4x4(1.001f, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    EXPECT_TRUE(m.IsIdentity(1e-3f));
-}
 
 TEST_F(AssimpAPITest_aiMatrix4x4, aiIdentityMatrix4Test) {
     // Force a non-identity matrix.

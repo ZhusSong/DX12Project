@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -199,27 +199,35 @@ public:
     }
 
 public:
-    /// @brief Parse a variable from a string and set 'inout' to the character behind the last consumed character.
-    ///
-    ///  An optional schema enables, if specified, automatic conversion of custom data types.
-    ///
-    /// @throw SyntaxError
-    static std::shared_ptr<const EXPRESS::DataType> Parse(const char *&inout, const char *end,
-            uint64_t line = SyntaxError::LINE_NOT_SPECIFIED, const EXPRESS::ConversionSchema *schema = nullptr);
+    /** parse a variable from a string and set 'inout' to the character
+     *  behind the last consumed character. An optional schema enables,
+     *  if specified, automatic conversion of custom data types.
+     *
+     *  @throw SyntaxError
+     */
+    static std::shared_ptr<const EXPRESS::DataType> Parse(const char *&inout,
+            uint64_t line = SyntaxError::LINE_NOT_SPECIFIED,
+            const EXPRESS::ConversionSchema *schema = nullptr);
 };
 
 typedef DataType SELECT;
 typedef DataType LOGICAL;
 
 // -------------------------------------------------------------------------------
-/// Sentinel class to represent explicitly unset (optional) fields ($)
+/** Sentinel class to represent explicitly unset (optional) fields ($) */
 // -------------------------------------------------------------------------------
-class UNSET : public DataType {};
+class UNSET : public DataType {
+public:
+private:
+};
 
 // -------------------------------------------------------------------------------
-/// Sentinel class to represent explicitly derived fields (*)
+/** Sentinel class to represent explicitly derived fields (*) */
 // -------------------------------------------------------------------------------
-class ISDERIVED : public DataType {};
+class ISDERIVED : public DataType {
+public:
+private:
+};
 
 // -------------------------------------------------------------------------------
 /** Shared implementation for some of the primitive data type, i.e. int, float
@@ -296,7 +304,7 @@ public:
 public:
     /** @see DaraType::Parse
      */
-    static std::shared_ptr<const EXPRESS::LIST> Parse(const char *&inout, const char *end,
+    static std::shared_ptr<const EXPRESS::LIST> Parse(const char *&inout,
             uint64_t line = SyntaxError::LINE_NOT_SPECIFIED,
             const EXPRESS::ConversionSchema *schema = nullptr);
 

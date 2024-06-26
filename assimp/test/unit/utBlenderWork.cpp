@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -48,14 +48,11 @@ using namespace ::Assimp;
 
 class BlenderWorkTest : public ::testing::Test {
 public:
-    BlenderWorkTest() : im(nullptr) {}
-    ~BlenderWorkTest() override = default;
-
-    void SetUp() override {
+    virtual void SetUp() {
         im = new Assimp::Importer();
     }
 
-    void TearDown() override {
+    virtual void TearDown() {
         delete im;
     }
 

@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -324,7 +324,7 @@ public:
 
     // -------------------------------------------------------------------
     //! Parse a property instance
-    static bool ParseInstance(const char* &pCur, const char *end,
+    static bool ParseInstance(const char* &pCur,
         const Property* prop, PropertyInstance* p_pcOut);
 
     // -------------------------------------------------------------------
@@ -364,7 +364,7 @@ public:
 
     // -------------------------------------------------------------------
     //! Parse an element instance
-    static bool ParseInstance(const char *&pCur, const char *end,
+    static bool ParseInstance(const char* &pCur,
         const Element* pcElement, ElementInstance* p_pcOut);
 
     // -------------------------------------------------------------------

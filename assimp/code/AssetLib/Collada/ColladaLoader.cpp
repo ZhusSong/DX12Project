@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -64,7 +64,7 @@ namespace Assimp {
 using namespace Assimp::Formatter;
 using namespace Assimp::Collada;
 
-static constexpr aiImporterDesc desc = {
+static const aiImporterDesc desc = {
     "Collada Importer",
     "",
     "",
@@ -100,6 +100,10 @@ ColladaLoader::ColladaLoader() :
         mNodeNameCounter(0) {
     // empty
 }
+
+// ------------------------------------------------------------------------------------------------
+// Destructor, private as well
+ColladaLoader::~ColladaLoader() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the class can handle the format of the given file.
@@ -247,9 +251,7 @@ aiNode *ColladaLoader::BuildHierarchy(const ColladaParser &pParser, const Collad
 
     // add children. first the *real* ones
     node->mNumChildren = static_cast<unsigned int>(pNode->mChildren.size() + instances.size());
-    if (node->mNumChildren != 0) {
-        node->mChildren = new aiNode * [node->mNumChildren];
-    }
+    node->mChildren = new aiNode *[node->mNumChildren];
 
     for (size_t a = 0; a < pNode->mChildren.size(); ++a) {
         node->mChildren[a] = BuildHierarchy(pParser, pNode->mChildren[a]);

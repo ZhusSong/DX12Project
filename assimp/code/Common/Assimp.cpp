@@ -3,7 +3,7 @@
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -233,13 +233,8 @@ const aiScene *aiImportFileFromMemoryWithProperties(
         unsigned int pFlags,
         const char *pHint,
         const aiPropertyStore *props) {
-    if (pBuffer == nullptr) {
-        return nullptr;
-    }
-
-    if (pLength == 0u) {
-        return nullptr;
-    }
+    ai_assert(nullptr != pBuffer);
+    ai_assert(0 != pLength);
 
     const aiScene *scene = nullptr;
     ASSIMP_BEGIN_EXCEPTION_REGION();

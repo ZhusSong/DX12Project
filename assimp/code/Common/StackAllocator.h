@@ -2,7 +2,7 @@
 Open Asset Import Library (assimp)
 ----------------------------------------------------------------------
 
-Copyright (c) 2006-2024, assimp team
+Copyright (c) 2006-2022, assimp team
 
 All rights reserved.
 
@@ -61,10 +61,9 @@ namespace Assimp {
 class StackAllocator {
 public:
     /// @brief Constructs the allocator
-    StackAllocator();
-
+    inline StackAllocator();
     /// @brief Destructs the allocator and frees all memory
-    ~StackAllocator();
+    inline ~StackAllocator();
 
     // non copyable
     StackAllocator(const StackAllocator &) = delete;

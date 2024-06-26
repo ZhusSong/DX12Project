@@ -343,7 +343,7 @@ void ObjFileMtlImporter::createMaterial() {
         }
     }
 
-    name = ai_trim(name);
+    name = trim_whitespaces(name);
 
     std::map<std::string, ObjFile::Material *>::iterator it = m_pModel->mMaterialMap.find(name);
     if (m_pModel->mMaterialMap.end() == it) {
