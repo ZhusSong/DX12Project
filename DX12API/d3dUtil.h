@@ -22,6 +22,7 @@
 #include "d3dx12.h"
 #include "DDSTextureLoader.h"
 #include "MathHelper.h"
+#include "d3dDebugLogger.h"
 
 extern const int gNumFrameResources;
 inline void d3dSetDebugName(IDXGIObject* obj, const char* name)

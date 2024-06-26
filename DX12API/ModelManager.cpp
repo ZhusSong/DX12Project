@@ -5,27 +5,36 @@ Importer mImporter;
 
  ModelManager::ModelManager(const std::string& path)
 {
+	 initLogger("Logs/LogFile.txt", "Logs/WarningFile.txt", "Logs/ErrorFile.txt");
+	
 	 const aiScene* pLocalScene = mImporter.ReadFile(
 		 path,
-		 // Triangulates all faces of all meshes
+		 // Triangulates all faces of all meshes、
+		 // 三角化网格的所有面
 		 aiProcess_Triangulate |
+		 aiProcess_GenBoundingBoxes |
 		 // Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
 		 aiProcess_ConvertToLeftHanded |
 		 // This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
 		 aiProcessPreset_TargetRealtime_MaxQuality |
-		 // Calculates the tangents and bitangents for the imported meshes
+		 //// Calculates the tangents and bitangents for the imported meshes
 		 aiProcess_CalcTangentSpace |
-		 // Splits large meshes into smaller sub-meshes
-		 // This is quite useful for real-time rendering, 
-		 // where the number of triangles which can be maximally processed in a single draw - call is limited by the video driver / hardware
+		 //// Splits large meshes into smaller sub-meshes
+		 //// This is quite useful for real-time rendering, 
+		 //// where the number of triangles which can be maximally processed in a single draw - call is limited by the video driver / hardware
 		 aiProcess_SplitLargeMeshes |
-		 // A postprocessing step to reduce the number of meshes
+		 //// A postprocessing step to reduce the number of meshes
 		 aiProcess_OptimizeMeshes |
-		 // A postprocessing step to optimize the scene hierarchy
-		 aiProcess_OptimizeGraph);
-
+		 aiProcess_SortByPType |
+		 //// A postprocessing step to optimize the scene hierarchy
+		 aiProcess_OptimizeGraph
+	 );
+	 if (pLocalScene == nullptr || pLocalScene->mRootNode == nullptr)
+	 {
+		 std::cout << "ERROR::ASSIMP::" << mImporter.GetErrorString() << std::endl;
+	 }
 	 // "localScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE" is used to check whether value data returned is incomplete
-	 if (pLocalScene == nullptr || pLocalScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || pLocalScene->mRootNode == nullptr)
+	 if ( pLocalScene->mFlags & AI_SCENE_FLAGS_INCOMPLETE )
 	 {
 		 std::cout << "ERROR::ASSIMP::" << mImporter.GetErrorString() << std::endl;
 	 }
@@ -64,10 +73,24 @@ Importer mImporter;
 		 localVertex.position.y = mesh->mVertices[i].y;
 		 localVertex.position.z = mesh->mVertices[i].z;
 
-		 localVertex.normal.x = mesh->mNormals[i].x;
-		 localVertex.normal.y = mesh->mNormals[i].y;
-		 localVertex.normal.z = mesh->mNormals[i].z;
-
+		 if (mesh->HasNormals()) {
+			 localVertex.normal.x = mesh->mNormals[i].x;
+			 localVertex.normal.y = mesh->mNormals[i].y;
+			 localVertex.normal.z = mesh->mNormals[i].z;
+		 }
+		 else
+		 {
+			 localVertex.normal.x =0.0f;
+			 localVertex.normal.y = 0.0f;
+			 localVertex.normal.z = 0.0f;
+		 }
+		 if (mesh->HasTangentsAndBitangents()) {
+			 localVertex.tangent.x = mesh->mTangents[i].x;
+			 localVertex.tangent.y = mesh->mTangents[i].y;
+			 localVertex.tangent.z = mesh->mTangents[i].z;
+		 }
+		
+		
 		/* localVertex.tangent.x = mesh->mTangents[i].x;
 		 localVertex.tangent.y = mesh->mTangents[i].y;
 		 localVertex.tangent.z = mesh->mTangents[i].z;*/
@@ -83,6 +106,19 @@ Importer mImporter;
 			 localVertex.texCoord = DirectX::XMFLOAT2(0.0f, 0.0f);
 		 }
 
+		 std::string a = "Vertex is " + std::to_string(localVertex.position.x) + ' '
+			 + std::to_string(localVertex.position.y) + ' '
+			 + std::to_string(localVertex.position.z) + "\n\t\t\t\t\t"
+			 + "Normal is " + std::to_string(localVertex.normal.x) + ' '
+			 + std::to_string(localVertex.normal.y) + ' '
+			 + std::to_string(localVertex.normal.z) + "\n\t\t\t\t\t"
+			 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
+			 + std::to_string(localVertex.tangent.y) + ' '
+			 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"
+			 + "Tex is " + std::to_string(localVertex.texCoord.x) + ' '
+			 + std::to_string(localVertex.texCoord.y);
+		 LOG(Info) << a;
+
 		 localVertices.push_back(localVertex);
 	 }
 
@@ -92,7 +128,12 @@ Importer mImporter;
 		 for (UINT j = 0; j < localFace.mNumIndices; ++j)
 		 {
 			 localIndices.push_back(localFace.mIndices[j]);
+
+			 std::string a = "Indices is " + std::to_string(localFace.mIndices[j]);
+			 LOG(Info) << a;
+
 		 }
+
 	 }
 
 	 return Mesh(localVertices, localIndices);

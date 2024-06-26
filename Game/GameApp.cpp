@@ -733,27 +733,27 @@ void GameApp::BuildRoomGeometry()
         // Wall: Observe we tile texture coordinates, and that we
         // leave a gap in the middle for the mirror.
         // 墙面顶点信息 位置(3) 法线(3) uv(2)
-        Vertex(-3.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 2.0f), // 4
-        Vertex(-3.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
-        Vertex(-2.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.5f, 0.0f),
-        Vertex(-2.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.5f, 2.0f),
+        Vertex(-5.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 2.0f), // 4
+        Vertex(-5.0f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+        Vertex(-3.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.5f, 0.0f),
+        Vertex(-3.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.5f, 2.0f),
 
-        Vertex(2.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 2.0f), // 8 
-        Vertex(2.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+        Vertex(3.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 2.0f), // 8 
+        Vertex(3.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
         Vertex(7.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 2.0f, 0.0f),
         Vertex(7.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 2.0f, 2.0f),
 
-        Vertex(-3.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f), // 12
-        Vertex(-3.5f, 6.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+        Vertex(-5.0f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f), // 12
+        Vertex(-5.0f, 6.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
         Vertex(7.5f, 6.0f, 0.0f, 0.0f, 0.0f, -1.0f, 6.0f, 0.0f),
         Vertex(7.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 6.0f, 1.0f),
 
         // Mirror
         // 镜子顶点信息
-        Vertex(-2.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f), // 16
-        Vertex(-2.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
-        Vertex(2.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f),
-        Vertex(2.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f)
+        Vertex(-3.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f), // 16
+        Vertex(-3.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f),
+        Vertex(3.5f, 4.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f),
+        Vertex(3.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f)
     };
     std::array<std::int16_t, 24> indices =
     {
@@ -966,8 +966,7 @@ void GameApp::BuildModels()
     {
         localVertices[k].position = { ModelVertices[i].position.x  , ModelVertices[i].position.y, ModelVertices[i].position.z };
         localVertices[k].normal = ModelVertices[i].normal;
-        localVertices[k].texCoord = { 0.0f, 0.0f };
-
+        localVertices[k].texCoord = ModelVertices[i].texCoord;
     }
     std::vector<uint32_t> localIndices;
     localIndices.insert(localIndices.end(), std::begin(ModelIndices), std::end(ModelIndices));
@@ -1200,7 +1199,7 @@ void GameApp::BuildMaterials()
     auto modelMat = std::make_unique<Material>();
     modelMat->Name = "playerMat";
     modelMat->MatCBIndex = 5;
-    modelMat->DiffuseSrvHeapIndex = 5;
+    modelMat->DiffuseSrvHeapIndex = 3;
     modelMat->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
     modelMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
     modelMat->Roughness = 0.3f;
@@ -1258,7 +1257,7 @@ void GameApp::BuildRenderItems()
     XMStoreFloat4x4(&modelRitem->World, modelWorld);
     modelRitem->ObjCBIndex = 3;
     modelRitem->Geo = mGeometries["Player"].get();
-    modelRitem->Mat = mMaterials["icemirror"].get();
+    modelRitem->Mat = mMaterials["checkertile"].get();
     modelRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     modelRitem->IndexCount = modelRitem->Geo->DrawArgs["Player"].IndexCount;
     modelRitem->StartIndexLocation = modelRitem->Geo->DrawArgs["Player"].StartIndexLocation;

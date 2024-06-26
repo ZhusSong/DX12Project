@@ -23,7 +23,10 @@ struct ModelVertex
 	{
 		this->position = rhs.position;
 		this->normal = rhs.normal;
+		this->tangent = rhs.tangent;
 		this->texCoord = rhs.texCoord;
+		this->bitangent = rhs.bitangent;
+		
 	}
 	ModelVertex& operator= (ModelVertex& rhs)
 	{
@@ -34,7 +37,15 @@ struct ModelVertex
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT3 tangent;
+	DirectX::XMFLOAT3 bitangent;
 	DirectX::XMFLOAT2 texCoord;
+};
+struct ModelMaterial
+{
+	aiColor4D	Ambient;				
+	aiColor4D	Diffuse;				
+	aiColor4D	Specular;				
 };
 class ModelManager
 {
@@ -45,6 +56,7 @@ public:
 		std::vector<ModelVertex> vertices;
 		std::vector<uint32_t> indices;
 
+		Material mats;
 		Mesh(std::vector<ModelVertex>& vertices, std::vector<UINT>& indices)
 		{
 			this->vertices = vertices;
@@ -57,6 +69,8 @@ public:
 	void TraverseNode(const aiScene* scene, aiNode* node);
 
 	Mesh LoadMesh(const aiScene* scene, aiMesh* mesh);
+
+	std::vector<ModelMaterial> GetMaterials();
 
 	std::vector< ModelVertex> GetVertices();
 
