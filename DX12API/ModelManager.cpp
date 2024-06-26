@@ -84,11 +84,11 @@ Importer mImporter;
 			 localVertex.normal.y = 0.0f;
 			 localVertex.normal.z = 0.0f;
 		 }
-		 if (mesh->HasTangentsAndBitangents()) {
+	/*	 if (mesh->HasTangentsAndBitangents()) {
 			 localVertex.tangent.x = mesh->mTangents[i].x;
 			 localVertex.tangent.y = mesh->mTangents[i].y;
 			 localVertex.tangent.z = mesh->mTangents[i].z;
-		 }
+		 }*/
 		
 		
 		/* localVertex.tangent.x = mesh->mTangents[i].x;
@@ -112,9 +112,9 @@ Importer mImporter;
 			 + "Normal is " + std::to_string(localVertex.normal.x) + ' '
 			 + std::to_string(localVertex.normal.y) + ' '
 			 + std::to_string(localVertex.normal.z) + "\n\t\t\t\t\t"
-			 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
+		/*	 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
 			 + std::to_string(localVertex.tangent.y) + ' '
-			 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"
+			 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"*/
 			 + "Tex is " + std::to_string(localVertex.texCoord.x) + ' '
 			 + std::to_string(localVertex.texCoord.y);
 		 LOG(Info) << a;

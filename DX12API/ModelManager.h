@@ -23,9 +23,9 @@ struct ModelVertex
 	{
 		this->position = rhs.position;
 		this->normal = rhs.normal;
-		this->tangent = rhs.tangent;
+		//this->tangent = rhs.tangent;
 		this->texCoord = rhs.texCoord;
-		this->bitangent = rhs.bitangent;
+		//this->bitangent = rhs.bitangent;
 		
 	}
 	ModelVertex& operator= (ModelVertex& rhs)
@@ -37,8 +37,8 @@ struct ModelVertex
 
 	DirectX::XMFLOAT3 position;
 	DirectX::XMFLOAT3 normal;
-	DirectX::XMFLOAT3 tangent;
-	DirectX::XMFLOAT3 bitangent;
+	//DirectX::XMFLOAT3 tangent;
+	//DirectX::XMFLOAT3 bitangent;
 	DirectX::XMFLOAT2 texCoord;
 };
 struct ModelMaterial
