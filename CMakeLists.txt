@@ -17,7 +17,7 @@ set(USE_IMGUI ON)
 
 # 使用Assimp时设置为ON
 # 需要将解压的assimp文件夹内CMakeList.txt所在的全部文件复制到当前项目的Assimp文件夹内
-set(USE_ASSIMP  ON)
+set(USE_ASSIMP ON)
 
 # 设置C++标准为C++17
 set(CMAKE_CXX_STANDARD 17)
