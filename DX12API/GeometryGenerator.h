@@ -11,10 +11,10 @@ public:
 	using uint32= std::uint32_t;
 	//Vertex struct and constructors. Contains position,normal,TangentU and tex's variables
 	//顶点数据结构体及构造函数，包含位置(p)、法线(n)、切线空间(t)、纹理(uv)等数据
-	struct Vertex
+	struct GeoVertex
 	{
-		Vertex() {}
-		Vertex(
+		GeoVertex() {}
+		GeoVertex(
 			const DirectX::XMFLOAT3& p,
 			const DirectX::XMFLOAT3& n,
 			const DirectX::XMFLOAT3& t,
@@ -23,7 +23,7 @@ public:
 			Normal(n),
 			TangentU(t),
 			TexC(uv) {}
-		Vertex(
+		GeoVertex(
 			float px, float py, float pz,
 			float nx, float ny, float nz,
 			float tx, float ty, float tz,
@@ -41,7 +41,7 @@ public:
 	struct MeshData
 	{
 		//顶点数据
-		std::vector<Vertex> Vertices;
+		std::vector<GeoVertex> Vertices;
 		//索引数据
 		std::vector<uint32> Indices32;
 		//获取索引
@@ -106,7 +106,7 @@ private:
 	// 对输入的顶点数据进行细分
 	void Subdivide(MeshData& meshData);
 	// 计算中点
-	Vertex MidPoint(const Vertex& v0, const Vertex& v1);
+	GeoVertex MidPoint(const GeoVertex& v0, const GeoVertex& v1);
 	// 构建柱面的端面几何体
 	void BuildCylinderTopCap(float bottomRadius, float topRadius, float height, uint32 sliceCount, uint32 stackCount, MeshData& meshData);
 	// 构建柱面的底面几何体

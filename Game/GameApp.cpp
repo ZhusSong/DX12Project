@@ -31,7 +31,7 @@ bool GameApp::Init()
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     //mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
- 
+
 
 
     LoadTextures();
@@ -55,8 +55,8 @@ bool GameApp::Init()
     BuildFrameResources();
     BuildPSO();
 
-    
-   
+
+
     // Execute the initialization commands.
     // 执行初始化命令
     ThrowIfFailed(mCommandList->Close());
@@ -345,7 +345,7 @@ void GameApp::UpdateCamera(const DXGameTimer& gt)
 
     // Build the view matrix.
     // 构建观察矩阵
-    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
+    XMVECTOR pos = XMVectorSet(mEyePos.x+5.0f, mEyePos.y, mEyePos.z, 1.0f);
     XMVECTOR target = XMVectorZero();
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -573,7 +573,7 @@ void GameApp::LoadTextures()
         mCommandList.Get(), white1x1Tex->Filename.c_str(),
         white1x1Tex->Resource, white1x1Tex->UploadHeap));
 
-   
+
 
     mTextures[bricksTex->Name] = std::move(bricksTex);
     mTextures[checkboardTex->Name] = std::move(checkboardTex);
@@ -943,7 +943,7 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
+    ModelManager ModelTest("asset\\Models\\player.obj");
 
     auto ModelVertices = ModelTest.GetVertices();
     auto ModelIndices = ModelTest.GetIndices();
@@ -953,7 +953,7 @@ void GameApp::BuildModels()
     uint32_t ModelVertexOffset = 0;
     uint32_t ModelIndexOffset = 0;
 
-    SubmeshGeometry ModelDraw ;
+    SubmeshGeometry ModelDraw;
     ModelDraw.BaseVertexLocation = ModelVertexOffset;
     ModelDraw.IndexCount = (UINT)ModelIndices.size();
     ModelDraw.StartIndexLocation = ModelIndexOffset;
@@ -962,7 +962,7 @@ void GameApp::BuildModels()
     std::vector<ModelVertex> localVertices(totalVertexCount);
 
     uint32_t k = 0;
-    for (size_t i = 0; i < ModelVertices.size();++i,++k)
+    for (size_t i = 0; i < ModelVertices.size(); ++i, ++k)
     {
         localVertices[k].position = { ModelVertices[i].position.x  , ModelVertices[i].position.y, ModelVertices[i].position.z };
         localVertices[k].normal = ModelVertices[i].normal;
@@ -975,7 +975,7 @@ void GameApp::BuildModels()
     const uint32_t ibSize = (uint32_t)localIndices.size() * sizeof(uint32_t);
 
 
-    auto pModel = std::make_unique <MeshGeometry> ();
+    auto pModel = std::make_unique <MeshGeometry>();
     pModel->Name = "Player";
     pModel->VertexByteStride = sizeof(ModelVertex);
     pModel->VertexBufferByteSize = vbSize;
@@ -988,8 +988,8 @@ void GameApp::BuildModels()
     ThrowIfFailed(D3DCreateBlob(ibSize, &pModel->IndexBufferCPU));
     CopyMemory(pModel->IndexBufferCPU->GetBufferPointer(), localIndices.data(), ibSize);
 
-    pModel->VertexBufferGPU= d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-            mCommandList.Get(), localVertices.data(), vbSize, pModel->VertexBufferUploader);
+    pModel->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), localVertices.data(), vbSize, pModel->VertexBufferUploader);
     pModel->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
         mCommandList.Get(), localIndices.data(), ibSize, pModel->IndexBufferUploader);
 
@@ -1268,11 +1268,11 @@ void GameApp::BuildRenderItems()
     // 被反射的模型将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto reflectedSkullRitem = std::make_unique<RenderItem>();
     *reflectedSkullRitem = *skullRitem;
-    reflectedSkullRitem->ObjCBIndex =4;
+    reflectedSkullRitem->ObjCBIndex = 4;
     mReflectedSkullRitem = reflectedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedSkullRitem.get());
 
-  
+
 
     auto reflectedModelRitem = std::make_unique<RenderItem>();
     *reflectedModelRitem = *modelRitem;
@@ -1303,7 +1303,7 @@ void GameApp::BuildRenderItems()
     mRitemLayer[(int)RenderLayer::Transparent].push_back(mirrorRitem.get());
 
 
-  
+
 
     mAllRitems.push_back(std::move(floorRitem));
     mAllRitems.push_back(std::move(wallsRitem));
