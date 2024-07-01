@@ -1,5 +1,4 @@
 #include "GameApp.h"
-#include "ModelManager.h"
 const int gNumFrameResources = 3;
 
 
@@ -943,8 +942,9 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\player.obj");
+    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
 
+    localMat = ModelTest.GetMaterials()[0];
     auto ModelVertices = ModelTest.GetVertices();
     auto ModelIndices = ModelTest.GetIndices();
     assert(ModelVertices.size() > 0);
@@ -1196,13 +1196,15 @@ void GameApp::BuildMaterials()
     shadowMat->Roughness = 0.0f;
 
     // 创建模型材质
+    
+
     auto modelMat = std::make_unique<Material>();
     modelMat->Name = "playerMat";
     modelMat->MatCBIndex = 5;
-    modelMat->DiffuseSrvHeapIndex = 3;
-    modelMat->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    modelMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
-    modelMat->Roughness = 0.3f;
+    modelMat->DiffuseSrvHeapIndex = 2;
+    modelMat->DiffuseAlbedo =localMat.DiffuseAlbedo;
+    modelMat->FresnelR0 = localMat.FresnelR0;
+    modelMat->Roughness = localMat.Roughness;
 
     mMaterials["bricks"] = std::move(bricks);
     mMaterials["checkertile"] = std::move(checkertile);

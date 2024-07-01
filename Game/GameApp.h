@@ -15,6 +15,7 @@
 #include "GeometryGenerator.h"
 #include "Camera.h"
 #include "WinAPISetting.h"
+#include "ModelManager.h"
 
 #include"Wave.h"
 
@@ -224,6 +225,7 @@ private:
 
     std::shared_ptr<Camera> mCamera;
 
+   ModelMaterial localMat;
 };
 
 #endif

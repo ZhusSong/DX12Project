@@ -72,7 +72,10 @@ public:
 	Mesh LoadMesh(const aiScene* scene, aiMesh* mesh);
 	ModelMaterial LoadMaterial(const aiScene* scene, aiMesh* mesh);
 
-	std::vector<ModelMaterial> GetMaterials();
+	std::vector<ModelMaterial> GetMaterials()
+	{
+		return m_materials;
+	};
 
 	std::vector< ModelVertex> GetVertices();
 
