@@ -27,13 +27,6 @@
 
 #define MAX_OUTPUT_BUFFER_LEN 1024
 extern const int gNumFrameResources; 
-inline void d3dSetDebugName(IDXGIObject* obj, const char* name)
-{
-    if (obj)
-    {
-        obj->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
-    }
-}
 inline void d3dSetDebugName(ID3D12Device* obj, const char* name)
 {
     if (obj)
@@ -55,73 +48,7 @@ inline std::wstring AnsiToWString(const std::string& str)
     MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, buffer, 512);
     return std::wstring(buffer);
 }
-//
-//__inline void PrintfW(LPCWSTR pszFormat, ...)
-//{
-//    WCHAR pBuffer[MAX_OUTPUT_BUFFER_LEN] = {};
-//    size_t szStrLen = 0;
-//    va_list va;
-//    va_start(va, pszFormat);
-//    if (S_OK != ::StringCchVPrintfW(pBuffer, _countof(pBuffer), pszFormat, va))
-//    {
-//        va_end(va);
-//        return;
-//    }
-//    va_end(va);
-//
-//    StringCchLengthW(pBuffer, MAX_OUTPUT_BUFFER_LEN, &szStrLen);
-//
-//    (szStrLen > 0) ?
-//        WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), pBuffer, (DWORD)szStrLen, nullptr, nullptr)
-//        : 0;
-//}
-//__inline void PrintfA(LPCSTR pszFormat, ...)
-//{
-//    CHAR pBuffer[MAX_OUTPUT_BUFFER_LEN] = {};
-//    size_t szStrLen = 0;
-//
-//    va_list va;
-//    va_start(va, pszFormat);
-//    if (S_OK != ::StringCchVPrintfA(pBuffer, _countof(pBuffer), pszFormat, va))
-//    {
-//        va_end(va);
-//        return;
-//    }
-//    va_end(va);
-//
-//    StringCchLengthA(pBuffer, MAX_OUTPUT_BUFFER_LEN, &szStrLen);
-//
-//    (szStrLen > 0) ?
-//        WriteConsoleA(GetStdHandle(STD_OUTPUT_HANDLE), pBuffer, (DWORD)szStrLen, nullptr, nullptr)
-//        : 0;
-//}
-/*
-#if defined(_DEBUG)
-    #ifndef Assert
-    #define Assert(x, description)                                  \
-    {                                                               \
-        static bool ignoreAssert = false;                           \
-        if(!ignoreAssert && !(x))                                   \
-        {                                                           \
-            Debug::AssertResult result = Debug::ShowAssertDialog(   \
-            (L#x), description, AnsiToWString(__FILE__), __LINE__); \
-        if(result == Debug::AssertIgnore)                           \
-        {                                                           \
-            ignoreAssert = true;                                    \
-        }                                                           \
-                    else if(result == Debug::AssertBreak)           \
-        {                                                           \
-            __debugbreak();                                         \
-        }                                                           \
-        }                                                           \
-    }
-    #endif
-#else
-    #ifndef Assert
-    #define Assert(x, description)
-    #endif
-#endif
-    */
+
 
 class d3dUtil
 {

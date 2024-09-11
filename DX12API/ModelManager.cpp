@@ -14,20 +14,22 @@ ModelManager::ModelManager(const std::string& path)
 		// 三角化网格的所有面
 		aiProcess_Triangulate |
 		aiProcess_GenBoundingBoxes |
+		//aiProcess_GenNormals|
 		// Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
 		aiProcess_ConvertToLeftHanded |
 		// This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
 		aiProcessPreset_TargetRealtime_MaxQuality |
+		
 		//// Calculates the tangents and bitangents for the imported meshes
-		//aiProcess_CalcTangentSpace |
+		//aiProcess_CalcTangentSpace 
 		//// Splits large meshes into smaller sub-meshes
 		//// This is quite useful for real-time rendering, 
 		//// where the number of triangles which can be maximally processed in a single draw - call is limited by the video driver / hardware
-		//aiProcess_SplitLargeMeshes |
+		//aiProcess_SplitLargeMeshes 
 		//// A postprocessing step to reduce the number of meshes
-		aiProcess_OptimizeMeshes |
-		aiProcess_SortByPType |
-		//// A postprocessing step to optimize the scene hierarchy
+		//aiProcess_OptimizeMeshes 
+		//aiProcess_SortByPType 
+		// A postprocessing step to optimize the scene hierarchy
 		aiProcess_OptimizeGraph
 	);
 	if (pLocalScene == nullptr || pLocalScene->mRootNode == nullptr)
