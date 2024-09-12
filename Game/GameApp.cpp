@@ -942,7 +942,7 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
+    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
 
     localMat = ModelTest.GetMaterials()[0];
     auto ModelVertices = ModelTest.GetVertices();
