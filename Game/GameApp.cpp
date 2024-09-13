@@ -964,7 +964,7 @@ void GameApp::BuildModels()
     uint32_t k = 0;
     for (size_t i = 0; i < ModelVertices.size(); ++i, ++k)
     {
-        localVertices[k].position = { ModelVertices[i].position.x  , ModelVertices[i].position.y, ModelVertices[i].position.z };
+        localVertices[k].position = { ModelVertices[i].position.x/20  , ModelVertices[i].position.y / 20 , ModelVertices[i].position.z / 20 };
         localVertices[k].normal = ModelVertices[i].normal;
         localVertices[k].texCoord = ModelVertices[i].texCoord;
     }

@@ -86,17 +86,17 @@ ModelMaterial ModelManager::LoadMaterial(const aiScene* scene, aiMesh* mesh)
 		localMaterial.Roughness = 1.0f - shininess / 100.0f; // Assuming AI_MATKEY_SHININESS is in range [0, 100]
 	}
 
-	std::string a = "DiffuseAlbedo is " + std::to_string(localMaterial.DiffuseAlbedo.x) + ' '
-		+ std::to_string(localMaterial.DiffuseAlbedo.y) + ' '
-		+ std::to_string(localMaterial.DiffuseAlbedo.z) + "\n\t\t\t\t\t"
-		+ "FresnelR0  is " + std::to_string(localMaterial.FresnelR0.x) + ' '
-		+ std::to_string(localMaterial.FresnelR0.y) + ' '
-		+ std::to_string(localMaterial.FresnelR0.z) + "\n\t\t\t\t\t"
-		/*	 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
-			 + std::to_string(localVertex.tangent.y) + ' '
-			 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"*/
-		+"Roughness  is " + std::to_string(localMaterial.Roughness);
-	LOG(Info) << a;
+	//std::string a = "DiffuseAlbedo is " + std::to_string(localMaterial.DiffuseAlbedo.x) + ' '
+	//	+ std::to_string(localMaterial.DiffuseAlbedo.y) + ' '
+	//	+ std::to_string(localMaterial.DiffuseAlbedo.z) + "\n\t\t\t\t\t"
+	//	+ "FresnelR0  is " + std::to_string(localMaterial.FresnelR0.x) + ' '
+	//	+ std::to_string(localMaterial.FresnelR0.y) + ' '
+	//	+ std::to_string(localMaterial.FresnelR0.z) + "\n\t\t\t\t\t"
+	//	/*	 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
+	//		 + std::to_string(localVertex.tangent.y) + ' '
+	//		 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"*/
+	//	+"Roughness  is " + std::to_string(localMaterial.Roughness);
+	//LOG(Info) << a;
 
 	return localMaterial;
 }
