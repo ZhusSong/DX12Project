@@ -21,6 +21,7 @@
 #include <iostream>
 #include <strsafe.h>
 #include "d3dx12.h"
+#include "WICTextureLoader12.h"
 #include "DDSTextureLoader.h"
 #include "MathHelper.h"
 #include "d3dDebugLogger.h"

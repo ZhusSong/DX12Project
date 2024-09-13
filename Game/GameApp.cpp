@@ -551,6 +551,13 @@ void GameApp::LoadTextures()
         mCommandList.Get(), bricksTex->Filename.c_str(),
         bricksTex->Resource, bricksTex->UploadHeap));
 
+ /*   auto WicTest = std::make_unique<Texture>();
+    WicTest->Name = "TestTex";
+    WicTest->Filename = L"asset\\WICTest_01.jpg";
+    ThrowIfFailed(DirectX::LoadWICTextureFromFile(md3dDevice.Get(),
+        mCommandList.Get(), WicTest->WicTest.c_str(),
+        WicTest->Resource, WicTest->UploadHeap));*/
+
     auto checkboardTex = std::make_unique<Texture>();
     checkboardTex->Name = "checkboardTex";
     checkboardTex->Filename = L"asset\\checkboard.dds";
@@ -578,6 +585,7 @@ void GameApp::LoadTextures()
     mTextures[checkboardTex->Name] = std::move(checkboardTex);
     mTextures[iceTex->Name] = std::move(iceTex);
     mTextures[white1x1Tex->Name] = std::move(white1x1Tex);
+    mTextures[WicTest->Name] = std::move(WicTest);
 }
 
 void GameApp::BuildRootSignature()
