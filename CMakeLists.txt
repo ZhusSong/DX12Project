@@ -173,6 +173,8 @@ DX12API/Camera.h
 DX12API/TextureLoader/DDSTextureLoader.h
 DX12API/TextureLoader/WICTextureLoader12.cpp
 DX12API/TextureLoader/WICTextureLoader12.h
+DX12API/TextureLoader/TextureData.cpp
+DX12API/TextureLoader/TextureData.h
  )
  #HLSL文件分组
  source_group(HLSL FILES ${HLSL_Files})
