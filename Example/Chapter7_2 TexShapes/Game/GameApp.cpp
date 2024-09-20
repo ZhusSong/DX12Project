@@ -505,7 +505,7 @@ void GameApp::LoadTextures()
 {
     auto brickTex = std::make_unique<Texture>();
     brickTex->Name = "brickTex";
-    brickTex->Filename = L"asset\\bricks.dds";
+    brickTex->Filename = L"asset\\brick.dds";
     ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
         mCommandList.Get(), brickTex->Filename.c_str(),
         brickTex->Resource, brickTex->UploadHeap));

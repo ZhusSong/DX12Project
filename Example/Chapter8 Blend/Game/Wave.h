@@ -39,6 +39,7 @@ public:
     const DirectX::XMFLOAT3& TangentX(int i)const { return mTangentX[i]; }
 
     void Update(float dt);
+    //根据方程计算高度
     void Disturb(int i, int j, float magnitude);
 
 private:

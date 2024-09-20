@@ -241,7 +241,18 @@ void GameApp::OnMouseMove()
         // Restrict the angle mPhi.
         mPhi = MathHelper::Clamp(mPhi, 0.1f, MathHelper::Pi - 0.1f);
     }
-  
+    else if (ImGui::IsMouseDragging(ImGuiMouseButton_Right))
+    {
+        // Make each pixel correspond to 0.2 unit in the scene.
+        float dx = 0.2f * static_cast<float>(ImGui::GetIO().MousePos.x - mLastMousePos.x);
+        float dy = 0.2f * static_cast<float>(ImGui::GetIO().MousePos.y - mLastMousePos.y);
+
+        // Update the camera radius based on input.
+        mRadius += dx - dy;
+
+        // Restrict the radius.
+        mRadius = MathHelper::Clamp(mRadius, 5.0f, 150.0f);
+    }
 
     mLastMousePos.x = ImGui::GetIO().MousePos.x;
     mLastMousePos.y = ImGui::GetIO().MousePos.y;
@@ -251,17 +262,17 @@ void GameApp::OnMouseMove()
 
 void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
 {
-  /*  const float dt = gt.GetDeltaTime();
-    if (ImGui::IsKeyDown(ImGuiKey_LeftArrow))
-        mSunTheta -= 1.0f * dt;
-    if (ImGui::IsKeyDown(ImGuiKey_RightArrow))
-        mSunTheta += 1.0f * dt;
-    if (ImGui::IsKeyDown(ImGuiKey_UpArrow))
-        mSunPhi-= 1.0f * dt;
-    if (ImGui::IsKeyDown(ImGuiKey_DownArrow))
-        mSunPhi += 1.0f * dt;
+    const float dt = gt.GetDeltaTime();
+    if (ImGui::IsKeyDown(ImGuiKey_W))
+        mLastMousePos.y +=1* dt;
+    if (ImGui::IsKeyDown(ImGuiKey_A))
+        mLastMousePos.x += 1 * dt;
+    if (ImGui::IsKeyDown(ImGuiKey_S))
+        mLastMousePos.y -= 1 * dt;
+    if (ImGui::IsKeyDown(ImGuiKey_D))
+        mLastMousePos.x -= 1 * dt;
 
-    mSunPhi = MathHelper::Clamp(mSunPhi, 0.1f, XM_PIDIV2);*/
+    //mSunPhi = MathHelper::Clamp(mSunPhi, 0.1f, XM_PIDIV2);
 }
 void GameApp::UpdateCamera(const DXGameTimer& gt)
 {	
@@ -416,7 +427,8 @@ void GameApp::UpdateWaves(const DXGameTimer& gt)
 {
     // Every quarter second, generate a random wave.
     static float t_base = 0.0f;
-    if ((mTimer.GetTotalTime() - t_base) >= 0.25f)
+    //if ((mTimer.GetTotalTime() - t_base) >= 0.25f)
+        if (ImGui::IsKeyDown(ImGuiKey_Space))
     {
         t_base += 0.25f;
 
@@ -679,7 +691,7 @@ void GameApp::BuildLandGeometry()
     {
         auto& p = grid.Vertices[i].Position;
         vertices[i].Pos = p;
-        vertices[i].Pos.y = GetHillsHeight(p.x, p.z);
+        vertices[i].Pos.y = GetHillsHeight(p.x, p.z)-1.5f;
         vertices[i].Normal = GetHillsNormal(p.x, p.z);
         vertices[i].TexC = grid.Vertices[i].TexC;
     }
@@ -1234,7 +1246,7 @@ void GameApp::AnimateMaterials(const DXGameTimer& gt)
 
 float GameApp::GetHillsHeight(float x, float z)const
 {
-    return 0.3f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
+    return 0.01f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
 }
 
 XMFLOAT3 GameApp::GetHillsNormal(float x, float z)const

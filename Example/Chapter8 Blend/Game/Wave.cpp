@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include<MathHelper.h>
 Waves::Waves(int m, int n, float dx, float dt, float speed, float damping)
 {
     mNumRows = m;
@@ -167,7 +168,7 @@ void  Waves::Disturb(int i, int j, float magnitude)
     assert(i > 1 && i < mNumRows - 2);
     assert(j > 1 && j < mNumCols - 2);
 
-    float halfMag = 0.5f * magnitude;
+    float halfMag =MathHelper::RandF(0.1f,2.0f) * magnitude;
 
     // Disturb the ijth vertex height and its neighbors.
 	// 

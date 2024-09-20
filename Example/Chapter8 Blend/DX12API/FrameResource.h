@@ -42,8 +42,8 @@ struct PassConstants
 
 	DirectX::XMFLOAT4 FogColor = { 0.7f, 0.7f, 0.7f, 1.0f };
 	// 雾气的起始点与范围
-	float gFogStart = 5.0f;
-	float gFogRange = 150.0f;
+	float gFogStart = 55.0f;
+	float gFogRange = 250.0f;
 	DirectX::XMFLOAT2 cbPerObjectPad2;
 
 	Light Lights[MaxLights];
