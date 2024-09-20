@@ -31,7 +31,8 @@
 
 /.vs/
 /x64/
-/out/
+/out
+/Example/*/out
 /assimp
 /d3d12book-master
 /ReferCodes
