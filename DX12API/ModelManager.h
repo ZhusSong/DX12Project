@@ -3,7 +3,6 @@
 #ifndef MODEL_MANAGER_H
 #define MODEL_MANAGER_H
 // 模型读取相关
-#include <d3d11_1.h>
 #include <wrl/client.h>
 #include <filesystem>
 #include <DirectXMath.h>
@@ -14,80 +13,118 @@
 #include "assimp/mesh.h"
 #include "assimp/texture.h"
 
+#include "d3dUtil.h"
+#include "TextureData.h"
+#include "SkinnedData.h"
 
-#define ASSIMP_LOAD_FLAGS 0
-
-struct ModelVertex
+// 材质信息
+struct MaterialInfo 
 {
-	ModelVertex() = default;
-	ModelVertex(const ModelVertex& rhs)
-	{
-		this->position = rhs.position;
-		this->normal = rhs.normal;
-		aiColor4D color=rhs.color;
-		this->tangent = rhs.tangent;
-		this->texCoord = rhs.texCoord;
-		//this->bitangent = rhs.bitangent;
-
-	}
-	ModelVertex& operator= (ModelVertex& rhs)
-	{
-		return rhs;
-	}
-
-	ModelVertex(ModelVertex&& rhs) = default;
-
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 normal;
-	aiColor4D color;
-	DirectX::XMFLOAT3 tangent;
-	//DirectX::XMFLOAT3 bitangent;
-	DirectX::XMFLOAT2 texCoord;
+	// 默认材质
+	UINT diffuseMaps;
 };
-struct ModelMaterial
+
+// 渲染信息
+struct RenderInfo
 {
-	DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
-	float Roughness = 0.25f;
+	std::vector<SkinnedData> vertices;
+};
+class Mesh
+{
+public:
+	std::vector<SkinnedVertex> vertices;
+	std::vector<UINT> indices;
+	UINT materialIndex;
+
+	Mesh(std::vector<SkinnedVertex> vertices, std::vector<UINT> indices, UINT materialIndex) {
+		this->vertices = vertices;
+		this->indices = indices;
+		this->materialIndex = materialIndex;
+	}
 };
 class ModelManager
 {
 public:
-	struct Mesh
+	struct BoneData
 	{
-		Mesh() = default;
-		std::vector<ModelVertex> vertices;
-		std::vector<uint32_t> indices;
-
-		//Material mats;
-		Mesh(std::vector<ModelVertex>& vertices, std::vector<UINT>& indices)
+		UINT boneIndex[NUM_BONES_PER_VERTEX];
+		float weights[NUM_BONES_PER_VERTEX];
+		void Add(UINT boneID,float weight)
 		{
-			this->vertices = vertices;
-			this->indices = indices;
+			for (size_t i = 0; i < NUM_BONES_PER_VERTEX; i++)
+			{
+				if (weights[i] == 0.0f)
+				{
+					boneIndex[i] = boneID;
+					weights[i] = weight;
+					return;
+				}
+			}
 		}
 	};
 
-	ModelManager(const std::string& path);
-
-	void TraverseNode(const aiScene* scene, aiNode* node);
-
-	Mesh LoadMesh(const aiScene* scene, aiMesh* mesh);
-	ModelMaterial LoadMaterial(const aiScene* scene, aiMesh* mesh);
-
-	std::vector<ModelMaterial> GetMaterials()
+	struct BoneInfo
 	{
-		return m_materials;
+		bool isSkinned = false;
+		DirectX::XMFLOAT4X4 boneOffset;
+		DirectX::XMFLOAT4X4 defaultOffset;
+		int parentIndex;
 	};
 
-	std::vector< ModelVertex> GetVertices();
 
-	std::vector<uint32_t> GetIndices();
+	ModelManager(const std::string path);
+	std::vector<Mesh> meshes;
+	std::vector<MaterialInfo> materials;
+	std::vector<RenderInfo> renderInfo;
+	std::vector<Texture> textureInfo;
+
+
+	void GetBoneMapping(std::unordered_map<std::string, UINT>& boneMapping) 
+	{
+		boneMapping = this->boneMapping;
+	}
+	void GetBoneOffsets(std::vector<DirectX::XMFLOAT4X4>& boneOffsets) 
+	{
+		for (size_t i = 0; i < boneInfo.size(); i++)
+			boneOffsets.push_back(boneInfo[i].boneOffset);
+	}
+
+	void GetNodeOffsets(std::vector<DirectX::XMFLOAT4X4>& nodeOffsets) 
+	{
+		for (size_t i = 0; i < boneInfo.size(); i++)
+			nodeOffsets.push_back(boneInfo[i].defaultOffset);
+	}
+	void GetBoneHierarchy(std::vector<int>& boneHierarchy) 
+	{
+		for (size_t i = 0; i < boneInfo.size(); i++)
+			boneHierarchy.push_back(boneInfo[i].parentIndex);
+	}
+	void GetAnimations(std::unordered_map<std::string, AnimationClip>& animations) 
+	{
+		animations.insert(this->animations.begin(), this->animations.end());
+	}
+	void LoadTexturesFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
 
 private:
 	std::string directory;
-	std::vector<Mesh> m_meshs;
-	std::vector<ModelMaterial> m_materials;
+	std::vector<std::string> texturePath;
 
+	void ProcessNode(const aiScene* scene, aiNode* node);
+	Mesh ProcessMesh(const aiScene* scene, aiMesh* mesh);
+	UINT SetupMaterial(std::vector<UINT> diffuseMaps);
+	void SetupRenderInfo();
+	std::vector<UINT> LoadMaterialTextures(aiMaterial* mat, aiTextureType type);
 
+	//Bone/Animation Information
+	std::vector<BoneInfo> boneInfo;
+	std::unordered_map<std::string, UINT> boneMapping;
+	std::unordered_map<std::string, AnimationClip> animations;
+
+	void LoadBones(const aiMesh* mesh, std::vector<BoneData>& bones);
+	void ReadNodeHierarchy(const aiNode* node, int parentIndex);
+	void LoadAnimations(const aiScene* scene);
 };
+
+bool CompareMaterial(MaterialInfo dest, MaterialInfo source);
+wchar_t* StringToWideChar(const std::string& str);
 #endif

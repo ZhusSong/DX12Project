@@ -4,7 +4,7 @@
 #define  SKINNEDDATA_H
 #include "d3dUtil.h"
 
-// ¶¯»­¹Ø¼üÖ¡
+// ï½¶ï½¯ï½»ï½­ï½¹ï¾˜ï½¼ãƒ»ï½¡
 struct VectorKey {
 	float TimePos;
 	DirectX::XMFLOAT3 Value;

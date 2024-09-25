@@ -1,10 +1,9 @@
 #include "ModelManager.h"
-#include "d3dUtil.h"
 
 using namespace Assimp;
 Importer mImporter;
 
-ModelManager::ModelManager(const std::string& path)
+ModelManager::ModelManager(std::string path)
 {
 	initLogger("Logs/LogFile.txt", "Logs/WarningFile.txt", "Logs/ErrorFile.txt");
 
@@ -14,7 +13,7 @@ ModelManager::ModelManager(const std::string& path)
 		// 三角化网格的所有面
 		aiProcess_Triangulate |
 		aiProcess_GenBoundingBoxes |
-		//aiProcess_GenNormals|
+		aiProcess_GenNormals|
 		// Supersedes the aiProcess_MakeLeftHanded and aiProcess_FlipUVs and aiProcess_FlipWindingOrder flags
 		aiProcess_ConvertToLeftHanded |
 		// This preset enables almost every optimization step to achieve perfectly optimized data. In D3D, need combine with aiProcess_ConvertToLeftHanded
@@ -43,27 +42,28 @@ ModelManager::ModelManager(const std::string& path)
 		//PrintfA("无法解析文件(%s)：%s (%d)\n", path, mImporter.GetErrorString(), ::GetLastError());
 		std::cout << "ERROR::ASSIMP::" << mImporter.GetErrorString() << std::endl;
 	}
-
-	directory = path.substr(0, path.find_last_of('/'));
-	TraverseNode(pLocalScene, pLocalScene->mRootNode);
+	directory = path.substr(0, path.find_last_of('\\')) + '\\';
+	ReadNodeHierarchy(pLocalScene->mRootNode, -1);
+	ProcessNode(pLocalScene, pLocalScene->mRootNode);
+	SetupRenderInfo();
+	LoadAnimations(pLocalScene);
 }
 
-void ModelManager::TraverseNode(const aiScene* scene, aiNode* node)
+void ModelManager::ProcessNode(const aiScene* scene, aiNode* node)
 {
 	// load mesh
-	for (UINT i = 0; i < node->mNumMeshes; ++i)
+	for (UINT i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* pLocalMesh = scene->mMeshes[node->mMeshes[i]];
-		m_materials.push_back(LoadMaterial(scene, pLocalMesh));
-		m_meshs.push_back(LoadMesh(scene, pLocalMesh));
+		meshes.push_back(ProcessMesh(scene, pLocalMesh));
 	}
 	// traverse child node
 	for (UINT i = 0; i < node->mNumChildren; ++i)
 	{
-		TraverseNode(scene, node->mChildren[i]);
+		ProcessNode(scene, node->mChildren[i]);
 	}
 }
-ModelMaterial ModelManager::LoadMaterial(const aiScene* scene, aiMesh* mesh)
+Mesh ModelManager::ProcessMesh(const aiScene* scene, aiMesh* mesh)
 {
 	ModelMaterial localMaterial;
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];

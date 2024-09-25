@@ -573,31 +573,30 @@ void GameApp::LoadTextures()
         white1x1Tex->Resource, white1x1Tex->UploadHeap));
 
     //WIC贴图读取
-    auto WicTest = std::make_unique<Texture>();
-    WicTest->Name = "TestTex";
-    WicTest->Filename = L"asset\\WICTest_01.jpg";
-    std::unique_ptr<uint8_t[]> wicData;
-    D3D12_SUBRESOURCE_DATA subresouceData;
-    ThrowIfFailed(DirectX::LoadWICTextureFromFile(md3dDevice.Get(),
-        WicTest->Filename.c_str(), WicTest->Resource.ReleaseAndGetAddressOf(), wicData, subresouceData));
-    //转译WIC贴图的资源
-    D3D12_RESOURCE_DESC texDesc = WicTest->Resource->GetDesc();
-    const UINT64 uploadBufferSize = GetRequiredIntermediateSize(WicTest->Resource.Get(), 0, 1);
+    //auto WicTest = std::make_unique<Texture>();
+    //WicTest->Name = "TestTex";
+    //WicTest->Filename = L"asset\\WICTest_01.jpg";
+    //std::unique_ptr<uint8_t[]> wicData;
+    //D3D12_SUBRESOURCE_DATA subresouceData;
+    //ThrowIfFailed(DirectX::LoadWICTextureFromFile(md3dDevice.Get(),
+    //    WicTest->Filename.c_str(), WicTest->Resource.ReleaseAndGetAddressOf(), wicData, subresouceData));
+    ////转译WIC贴图的资源
+    //D3D12_RESOURCE_DESC texDesc = WicTest->Resource->GetDesc();
+    //const UINT64 uploadBufferSize = GetRequiredIntermediateSize(WicTest->Resource.Get(), 0, 1);
 
-    CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+   /* CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
     CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
     md3dDevice->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&WicTest->UploadHeap));
     UpdateSubresources(mCommandList.Get(), WicTest->Resource.Get(), WicTest->UploadHeap.Get(), 0, 0, 1, &subresouceData);
 
-    CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(WicTest->Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
+    CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(WicTest->Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);*/
 
 
     mTextures[bricksTex->Name] = std::move(bricksTex);
     mTextures[checkboardTex->Name] = std::move(checkboardTex);
     mTextures[iceTex->Name] = std::move(iceTex);
     mTextures[white1x1Tex->Name] = std::move(white1x1Tex);
-    mTextures[WicTest->Name] = std::move(WicTest);
+    //mTextures[WicTest->Name] = std::move(WicTest);
 }
 
 void GameApp::BuildRootSignature()
@@ -659,7 +658,7 @@ void GameApp::BuildDescriptorHeaps()
     // 创建SRV描述符堆
     D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
     // 描述符数量与需渲染物体贴图数对应
-    srvHeapDesc.NumDescriptors = 5;
+    srvHeapDesc.NumDescriptors = 4;
     srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&mSrvDescriptorHeap)));
@@ -673,7 +672,7 @@ void GameApp::BuildDescriptorHeaps()
     auto checkboardTex = mTextures["checkboardTex"]->Resource;
     auto iceTex = mTextures["iceTex"]->Resource;
     auto white1x1Tex = mTextures["white1x1Tex"]->Resource;
-    auto WicTex = mTextures["WicTest"]->Resource;
+    //auto WicTex = mTextures["WicTest"]->Resource;
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -700,9 +699,9 @@ void GameApp::BuildDescriptorHeaps()
     srvDesc.Format = white1x1Tex->GetDesc().Format;
     md3dDevice->CreateShaderResourceView(white1x1Tex.Get(), &srvDesc, hDescriptor);
 
-    hDescriptor.Offset(1, mCbvSrvDescriptorSize);
+ /*   hDescriptor.Offset(1, mCbvSrvDescriptorSize);
     srvDesc.Format = WicTex->GetDesc().Format;
-    md3dDevice->CreateShaderResourceView(WicTex.Get(), &srvDesc, hDescriptor);
+    md3dDevice->CreateShaderResourceView(WicTex.Get(), &srvDesc, hDescriptor);*/
 }
 
 void GameApp::BuildShadersAndInputLayout()

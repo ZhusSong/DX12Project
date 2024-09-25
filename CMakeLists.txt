@@ -149,6 +149,8 @@ DX12API/Camera.h
  DX12API/GeometryGenerator.h
  DX12API/ModelManager.cpp
  DX12API/ModelManager.h
+ DX12API/SkinnedData.cpp
+ DX12API/SkinnedData.h
  )
  
  #帧资源处理
