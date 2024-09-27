@@ -178,11 +178,11 @@ struct SkinnedConstants
 
 // 材质常量数据
 struct MaterialConstants {
-    DirectX::XMFLOAT4 diffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-    DirectX::XMFLOAT3 fresnelR0 = { 0.01f, 0.01f, 0.01f };
-    float roughness = 0.25f;
+    DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
+    float Roughness = 0.25f;
 
-    DirectX::XMFLOAT4X4 matTransform = {
+    DirectX::XMFLOAT4X4 MatTransform = {
         1.0f, 0.0f, 0.0f, 0.0f,
         0.0f, 1.0f, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
@@ -206,10 +206,10 @@ struct Vertex
 // 蒙皮的顶点数据
 struct SkinnedVertex
 {
-    DirectX::XMFLOAT3 position;
-    DirectX::XMFLOAT2 texCoord;
-    DirectX::XMFLOAT3 normal;
-    DirectX::XMFLOAT3 boneWeights;
+    DirectX::XMFLOAT3 Position;
+    DirectX::XMFLOAT2 TexCoord;
+    DirectX::XMFLOAT3 Normal;
+    DirectX::XMFLOAT3 BoneWeights;
     // 每一块骨骼的顶点索引
     BYTE boneIndices[NUM_BONES_PER_VERTEX];
 

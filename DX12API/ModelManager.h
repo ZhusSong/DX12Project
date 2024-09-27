@@ -28,6 +28,7 @@ struct MaterialInfo
 struct RenderInfo
 {
 	std::vector<SkinnedData> vertices;
+	std::vector<UINT> indices;
 };
 class Mesh
 {
@@ -76,7 +77,7 @@ public:
 	std::vector<Mesh> meshes;
 	std::vector<MaterialInfo> materials;
 	std::vector<RenderInfo> renderInfo;
-	std::vector<Texture> textureInfo;
+	std::vector<TextureData > textureHasLoaded;
 
 
 	void GetBoneMapping(std::unordered_map<std::string, UINT>& boneMapping) 

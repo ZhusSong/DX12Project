@@ -65,148 +65,252 @@ void ModelManager::ProcessNode(const aiScene* scene, aiNode* node)
 }
 Mesh ModelManager::ProcessMesh(const aiScene* scene, aiMesh* mesh)
 {
-	ModelMaterial localMaterial;
-	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	std::vector<SkinnedVertex> localVertices;
+	std::vector<UINT> localIndices;
 
-	aiColor3D diffuseColor;
-	if (material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor) == AI_SUCCESS)
-	{
-		localMaterial.DiffuseAlbedo = DirectX::XMFLOAT4(diffuseColor.r, diffuseColor.g, diffuseColor.b, 1.0f);
+	std::vector<BoneData> localVertexBoneData(mesh->mNumVertices);
+	LoadBones(mesh, localVertexBoneData);
+
+
+	for (size_t i = 0; i < mesh->mNumVertices; i++) {
+		SkinnedVertex vertex;
+		vertex.position.x = mesh->mVertices[i].x;
+		vertex.position.y = mesh->mVertices[i].y;
+		vertex.position.z = mesh->mVertices[i].z;
+
+		vertex.normal.x = mesh->mNormals[i].x;
+		vertex.normal.y = mesh->mNormals[i].y;
+		vertex.normal.z = mesh->mNormals[i].z;
+
+		if (mesh->mTextureCoords[0]) {
+			vertex.texCoord.x = mesh->mTextureCoords[0][i].x;
+			vertex.texCoord.y = mesh->mTextureCoords[0][i].y;
+		}
+		else {
+			vertex.texCoord = { 0.0f, 0.0f };
+		}
+		vertex.boneWeights.x = localVertexBoneData[i].weights[0];
+		vertex.boneWeights.y = localVertexBoneData[i].weights[1];
+		vertex.boneWeights.z = localVertexBoneData[i].weights[2];
+
+		for (size_t j = 0; j < NUM_BONES_PER_VERTEX; j++)
+			vertex.boneIndices[j] = localVertexBoneData[i].boneIndex[j];
+
+		localVertices.push_back(vertex);
 	}
 
-	aiColor3D specularColor;
-	if (material->Get(AI_MATKEY_COLOR_SPECULAR, specularColor) == AI_SUCCESS)
-	{
-		localMaterial.FresnelR0 = DirectX::XMFLOAT3(specularColor.r, specularColor.g, specularColor.b);
-	}
-	float shininess;
-	if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS)
-	{
-		// Convert shininess to roughness (assuming roughness = 1 - shininess)
-		localMaterial.Roughness = 1.0f - shininess / 100.0f; // Assuming AI_MATKEY_SHININESS is in range [0, 100]
+	for (size_t i = 0; i < mesh->mNumFaces; i++) {
+		aiFace face = mesh->mFaces[i];
+		for (size_t j = 0; j < face.mNumIndices; j++)
+			localIndices.push_back(face.mIndices[j]);
 	}
 
-	//std::string a = "DiffuseAlbedo is " + std::to_string(localMaterial.DiffuseAlbedo.x) + ' '
-	//	+ std::to_string(localMaterial.DiffuseAlbedo.y) + ' '
-	//	+ std::to_string(localMaterial.DiffuseAlbedo.z) + "\n\t\t\t\t\t"
-	//	+ "FresnelR0  is " + std::to_string(localMaterial.FresnelR0.x) + ' '
-	//	+ std::to_string(localMaterial.FresnelR0.y) + ' '
-	//	+ std::to_string(localMaterial.FresnelR0.z) + "\n\t\t\t\t\t"
-	//	/*	 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
-	//		 + std::to_string(localVertex.tangent.y) + ' '
-	//		 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"*/
-	//	+"Roughness  is " + std::to_string(localMaterial.Roughness);
-	//LOG(Info) << a;
+	std::vector<UINT> diffuseMaps;
+	if (mesh->mMaterialIndex >= 0) {
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE);
+	}
+	UINT materialIndex = SetupMaterial(diffuseMaps);
 
-	return localMaterial;
+	return Mesh(localVertices, localIndices, materialIndex);
 }
-ModelManager::Mesh ModelManager::LoadMesh(const aiScene* scene, aiMesh* mesh)
-{
-	std::vector<ModelVertex> localVertices;
-	std::vector<uint32_t> localIndices;
 
-	// process vertex position, normal, tangent, texture coordinates
-	for (UINT i = 0; i < mesh->mNumVertices; ++i)
-	{
-		ModelVertex localVertex;
+void ModelManager::LoadBones(const aiMesh* mesh, std::vector<BoneData>& boneData) {
+	for (size_t i = 0; i < mesh->mNumBones; i++) {
+		UINT boneIndex = 0;
+		std::string boneName(mesh->mBones[i]->mName.C_Str());
 
-		localVertex.position.x = mesh->mVertices[i].x;
-		localVertex.position.y = mesh->mVertices[i].y;
-		localVertex.position.z = mesh->mVertices[i].z;
-
-		//PrintfW(L"Positions[%u]:\n", localVertex.position);
-
-		if (mesh->HasNormals()) {
-			localVertex.normal.x = mesh->mNormals[i].x;
-			localVertex.normal.y = mesh->mNormals[i].y;
-			localVertex.normal.z = mesh->mNormals[i].z;
+		if (boneMapping.find(boneName) == boneMapping.end()) {
+			//insert error program
+			MessageBox(NULL, L"cannot find node", NULL, NULL);
 		}
 		else
-		{
-			localVertex.normal.x = 0.0f;
-			localVertex.normal.y = 0.0f;
-			localVertex.normal.z = 0.0f;
-		}
-		/*	 if (mesh->HasTangentsAndBitangents()) {
-				 localVertex.tangent.x = mesh->mTangents[i].x;
-				 localVertex.tangent.y = mesh->mTangents[i].y;
-				 localVertex.tangent.z = mesh->mTangents[i].z;
-			 }*/
+			boneIndex = boneMapping[boneName];
 
+		boneMapping[boneName] = boneIndex;
 
-			 /* localVertex.tangent.x = mesh->mTangents[i].x;
-			  localVertex.tangent.y = mesh->mTangents[i].y;
-			  localVertex.tangent.z = mesh->mTangents[i].z;*/
-
-			  // assimp allow one model have 8 different texture coordinates in one vertex, but we just care first texture coordinates because we will not use so many
-		if (mesh->mTextureCoords[0])
-		{
-			localVertex.texCoord.x = mesh->mTextureCoords[0][i].x;
-			localVertex.texCoord.y = mesh->mTextureCoords[0][i].y;
-		}
-		else
-		{
-			localVertex.texCoord = DirectX::XMFLOAT2(0.0f, 0.0f);
+		if (!boneInfo[boneIndex].isSkinned) {
+			aiMatrix4x4 offsetMatrix = mesh->mBones[i]->mOffsetMatrix;
+			boneInfo[boneIndex].boneOffset = {
+				offsetMatrix.a1, offsetMatrix.b1, offsetMatrix.c1, offsetMatrix.d1,
+				offsetMatrix.a2, offsetMatrix.b2, offsetMatrix.c2, offsetMatrix.d2,
+				offsetMatrix.a3, offsetMatrix.b3, offsetMatrix.c3, offsetMatrix.d3,
+				offsetMatrix.a4, offsetMatrix.b4, offsetMatrix.c4, offsetMatrix.d4
+			};
+			boneInfo[boneIndex].isSkinned = true;
 		}
 
-		 std::string a = "Vertex is " + std::to_string(localVertex.position.x) + ' '
-			 + std::to_string(localVertex.position.y) + ' '
-			 + std::to_string(localVertex.position.z) + "\n\t\t\t\t\t"
-			 + "Normal is " + std::to_string(localVertex.normal.x) + ' '
-			 + std::to_string(localVertex.normal.y) + ' '
-			 + std::to_string(localVertex.normal.z) + "\n\t\t\t\t\t"
-		/*	 + "Tangent is " + std::to_string(localVertex.tangent.x) + ' '
-			 + std::to_string(localVertex.tangent.y) + ' '
-			 + std::to_string(localVertex.tangent.z) + "\n\t\t\t\t\t"*/
-			 + "Tex is " + std::to_string(localVertex.texCoord.x) + ' '
-			 + std::to_string(localVertex.texCoord.y);
-		 LOG(Info) << a;
-
-		localVertices.push_back(localVertex);
-	}
-
-	for (UINT i = 0; i < mesh->mNumFaces; ++i)
-	{
-		aiFace localFace = mesh->mFaces[i];
-		for (UINT j = 0; j < localFace.mNumIndices; ++j)
-		{
-			localIndices.push_back(localFace.mIndices[j]);
-
-			std::string a = "Indices is " + std::to_string(localFace.mIndices[j]);
-			LOG(Info) << a;
-
-		}
-
-	}
-
-	return Mesh(localVertices, localIndices);
-}
-std::vector<ModelVertex> ModelManager::GetVertices()
-{
-	std::vector<ModelVertex> localVertices;
-
-	for (auto& m : m_meshs)
-	{
-		for (auto& v : m.vertices)
-		{
-			localVertices.push_back(v);
+		for (size_t j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
+			UINT vertexID = mesh->mBones[i]->mWeights[j].mVertexId;
+			float weight = mesh->mBones[i]->mWeights[j].mWeight;
+			boneData[vertexID].Add(boneIndex, weight);
 		}
 	}
-
-	return localVertices;
 }
 
-std::vector<uint32_t> ModelManager::GetIndices()
-{
-	std::vector<uint32_t> localIndices;
 
-	for (auto& m : m_meshs)
+void ModelManager::ReadNodeHierarchy(const aiNode* node, int parentIndex) {
+	BoneInfo boneInfo;
+
+	UINT boneIndex = this->boneInfo.size();
+	boneMapping[node->mName.C_Str()] = boneIndex;
+
+	DirectX::XMStoreFloat4x4(&boneInfo.boneOffset, DirectX::XMMatrixIdentity());
+	boneInfo.parentIndex = parentIndex;
+	boneInfo.defaultOffset = {
+		node->mTransformation.a1, node->mTransformation.b1, node->mTransformation.c1, node->mTransformation.d1,
+		node->mTransformation.a2, node->mTransformation.b2, node->mTransformation.c2, node->mTransformation.d2,
+		node->mTransformation.a3, node->mTransformation.b3, node->mTransformation.c3, node->mTransformation.d3,
+		node->mTransformation.a4, node->mTransformation.b4, node->mTransformation.c4, node->mTransformation.d4
+	};
+
+	this->boneInfo.push_back(boneInfo);
+
+	for (size_t i = 0; i < node->mNumChildren; i++)
+		ReadNodeHierarchy(node->mChildren[i], boneIndex);
+}
+
+std::vector<UINT> ModelManager::LoadMaterialTextures(aiMaterial* mat, aiTextureType type) {
+	std::vector<UINT> textures;
+	for (UINT i = 0; i < mat->GetTextureCount(type); i++)
 	{
-		for (auto& i : m.indices)
+		aiString str;
+		mat->GetTexture(type, 0, &str);
+		bool skip = false;
+		std::string texturePath = directory + str.C_Str();
+		for (UINT j = 0; j < this->texturePath.size(); j++)
 		{
-			localIndices.push_back(i);
+			if (this->texturePath[j] == texturePath) {
+				textures.push_back(j);
+				skip = true;
+				break;
+			}
+		}
+		if (!skip) {
+			textures.push_back(this->texturePath.size());
+			this->texturePath.push_back(texturePath);
 		}
 	}
+	return textures;
+}
 
-	return localIndices;
+void ModelManager::LoadTexturesFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList) {
+	std::vector<TextureData > textures;
+	for (UINT i = 0; i < texturePath.size(); i++)
+	{
+		TextureData  texture;
+		wchar_t* path = StringToWideChar(texturePath[i]);
+		ImageInfo imageInfo;
+		bool res = LoadPixelWithWIC(path, GUID_WICPixelFormat32bppRGBA, imageInfo);
+		if (!res) MessageBox(NULL, L"Load Texture Error", NULL, NULL);
+		texture.LoadImageInfo(imageInfo);
+		texture.InitBuffer(device);
+		texture.SetCopyCommand(cmdList);
+		textures.push_back(texture);
+	}
+	this->textureHasLoaded.insert(textureHasLoaded.end(), textures.begin(), textures.end());
+}
+
+UINT ModelManager::SetupMaterial(std::vector<UINT> diffuseMaps) {
+	MaterialInfo material;
+	if (diffuseMaps.size() > 0)
+		material.diffuseMaps = diffuseMaps[0];
+	else
+		material.diffuseMaps = 0;
+
+	UINT materialIndex;
+	bool skip = false;
+	for (UINT i = 0; i < materials.size(); i++) {
+		if (CompareMaterial(materials[i], material)) {
+			materialIndex = i;
+			skip = true;
+			break;
+		}
+	}
+	if (!skip) {
+		materialIndex = materials.size();
+		materials.push_back(material);
+	}
+	return materialIndex;
+}
+
+void ModelManager::SetupRenderInfo() {
+	renderInfo.resize(materials.size());
+
+	for (UINT i = 0; i < meshes.size(); i++)
+	{
+		UINT index = meshes[i].materialIndex;
+		UINT indexOffset = renderInfo[index].vertices.size();
+
+		for (UINT j = 0; j < meshes[i].indices.size(); j++)
+			renderInfo[index].indices.push_back(meshes[i].indices[j] + indexOffset);
+
+		renderInfo[index].vertices.insert(renderInfo[index].vertices.end(), meshes[i].vertices.begin(), meshes[i].vertices.end());
+	}
+}
+
+void ModelManager::LoadAnimations(const aiScene* scene) {
+	for (size_t i = 0; i < scene->mNumAnimations; i++) {
+		AnimationClip animation;
+		std::vector<BoneAnimation> boneAnims(boneInfo.size());
+		aiAnimation* anim = scene->mAnimations[i];
+
+		float ticksPerSecond = anim->mTicksPerSecond != 0 ? anim->mTicksPerSecond : 25.0f;
+		float timeInTicks = 1.0f / ticksPerSecond;
+
+		for (size_t j = 0; j < anim->mNumChannels; j++) {
+			BoneAnimation boneAnim;
+			aiNodeAnim* nodeAnim = anim->mChannels[j];
+
+			for (size_t k = 0; k < nodeAnim->mNumPositionKeys; k++) {
+				VectorKey keyframe;
+				keyframe.TimePos= nodeAnim->mPositionKeys[k].mTime * timeInTicks;
+				keyframe.Value.x = nodeAnim->mPositionKeys[k].mValue.x;
+				keyframe.Value.y = nodeAnim->mPositionKeys[k].mValue.y;
+				keyframe.Value.z = nodeAnim->mPositionKeys[k].mValue.z;
+				boneAnim.mTranslation.push_back(keyframe);
+			}
+			for (size_t k = 0; k < nodeAnim->mNumScalingKeys; k++) {
+				VectorKey keyframe;
+				keyframe.TimePos = nodeAnim->mScalingKeys[k].mTime * timeInTicks;
+				keyframe.Value.x = nodeAnim->mScalingKeys[k].mValue.x;
+				keyframe.Value.y = nodeAnim->mScalingKeys[k].mValue.y;
+				keyframe.Value.z = nodeAnim->mScalingKeys[k].mValue.z;
+				boneAnim.mScale.push_back(keyframe);
+			}
+			for (size_t k = 0; k < nodeAnim->mNumRotationKeys; k++) {
+				QuatKey keyframe;
+				keyframe.TimePos = nodeAnim->mRotationKeys[k].mTime * timeInTicks;
+				keyframe.Value.x = nodeAnim->mRotationKeys[k].mValue.x;
+				keyframe.Value.y = nodeAnim->mRotationKeys[k].mValue.y;
+				keyframe.Value.z = nodeAnim->mRotationKeys[k].mValue.z;
+				keyframe.Value.w = nodeAnim->mRotationKeys[k].mValue.w;
+				boneAnim.mRotationQuat.push_back(keyframe);
+			}
+			boneAnims[boneMapping[nodeAnim->mNodeName.C_Str()]] = boneAnim;
+		}
+		animation.mBoneAnimations = boneAnims;
+
+		std::string animName(anim->mName.C_Str());
+		animName = animName.substr(animName.find_last_of('|') + 1, animName.length() - 1);
+
+		animations[animName] = animation;
+	}
+}
+
+bool CompareMaterial(MaterialInfo dest, MaterialInfo source) {
+	bool isSame = false;
+	if (dest.diffuseMaps == source.diffuseMaps)
+		isSame = true;
+	else
+		isSame = false;
+	return isSame;
+}
+
+wchar_t* StringToWideChar(const std::string& str) {
+	const char* pCStrKey = str.c_str();
+	int pSize = MultiByteToWideChar(CP_OEMCP, 0, pCStrKey, strlen(pCStrKey) + 1, NULL, 0);
+	wchar_t* pWCStrKey = new wchar_t[pSize];
+	MultiByteToWideChar(CP_OEMCP, 0, pCStrKey, strlen(pCStrKey) + 1, pWCStrKey, pSize);
+	return pWCStrKey;
 }
