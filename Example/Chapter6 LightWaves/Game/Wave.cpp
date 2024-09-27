@@ -3,46 +3,47 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include<MathHelper.h>
 Waves::Waves(int m, int n, float dx, float dt, float speed, float damping)
 {
-    mNumRows = m;
-    mNumCols = n;
+	mNumRows = m;
+	mNumCols = n;
 
-    mVertexCount = m * n;
-    mTriangleCount = (m - 1) * (n - 1) * 2;
+	mVertexCount = m * n;
+	mTriangleCount = (m - 1) * (n - 1) * 2;
 
-    mTimeStep = dt;
-    mSpatialStep = dx;
+	mTimeStep = dt;
+	mSpatialStep = dx;
 
-    float d = damping * dt + 2.0f;
-    float e = (speed * speed) * (dt * dt) / (dx * dx);
-    mK1 = (damping * dt - 2.0f) / d;
-    mK2 = (4.0f - 8.0f * e) / d;
-    mK3 = (2.0f * e) / d;
+	float d = damping * dt + 2.0f;
+	float e = (speed * speed) * (dt * dt) / (dx * dx);
+	mK1 = (damping * dt - 2.0f) / d;
+	mK2 = (4.0f - 8.0f * e) / d;
+	mK3 = (2.0f * e) / d;
 
-    mPrevSolution.resize(m * n);
-    mCurrSolution.resize(m * n);
-    mNormals.resize(m * n);
-    mTangentX.resize(m * n);
+	mPrevSolution.resize(m * n);
+	mCurrSolution.resize(m * n);
+	mNormals.resize(m * n);
+	mTangentX.resize(m * n);
 
-    // Generate grid vertices in system memory.
-    // 在系统内存中生成栅格顶点
+	// Generate grid vertices in system memory.
+	// 在系统内存中生成栅格顶点
 
-    float halfWidth = (n - 1) * dx * 0.5f;
-    float halfDepth = (m - 1) * dx * 0.5f;
-    for (int i = 0; i < m; ++i)
-    {
-        float z = halfDepth - i * dx;
-        for (int j = 0; j < n; ++j)
-        {
-            float x = -halfWidth + j * dx;
+	float halfWidth = (n - 1) * dx * 0.5f;
+	float halfDepth = (m - 1) * dx * 0.5f;
+	for (int i = 0; i < m; ++i)
+	{
+		float z = halfDepth - i * dx;
+		for (int j = 0; j < n; ++j)
+		{
+			float x = -halfWidth + j * dx;
 
-            mPrevSolution[i * n + j] =DirectX::XMFLOAT3(x, 0.0f, z);
-            mCurrSolution[i * n + j] = DirectX::XMFLOAT3(x, 0.0f, z);
-            mNormals[i * n + j] = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-            mTangentX[i * n + j] = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
-        }
-    }
+			mPrevSolution[i * n + j] = DirectX::XMFLOAT3(x, 0.0f, z);
+			mCurrSolution[i * n + j] = DirectX::XMFLOAT3(x, 0.0f, z);
+			mNormals[i * n + j] = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
+			mTangentX[i * n + j] = DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f);
+		}
+	}
 }
 
 Waves::~Waves()
@@ -51,32 +52,32 @@ Waves::~Waves()
 
 int Waves::RowCount() const
 {
-    return mNumRows;
+	return mNumRows;
 }
 
 int Waves::ColumnCount() const
 {
-    return  mNumCols;
+	return  mNumCols;
 }
 
 int Waves::VertexCount() const
 {
-    return mVertexCount;
+	return mVertexCount;
 }
 
 int Waves::TriangleCount() const
 {
-    return mTriangleCount;
+	return mTriangleCount;
 }
 
 float Waves::Width() const
 {
-    return mNumCols * mSpatialStep;
+	return mNumCols * mSpatialStep;
 }
 
 float Waves::Depth() const
 {
-    return mNumRows * mSpatialStep;
+	return mNumRows * mSpatialStep;
 }
 
 
@@ -112,7 +113,7 @@ void Waves::Update(float dt)
 					// 注意我们通过读/写同一元素来实现这一点，因为我们不再需要prev_IJ，而且赋值发生在最后
 					// 	注意 j 表示 x 索引，i 表示 z 索引：h(x_j, z_i, t_k)
 					// 此外，我们的 +z 轴是 “向下 ”的，这只是为了与我们的行索引向下保持一致。
-				
+
 					mPrevSolution[i * mNumCols + j].y =
 						mK1 * mPrevSolution[i * mNumCols + j].y +
 						mK2 * mCurrSolution[i * mNumCols + j].y +
@@ -131,7 +132,7 @@ void Waves::Update(float dt)
 
 		// reset time
 		// 重置时间
-		t = 0.0f; 
+		t = 0.0f;
 
 		//
 		// Compute normals using finite difference scheme.
@@ -162,19 +163,20 @@ void Waves::Update(float dt)
 
 void  Waves::Disturb(int i, int j, float magnitude)
 {
-    // Don't disturb boundaries.
+	// Don't disturb boundaries.
 	// 防止越界
-    assert(i > 1 && i < mNumRows - 2);
-    assert(j > 1 && j < mNumCols - 2);
+	assert(i > 1 && i < mNumRows - 2);
+	assert(j > 1 && j < mNumCols - 2);
 
-    float halfMag = 0.5f * magnitude;
+	//随机波浪高度
+	float halfMag = MathHelper::RandF(0.1f, 2.0f) * magnitude;
 
-    // Disturb the ijth vertex height and its neighbors.
+	// Disturb the ijth vertex height and its neighbors.
 	// 
-    mCurrSolution[i * mNumCols + j].y += magnitude;
-    mCurrSolution[i * mNumCols + j + 1].y += halfMag;
-    mCurrSolution[i * mNumCols + j - 1].y += halfMag;
-    mCurrSolution[(i + 1) * mNumCols + j].y += halfMag;
-    mCurrSolution[(i - 1) * mNumCols + j].y += halfMag;
+	mCurrSolution[i * mNumCols + j].y += magnitude;
+	mCurrSolution[i * mNumCols + j + 1].y += halfMag;
+	mCurrSolution[i * mNumCols + j - 1].y += halfMag;
+	mCurrSolution[(i + 1) * mNumCols + j].y += halfMag;
+	mCurrSolution[(i - 1) * mNumCols + j].y += halfMag;
 }
 

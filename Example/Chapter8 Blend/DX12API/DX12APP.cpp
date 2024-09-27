@@ -107,10 +107,7 @@ int DX12App::Run()
                 {
                     ShowFrameCount();
 
-                    // 添加ImGui
-                    ImGui_ImplDX12_NewFrame();
-                    ImGui_ImplWin32_NewFrame();
-                    ImGui::NewFrame();
+                   
 
                     Update(mTimer);
                     Draw(mTimer);
@@ -280,6 +277,8 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     if (ImGui_ImplWin32_WndProcHandler(mhMainWnd, msg, wParam, lParam))
         return true;
+
+  
     switch (msg)
     {	
     // We pause the game when the window is deactivated and unpause it when it becomes active.  
@@ -745,7 +744,7 @@ bool DX12App::InitImGui()
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // 允许键盘控制
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // 禁用ImGui的输入处理
     io.ConfigWindowsMoveFromTitleBarOnly = true;              // 仅允许标题拖动
 
     // 设置ImGui风格

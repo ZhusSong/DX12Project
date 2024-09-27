@@ -356,7 +356,18 @@ void GameApp::UpdateWaves(const DXGameTimer& gt)
     // Every quarter second, generate a random wave.
     // 每1/4秒创造一个随机波浪
     static float t_base = 0.0f;
-    if ((mTimer.GetTotalTime() - t_base) >= 0.25f)
+ /*   if ((mTimer.GetTotalTime() - t_base) >= 0.25f)
+    {
+        t_base += 0.25f;
+
+        int i = MathHelper::Rand(4, mWaves->RowCount() - 5);
+        int j = MathHelper::Rand(4, mWaves->ColumnCount() - 5);
+
+        float r = MathHelper::RandF(0.2f, 0.5f);
+
+        mWaves->Disturb(i, j, r);
+    }*/
+       if (ImGui::IsKeyDown(ImGuiKey_Space))
     {
         t_base += 0.25f;
 
@@ -367,7 +378,6 @@ void GameApp::UpdateWaves(const DXGameTimer& gt)
 
         mWaves->Disturb(i, j, r);
     }
-
     // Update the wave simulation.
     // 更新波浪模拟
     mWaves->Update(gt.GetDeltaTime());
@@ -414,6 +424,9 @@ void GameApp::DrawGame()
     ImGui::End();
 
     ImGui::Render();
+
+
+
     mCommandList->SetDescriptorHeaps(1, mSrvHeap.GetAddressOf());
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
 }
@@ -575,7 +588,7 @@ void GameApp::BuildLandGeometry()
     {
         auto& p = grid.Vertices[i].Position;
         vertices[i].Pos = p;
-        vertices[i].Pos.y = GetHillsHeight(p.x, p.z);
+        vertices[i].Pos.y = GetHillsHeight(p.x, p.z) - 1.5f;
         vertices[i].Normal = GetHillsNormal(p.x, p.z);
     }
 
@@ -814,7 +827,7 @@ void GameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vec
 
 float GameApp::GetHillsHeight(float x, float z)const
 {
-    return 0.3f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
+    return 0.01f * (z * sinf(0.1f * x) + x * cosf(0.1f * z));
 }
 
 XMFLOAT3 GameApp::GetHillsNormal(float x, float z)const

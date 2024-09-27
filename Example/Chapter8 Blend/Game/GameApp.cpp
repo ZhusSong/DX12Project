@@ -97,7 +97,15 @@ void GameApp::Update(const DXGameTimer& gt)
         CloseHandle(eventHandle);
     }
     // 更新常量缓冲区等在mCurrFrameResource内的资源
-
+    if (ImGui::IsKeyDown(ImGuiKey_LeftShift))
+    {
+        UpdatePSO();
+    }
+    if (ImGui::IsKeyDown(ImGuiKey_RightShift))
+    {
+        BuildPSO();
+    }
+   
     AnimateMaterials(gt);
 
     UpdateObjectCBs(gt);
@@ -167,19 +175,20 @@ void GameApp::Draw(const DXGameTimer& gt)
 
     mCommandList->SetPipelineState(mPSOs["transparent"].Get());
     DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Transparent]);
-    // Draw ImGui
-    // 绘制ImGui
-    DrawGame();
+ 
 
     // Indicate a state transition on the resource usage.
     // 再次对资源文件状态进行转换，将资源从渲染目标状态转换为呈现状态
     mCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
         D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-
+    // Draw ImGui
+ // 绘制ImGui
+    DrawGame();
     // Done recording commands.
     // 完成对命令的记录,需在此之前进行游戏物体及逻辑的绘制
     ThrowIfFailed(mCommandList->Close());
 
+   
     // Add the command list to the queue for execution.
     // 将待执行的命令列表加入命令队列
     ID3D12CommandList* cmdsLists[] = { mCommandList.Get() };
@@ -397,31 +406,45 @@ void GameApp::UpdateMainPassCB(const DXGameTimer& gt)
 
 void GameApp::DrawGame()
 {
-    bool show_demo_window = false;
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
-    static int counter = 0;
-    //test1    控制旋转
+    // 添加ImGui
+    ImGui_ImplDX12_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
     ImGui::Begin("imgui!Test");                          // Create a window called "Hello, world!" and append into it.
 
     ImGui::Text("Drag the slider to rotate the Angle of the Box.");               // Display some text (you can use a format strings too)
-    //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-
-    //ImGui::SliderFloat("float", &mPhi, 0.1f, 1.0f);  //mPhi立方体的旋转角度
-  //  ImGui::SliderFloat("float", &mTheta, 0.1f, 1.0f);  //mTheta也是旋转角度
-
-    //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-    //    counter++;
-    //ImGui::SameLine();
-    //ImGui::Text("counter = %d", counter);
-
-    //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-
+   
+ /*   if (ImGui::Checkbox("CheckTest", &isWire))
+    {
+        if (checkTest % 2 == 0)
+            UpdatePSO();
+        else
+            BuildPSO();
+    }*/
+   
+   // if(ImGui::Button("WireRender"));      // Edit bools storing our window open/close state
+   // {
+   //     isWire = !isWire;
+   //     ImGui::Text("Button!!!!.");
+   ///*     if (isWire)
+   //     {
+   //         UpdatePSO();
+   //     }
+   //     else
+   //     {
+   //         BuildPSO();
+   //     }*/
+   // }
+   
+    ImGui::SameLine();
+  
     ImGui::End();
 
     ImGui::Render();
     mCommandList->SetDescriptorHeaps(1, mSrvHeap.GetAddressOf());
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mCommandList.Get());
+
 }
 void GameApp::UpdateWaves(const DXGameTimer& gt)
 {
@@ -691,7 +714,7 @@ void GameApp::BuildLandGeometry()
     {
         auto& p = grid.Vertices[i].Position;
         vertices[i].Pos = p;
-        vertices[i].Pos.y = GetHillsHeight(p.x, p.z)-1.5f;
+        vertices[i].Pos.y = GetHillsHeight(p.x, p.z)-100.5f;
         vertices[i].Normal = GetHillsNormal(p.x, p.z);
         vertices[i].TexC = grid.Vertices[i].TexC;
     }
@@ -789,7 +812,7 @@ void GameApp::BuildWavesGeometry()
 void GameApp::BuildBoxGeometry()
 {
     GeometryGenerator geoGen;
-    GeometryGenerator::MeshData box = geoGen.CreateBox(8.0f, 8.0f, 8.0f, 3);
+    GeometryGenerator::MeshData box = geoGen.CreateBox(0.0f, 0.0f, 0.0f, 3);
 
     std::vector<Vertex> vertices(box.Vertices.size());
     for (size_t i = 0; i < box.Vertices.size(); ++i)
@@ -1027,6 +1050,74 @@ void GameApp::BuildPSO()
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&alphaTestedPsoDesc, IID_PPV_ARGS(&mPSOs["alphaTested"])));
 }
 
+
+void GameApp::UpdatePSO()
+{
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
+
+    //
+    // PSO for opaque objects.
+    // 非透明对象的PSO
+    ZeroMemory(&opaquePsoDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+    opaquePsoDesc.InputLayout = { mInputLayout.data(), (UINT)mInputLayout.size() };
+    opaquePsoDesc.pRootSignature = mRootSignature.Get();
+    opaquePsoDesc.VS =
+    {
+        /*  reinterpret_cast<BYTE*>(mvsByteCode->GetBufferPointer()),
+          mvsByteCode->GetBufferSize()*/
+          reinterpret_cast<BYTE*>(mShaders["standardVS"]->GetBufferPointer()),
+          mShaders["standardVS"]->GetBufferSize()
+    };
+    opaquePsoDesc.PS =
+    {
+        /* reinterpret_cast<BYTE*>(mpsByteCode->GetBufferPointer()),
+         mpsByteCode->GetBufferSize()*/
+          reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
+         mShaders["opaquePS"]->GetBufferSize()
+    };
+    opaquePsoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+    opaquePsoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_WIREFRAME;
+    opaquePsoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+    opaquePsoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+    opaquePsoDesc.SampleMask = UINT_MAX;
+    opaquePsoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+    opaquePsoDesc.NumRenderTargets = 1;
+    opaquePsoDesc.RTVFormats[0] = mBackBufferFormat;
+    opaquePsoDesc.SampleDesc.Count = m4xMsaaState ? 4 : 1;
+    opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
+    opaquePsoDesc.DSVFormat = mDepthStencilFormat;
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
+
+    // PSO for transparent objects
+    // 创建开启了混合功能的PSO
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC transparentPsoDesc = opaquePsoDesc;
+
+    D3D12_RENDER_TARGET_BLEND_DESC transparencyBlendDesc;
+    transparencyBlendDesc.BlendEnable = true;
+    transparencyBlendDesc.LogicOpEnable = false;
+    transparencyBlendDesc.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+    transparencyBlendDesc.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+    transparencyBlendDesc.BlendOp = D3D12_BLEND_OP_ADD;
+    transparencyBlendDesc.SrcBlendAlpha = D3D12_BLEND_ONE;
+    transparencyBlendDesc.DestBlendAlpha = D3D12_BLEND_ZERO;
+    transparencyBlendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;
+    transparencyBlendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
+    transparencyBlendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+    transparentPsoDesc.BlendState.RenderTarget[0] = transparencyBlendDesc;
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&transparentPsoDesc, IID_PPV_ARGS(&mPSOs["transparent"])));
+
+    // PSO for alpha tested objects
+    // 创建alpha测试物体的PSO
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC alphaTestedPsoDesc = opaquePsoDesc;
+    alphaTestedPsoDesc.PS =
+    {
+        reinterpret_cast<BYTE*>(mShaders["alphaTestedPS"]->GetBufferPointer()),
+        mShaders["alphaTestedPS"]->GetBufferSize()
+    };
+    alphaTestedPsoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&alphaTestedPsoDesc, IID_PPV_ARGS(&mPSOs["alphaTested"])));
+}
 
 void GameApp::BuildFrameResources()
 {

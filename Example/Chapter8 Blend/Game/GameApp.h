@@ -107,7 +107,10 @@ private:
 
     void UpdateWaves(const DXGameTimer& gt);
 
-    void DrawGame();
+    void DrawGame(); 
+    //设置是否为线框模式
+    bool isWire = false;
+    int checkTest = 0;
 
     //读取贴图
     void LoadTextures();
@@ -133,6 +136,9 @@ private:
 
     //创建PSO(流水线状态对象)
     void BuildPSO();
+
+    //更新流水线
+    void UpdatePSO();
     // 创建帧资源
     void BuildFrameResources();
     //创建材质
