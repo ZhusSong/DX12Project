@@ -74,24 +74,24 @@ Mesh ModelManager::ProcessMesh(const aiScene* scene, aiMesh* mesh)
 
 	for (size_t i = 0; i < mesh->mNumVertices; i++) {
 		SkinnedVertex vertex;
-		vertex.position.x = mesh->mVertices[i].x;
-		vertex.position.y = mesh->mVertices[i].y;
-		vertex.position.z = mesh->mVertices[i].z;
+		vertex.Position.x = mesh->mVertices[i].x;
+		vertex.Position.y = mesh->mVertices[i].y;
+		vertex.Position.z = mesh->mVertices[i].z;
 
-		vertex.normal.x = mesh->mNormals[i].x;
-		vertex.normal.y = mesh->mNormals[i].y;
-		vertex.normal.z = mesh->mNormals[i].z;
+		vertex.Normal.x = mesh->mNormals[i].x;
+		vertex.Normal.y = mesh->mNormals[i].y;
+		vertex.Normal.z = mesh->mNormals[i].z;
 
 		if (mesh->mTextureCoords[0]) {
-			vertex.texCoord.x = mesh->mTextureCoords[0][i].x;
-			vertex.texCoord.y = mesh->mTextureCoords[0][i].y;
+			vertex.TexCoord.x = mesh->mTextureCoords[0][i].x;
+			vertex.TexCoord.y = mesh->mTextureCoords[0][i].y;
 		}
 		else {
-			vertex.texCoord = { 0.0f, 0.0f };
+			vertex.TexCoord = { 0.0f, 0.0f };
 		}
-		vertex.boneWeights.x = localVertexBoneData[i].weights[0];
-		vertex.boneWeights.y = localVertexBoneData[i].weights[1];
-		vertex.boneWeights.z = localVertexBoneData[i].weights[2];
+		vertex.BoneWeights.x = localVertexBoneData[i].weights[0];
+		vertex.BoneWeights.y = localVertexBoneData[i].weights[1];
+		vertex.BoneWeights.z = localVertexBoneData[i].weights[2];
 
 		for (size_t j = 0; j < NUM_BONES_PER_VERTEX; j++)
 			vertex.boneIndices[j] = localVertexBoneData[i].boneIndex[j];

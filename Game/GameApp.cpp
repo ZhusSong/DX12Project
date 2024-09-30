@@ -967,44 +967,29 @@ void GameApp::BuildModels()
     // 创建模型
     ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
 
-    localMat = ModelTest.GetMaterials()[0];
-    auto ModelVertices = ModelTest.GetVertices();
-    auto ModelIndices = ModelTest.GetIndices();
-    assert(ModelVertices.size() > 0);
-    assert(ModelIndices.size() > 0);
+    ModelTest.LoadTexturesFromFile(md3dDevice.Get(),mCommandList.Get());
+    mCommandList.Get()->Close();
+    mCommandQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList**>(mCommandList.Get()));
 
-    uint32_t ModelVertexOffset = 0;
-    uint32_t ModelIndexOffset = 0;
-
-    SubmeshGeometry ModelDraw;
-    ModelDraw.BaseVertexLocation = ModelVertexOffset;
-    ModelDraw.IndexCount = (UINT)ModelIndices.size();
-    ModelDraw.StartIndexLocation = ModelIndexOffset;
-
-    auto totalVertexCount = ModelVertices.size();
-    std::vector<ModelVertex> localVertices(totalVertexCount);
-
-    uint32_t k = 0;
-    for (size_t i = 0; i < ModelVertices.size(); ++i, ++k)
-    {
-        localVertices[k].position = { ModelVertices[i].position.x/20  , ModelVertices[i].position.y / 20 , ModelVertices[i].position.z / 20 };
-        localVertices[k].normal = ModelVertices[i].normal;
-        localVertices[k].texCoord = ModelVertices[i].texCoord;
-    }
-    std::vector<uint32_t> localIndices;
-    localIndices.insert(localIndices.end(), std::begin(ModelIndices), std::end(ModelIndices));
-
-    const uint32_t vbSize = (uint32_t)localVertices.size() * sizeof(ModelVertex);
-    const uint32_t ibSize = (uint32_t)localIndices.size() * sizeof(uint32_t);
-
-
+    std::vector<Texture> textures;
+    textures.insert(textures.end(), ModelTest.textureHasLoaded.begin(), ModelTest.textureHasLoaded.end());
+ 
     auto pModel = std::make_unique <MeshGeometry>();
-    pModel->Name = "Player";
-    pModel->VertexByteStride = sizeof(ModelVertex);
-    pModel->VertexBufferByteSize = vbSize;
-    pModel->IndexFormat = DXGI_FORMAT_R32_UINT;
-    pModel->IndexBufferByteSize = ibSize;
+    std::vector<SkinnedVertex> vertices;
+    std::vector<UINT> indices;
 
+    for (UINT i = 0; i < ModelTest.renderInfo.size(); i++)
+    {
+        SubmeshGeometry submesh;
+        submesh.baseVertexLocation = vertices.size();
+        submesh.startIndexLocation = indices.size();
+        submesh.indexCount = morisaModel.renderInfo[i].indices.size();
+
+        vertices.insert(vertices.end(), morisaModel.renderInfo[i].vertices.begin(), morisaModel.renderInfo[i].vertices.end());
+        indices.insert(indices.end(), morisaModel.renderInfo[i].indices.begin(), morisaModel.renderInfo[i].indices.end());
+
+        meshGeometry->drawArgs.push_back(submesh);
+    }
     ThrowIfFailed(D3DCreateBlob(vbSize, &pModel->VertexBufferCPU));
     CopyMemory(pModel->VertexBufferCPU->GetBufferPointer(), localVertices.data(), vbSize);
 

@@ -225,7 +225,6 @@ private:
 
     std::shared_ptr<Camera> mCamera;
 
-   ModelMaterial localMat;
 };
 
 #endif
