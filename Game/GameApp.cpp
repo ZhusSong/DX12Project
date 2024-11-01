@@ -2,6 +2,7 @@
 const int gNumFrameResources = 3;
 
 
+
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
     : DX12App(hInstance, windowName, initWidth, initHeight)
 {
@@ -965,8 +966,9 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
 
+    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
+    mPlayerMaterialsSize = ModelTest.materials.size();
     ModelTest.LoadTexturesFromFile(md3dDevice.Get(),mCommandList.Get());
     mCommandList.Get()->Close();
     mCommandQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList**>(mCommandList.Get()));
@@ -974,35 +976,39 @@ void GameApp::BuildModels()
     std::vector<Texture> textures;
     textures.insert(textures.end(), ModelTest.textureHasLoaded.begin(), ModelTest.textureHasLoaded.end());
  
-    auto pModel = std::make_unique <MeshGeometry>();
+    auto meshGeometry = std::make_unique <MeshGeometry>();
     std::vector<SkinnedVertex> vertices;
     std::vector<UINT> indices;
 
     for (UINT i = 0; i < ModelTest.renderInfo.size(); i++)
     {
         SubmeshGeometry submesh;
-        submesh.baseVertexLocation = vertices.size();
-        submesh.startIndexLocation = indices.size();
-        submesh.indexCount = morisaModel.renderInfo[i].indices.size();
+        submesh.BaseVertexLocation = vertices.size();
+        submesh.StartIndexLocation = indices.size();
+        submesh.IndexCount = ModelTest.renderInfo[i].indices.size();
 
-        vertices.insert(vertices.end(), morisaModel.renderInfo[i].vertices.begin(), morisaModel.renderInfo[i].vertices.end());
-        indices.insert(indices.end(), morisaModel.renderInfo[i].indices.begin(), morisaModel.renderInfo[i].indices.end());
+        vertices.insert(vertices.end(), ModelTest.renderInfo[i].vertices.begin(), ModelTest.renderInfo[i].vertices.end());
+        indices.insert(indices.end(), ModelTest.renderInfo[i].indices.begin(), ModelTest.renderInfo[i].indices.end());
 
-        meshGeometry->drawArgs.push_back(submesh);
+        meshGeometry->DrawArgs["PlayerModel"]= submesh;
     }
-    ThrowIfFailed(D3DCreateBlob(vbSize, &pModel->VertexBufferCPU));
-    CopyMemory(pModel->VertexBufferCPU->GetBufferPointer(), localVertices.data(), vbSize);
 
-    ThrowIfFailed(D3DCreateBlob(ibSize, &pModel->IndexBufferCPU));
-    CopyMemory(pModel->IndexBufferCPU->GetBufferPointer(), localIndices.data(), ibSize);
 
-    pModel->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), localVertices.data(), vbSize, pModel->VertexBufferUploader);
-    pModel->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), localIndices.data(), ibSize, pModel->IndexBufferUploader);
+    UINT vertexBufferSize = sizeof(SkinnedVertex) * vertices.size();
+    UINT indexBufferSize = sizeof(UINT) * indices.size();
 
-    pModel->DrawArgs["Player"] = ModelDraw;
-    mGeometries[pModel->Name] = std::move(pModel);
+    ThrowIfFailed(D3DCreateBlob(vertexBufferSize, &meshGeometry->VertexBufferCPU));
+    CopyMemory(meshGeometry->VertexBufferCPU->GetBufferPointer(), vertices.data(), vertexBufferSize);
+
+    ThrowIfFailed(D3DCreateBlob(indexBufferSize, &meshGeometry->IndexBufferCPU));
+    CopyMemory(meshGeometry->IndexBufferCPU->GetBufferPointer(), indices.data(), indexBufferSize);
+
+    meshGeometry->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), vertices.data(), vertexBufferSize, meshGeometry->VertexBufferUploader);
+    meshGeometry->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), indexBufferSize, meshGeometry->IndexBufferUploader);
+
+    mGeometries[meshGeometry->Name] = std::move(meshGeometry);
 
 }
 
@@ -1203,24 +1209,26 @@ void GameApp::BuildMaterials()
     shadowMat->FresnelR0 = XMFLOAT3(0.001f, 0.001f, 0.001f);
     shadowMat->Roughness = 0.0f;
 
-    // 创建模型材质
-    
-
-    auto modelMat = std::make_unique<Material>();
-    modelMat->Name = "playerMat";
-    modelMat->MatCBIndex = 5;
-    modelMat->DiffuseSrvHeapIndex = 2;
-    modelMat->DiffuseAlbedo =localMat.DiffuseAlbedo;
-    modelMat->FresnelR0 = localMat.FresnelR0;
-    modelMat->Roughness = localMat.Roughness;
-
+   
     mMaterials["bricks"] = std::move(bricks);
     mMaterials["checkertile"] = std::move(checkertile);
     mMaterials["icemirror"] = std::move(icemirror);
     mMaterials["skullMat"] = std::move(skullMat);
     mMaterials["shadowMat"] = std::move(shadowMat);
 
-    mMaterials["modelMat"] = std::move(modelMat);
+    // 创建模型材质
+
+    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
+    for (UINT i = 0; i < mPlayerMaterialsSize; i++)
+    {
+        auto material = std::make_unique<Material>();
+        material->MatCBIndex = 5 + i;
+        material->DiffuseSrvHeapIndex = ModelTest.materials[i].diffuseMaps;
+        material->FresnelR0 = DirectX::XMFLOAT3(0.02f, 0.02f, 0.02f);
+        material->Roughness = 0.3f;
+        material->DiffuseAlbedo = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+        mMaterials["modelMat"] = std::move(material);
+    }
 }
 void GameApp::BuildRenderItems()
 {

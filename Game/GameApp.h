@@ -225,6 +225,8 @@ private:
 
     std::shared_ptr<Camera> mCamera;
 
+    int mPlayerMaterialsSize=0;
+
 };
 
 #endif

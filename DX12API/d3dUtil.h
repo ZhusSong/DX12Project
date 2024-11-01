@@ -64,16 +64,16 @@ struct Light
     float SpotPower = 64.0f;
 };
 
-
-struct MaterialConstants
-{
-    DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-    DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
-    float Roughness = 0.25f;
-
-    // Used in texture mapping.
-    DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
-};
+//
+//struct MaterialConstants
+//{
+//    DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+//    DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
+//    float Roughness = 0.25f;
+//
+//    // Used in texture mapping.
+//    DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+//};
 
 // Simple struct to represent a material for our demos.  A production 3D engine
 // would likely create a class hierarchy of Materials.
@@ -111,6 +111,8 @@ struct Material
     float Roughness = .25f;
 
     DirectX::XMFLOAT4X4 MatTransform = MathHelper::Identity4x4();
+
+    UINT numFramesDirty;
 };
 
 struct Texture
@@ -177,7 +179,8 @@ struct SkinnedConstants
 };
 
 // 材质常量数据
-struct MaterialConstants {
+struct MaterialConstants 
+{
     DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT3 FresnelR0 = { 0.01f, 0.01f, 0.01f };
     float Roughness = 0.25f;
