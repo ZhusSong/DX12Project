@@ -15,7 +15,6 @@
 #include "GeometryGenerator.h"
 #include "Camera.h"
 #include "WinAPISetting.h"
-#include "ModelManager.h"
 
 #include"Wave.h"
 
@@ -208,9 +207,9 @@ private:
 
     PassConstants mMainPassCB;
     PassConstants mReflectedPassCB;
-    
 
-    XMFLOAT3 mEyePos = { 5.0f, 10.0f, 0.0f };
+
+    XMFLOAT3 mEyePos = { 0.0f, 10.0f, 0.0f };
     XMFLOAT4X4 mView = MathHelper::Identity4x4();
     XMFLOAT4X4 mProj = MathHelper::Identity4x4();
 
@@ -224,8 +223,6 @@ private:
     POINT mLastMousePos;
 
     std::shared_ptr<Camera> mCamera;
-
-    int mPlayerMaterialsSize=0;
 
 };
 

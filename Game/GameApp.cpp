@@ -1,6 +1,6 @@
 #include "GameApp.h"
+#include "ModelManager.h"
 const int gNumFrameResources = 3;
-
 
 
 GameApp::GameApp(HINSTANCE hInstance, const std::wstring& windowName, int initWidth, int initHeight)
@@ -31,7 +31,7 @@ bool GameApp::Init()
     mCbvSrvDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
     //mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
-
+ 
 
 
     LoadTextures();
@@ -55,8 +55,8 @@ bool GameApp::Init()
     BuildFrameResources();
     BuildPSO();
 
-
-
+    
+   
     // Execute the initialization commands.
     // 执行初始化命令
     ThrowIfFailed(mCommandList->Close());
@@ -345,7 +345,7 @@ void GameApp::UpdateCamera(const DXGameTimer& gt)
 
     // Build the view matrix.
     // 构建观察矩阵
-    XMVECTOR pos = XMVectorSet(mEyePos.x+5.0f, mEyePos.y, mEyePos.z, 1.0f);
+    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
     XMVECTOR target = XMVectorZero();
     XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -573,31 +573,12 @@ void GameApp::LoadTextures()
         mCommandList.Get(), white1x1Tex->Filename.c_str(),
         white1x1Tex->Resource, white1x1Tex->UploadHeap));
 
-    //WIC贴图读取
-    //auto WicTest = std::make_unique<Texture>();
-    //WicTest->Name = "TestTex";
-    //WicTest->Filename = L"asset\\WICTest_01.jpg";
-    //std::unique_ptr<uint8_t[]> wicData;
-    //D3D12_SUBRESOURCE_DATA subresouceData;
-    //ThrowIfFailed(DirectX::LoadWICTextureFromFile(md3dDevice.Get(),
-    //    WicTest->Filename.c_str(), WicTest->Resource.ReleaseAndGetAddressOf(), wicData, subresouceData));
-    ////转译WIC贴图的资源
-    //D3D12_RESOURCE_DESC texDesc = WicTest->Resource->GetDesc();
-    //const UINT64 uploadBufferSize = GetRequiredIntermediateSize(WicTest->Resource.Get(), 0, 1);
-
-   /* CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-    CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
-    md3dDevice->CreateCommittedResource(&heapProp, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&WicTest->UploadHeap));
-    UpdateSubresources(mCommandList.Get(), WicTest->Resource.Get(), WicTest->UploadHeap.Get(), 0, 0, 1, &subresouceData);
-
-    CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(WicTest->Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);*/
-
+   
 
     mTextures[bricksTex->Name] = std::move(bricksTex);
     mTextures[checkboardTex->Name] = std::move(checkboardTex);
     mTextures[iceTex->Name] = std::move(iceTex);
     mTextures[white1x1Tex->Name] = std::move(white1x1Tex);
-    //mTextures[WicTest->Name] = std::move(WicTest);
 }
 
 void GameApp::BuildRootSignature()
@@ -673,7 +654,6 @@ void GameApp::BuildDescriptorHeaps()
     auto checkboardTex = mTextures["checkboardTex"]->Resource;
     auto iceTex = mTextures["iceTex"]->Resource;
     auto white1x1Tex = mTextures["white1x1Tex"]->Resource;
-    //auto WicTex = mTextures["WicTest"]->Resource;
 
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
     srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -697,12 +677,9 @@ void GameApp::BuildDescriptorHeaps()
 
     // next descriptor
     hDescriptor.Offset(1, mCbvSrvDescriptorSize);
+
     srvDesc.Format = white1x1Tex->GetDesc().Format;
     md3dDevice->CreateShaderResourceView(white1x1Tex.Get(), &srvDesc, hDescriptor);
-
- /*   hDescriptor.Offset(1, mCbvSrvDescriptorSize);
-    srvDesc.Format = WicTex->GetDesc().Format;
-    md3dDevice->CreateShaderResourceView(WicTex.Get(), &srvDesc, hDescriptor);*/
 }
 
 void GameApp::BuildShadersAndInputLayout()
@@ -966,49 +943,58 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
+    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
 
-    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
-    mPlayerMaterialsSize = ModelTest.materials.size();
-    ModelTest.LoadTexturesFromFile(md3dDevice.Get(),mCommandList.Get());
-    mCommandList.Get()->Close();
-    mCommandQueue->ExecuteCommandLists(1, reinterpret_cast<ID3D12CommandList**>(mCommandList.Get()));
+    auto ModelVertices = ModelTest.GetVertices();
+    auto ModelIndices = ModelTest.GetIndices();
+    assert(ModelVertices.size() > 0);
+    assert(ModelIndices.size() > 0);
 
-    std::vector<Texture> textures;
-    textures.insert(textures.end(), ModelTest.textureHasLoaded.begin(), ModelTest.textureHasLoaded.end());
- 
-    auto meshGeometry = std::make_unique <MeshGeometry>();
-    std::vector<SkinnedVertex> vertices;
-    std::vector<UINT> indices;
+    uint32_t ModelVertexOffset = 0;
+    uint32_t ModelIndexOffset = 0;
 
-    for (UINT i = 0; i < ModelTest.renderInfo.size(); i++)
+    SubmeshGeometry ModelDraw ;
+    ModelDraw.BaseVertexLocation = ModelVertexOffset;
+    ModelDraw.IndexCount = (UINT)ModelIndices.size();
+    ModelDraw.StartIndexLocation = ModelIndexOffset;
+
+    auto totalVertexCount = ModelVertices.size();
+    std::vector<ModelVertex> localVertices(totalVertexCount);
+
+    uint32_t k = 0;
+    for (size_t i = 0; i < ModelVertices.size();++i,++k)
     {
-        SubmeshGeometry submesh;
-        submesh.BaseVertexLocation = vertices.size();
-        submesh.StartIndexLocation = indices.size();
-        submesh.IndexCount = ModelTest.renderInfo[i].indices.size();
-
-        vertices.insert(vertices.end(), ModelTest.renderInfo[i].vertices.begin(), ModelTest.renderInfo[i].vertices.end());
-        indices.insert(indices.end(), ModelTest.renderInfo[i].indices.begin(), ModelTest.renderInfo[i].indices.end());
-
-        meshGeometry->DrawArgs["PlayerModel"]= submesh;
+        localVertices[k].position = { ModelVertices[i].position.x  , ModelVertices[i].position.y, ModelVertices[i].position.z };
+        localVertices[k].normal = ModelVertices[i].normal;
+        localVertices[k].texCoord = ModelVertices[i].texCoord;
     }
+    std::vector<uint32_t> localIndices;
+    localIndices.insert(localIndices.end(), std::begin(ModelIndices), std::end(ModelIndices));
+
+    const uint32_t vbSize = (uint32_t)localVertices.size() * sizeof(ModelVertex);
+    const uint32_t ibSize = (uint32_t)localIndices.size() * sizeof(uint32_t);
 
 
-    UINT vertexBufferSize = sizeof(SkinnedVertex) * vertices.size();
-    UINT indexBufferSize = sizeof(UINT) * indices.size();
+    auto pModel = std::make_unique <MeshGeometry> ();
+    pModel->Name = "Player";
+    pModel->VertexByteStride = sizeof(ModelVertex);
+    pModel->VertexBufferByteSize = vbSize;
+    pModel->IndexFormat = DXGI_FORMAT_R32_UINT;
+    pModel->IndexBufferByteSize = ibSize;
 
-    ThrowIfFailed(D3DCreateBlob(vertexBufferSize, &meshGeometry->VertexBufferCPU));
-    CopyMemory(meshGeometry->VertexBufferCPU->GetBufferPointer(), vertices.data(), vertexBufferSize);
+    ThrowIfFailed(D3DCreateBlob(vbSize, &pModel->VertexBufferCPU));
+    CopyMemory(pModel->VertexBufferCPU->GetBufferPointer(), localVertices.data(), vbSize);
 
-    ThrowIfFailed(D3DCreateBlob(indexBufferSize, &meshGeometry->IndexBufferCPU));
-    CopyMemory(meshGeometry->IndexBufferCPU->GetBufferPointer(), indices.data(), indexBufferSize);
+    ThrowIfFailed(D3DCreateBlob(ibSize, &pModel->IndexBufferCPU));
+    CopyMemory(pModel->IndexBufferCPU->GetBufferPointer(), localIndices.data(), ibSize);
 
-    meshGeometry->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), vertices.data(), vertexBufferSize, meshGeometry->VertexBufferUploader);
-    meshGeometry->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-        mCommandList.Get(), indices.data(), indexBufferSize, meshGeometry->IndexBufferUploader);
+    pModel->VertexBufferGPU= d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+            mCommandList.Get(), localVertices.data(), vbSize, pModel->VertexBufferUploader);
+    pModel->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), localIndices.data(), ibSize, pModel->IndexBufferUploader);
 
-    mGeometries[meshGeometry->Name] = std::move(meshGeometry);
+    pModel->DrawArgs["Player"] = ModelDraw;
+    mGeometries[pModel->Name] = std::move(pModel);
 
 }
 
@@ -1209,26 +1195,22 @@ void GameApp::BuildMaterials()
     shadowMat->FresnelR0 = XMFLOAT3(0.001f, 0.001f, 0.001f);
     shadowMat->Roughness = 0.0f;
 
-   
+    // 创建模型材质
+    auto modelMat = std::make_unique<Material>();
+    modelMat->Name = "playerMat";
+    modelMat->MatCBIndex = 5;
+    modelMat->DiffuseSrvHeapIndex = 3;
+    modelMat->DiffuseAlbedo = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+    modelMat->FresnelR0 = XMFLOAT3(0.05f, 0.05f, 0.05f);
+    modelMat->Roughness = 0.3f;
+
     mMaterials["bricks"] = std::move(bricks);
     mMaterials["checkertile"] = std::move(checkertile);
     mMaterials["icemirror"] = std::move(icemirror);
     mMaterials["skullMat"] = std::move(skullMat);
     mMaterials["shadowMat"] = std::move(shadowMat);
 
-    // 创建模型材质
-
-    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
-    for (UINT i = 0; i < mPlayerMaterialsSize; i++)
-    {
-        auto material = std::make_unique<Material>();
-        material->MatCBIndex = 5 + i;
-        material->DiffuseSrvHeapIndex = ModelTest.materials[i].diffuseMaps;
-        material->FresnelR0 = DirectX::XMFLOAT3(0.02f, 0.02f, 0.02f);
-        material->Roughness = 0.3f;
-        material->DiffuseAlbedo = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-        mMaterials["modelMat"] = std::move(material);
-    }
+    mMaterials["modelMat"] = std::move(modelMat);
 }
 void GameApp::BuildRenderItems()
 {
@@ -1286,11 +1268,11 @@ void GameApp::BuildRenderItems()
     // 被反射的模型将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto reflectedSkullRitem = std::make_unique<RenderItem>();
     *reflectedSkullRitem = *skullRitem;
-    reflectedSkullRitem->ObjCBIndex = 4;
+    reflectedSkullRitem->ObjCBIndex =4;
     mReflectedSkullRitem = reflectedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedSkullRitem.get());
 
-
+  
 
     auto reflectedModelRitem = std::make_unique<RenderItem>();
     *reflectedModelRitem = *modelRitem;
@@ -1321,7 +1303,7 @@ void GameApp::BuildRenderItems()
     mRitemLayer[(int)RenderLayer::Transparent].push_back(mirrorRitem.get());
 
 
-
+  
 
     mAllRitems.push_back(std::move(floorRitem));
     mAllRitems.push_back(std::move(wallsRitem));

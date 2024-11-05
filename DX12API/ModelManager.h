@@ -3,6 +3,7 @@
 #ifndef MODEL_MANAGER_H
 #define MODEL_MANAGER_H
 // 模型读取相关
+#include <d3d11_1.h>
 #include <wrl/client.h>
 #include <filesystem>
 #include <DirectXMath.h>
@@ -10,122 +11,74 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include "assimp/mesh.h"
-#include "assimp/texture.h"
 
-#include "d3dUtil.h"
-#include "TextureData.h"
-#include "SkinnedData.h"
 
-// 材质信息
-struct MaterialInfo 
+#define ASSIMP_LOAD_FLAGS 0
+
+struct ModelVertex
 {
-	// 默认材质
-	UINT diffuseMaps;
-};
-
-// 渲染信息
-struct RenderInfo
-{
-	std::vector<SkinnedData> vertices;
-	std::vector<UINT> indices;
-};
-class Mesh
-{
-public:
-	std::vector<SkinnedVertex> vertices;
-	std::vector<UINT> indices;
-	UINT materialIndex;
-
-	Mesh(std::vector<SkinnedVertex> vertices, std::vector<UINT> indices, UINT materialIndex) {
-		this->vertices = vertices;
-		this->indices = indices;
-		this->materialIndex = materialIndex;
+	ModelVertex() = default;
+	ModelVertex(const ModelVertex& rhs)
+	{
+		this->position = rhs.position;
+		this->normal = rhs.normal;
+		//this->tangent = rhs.tangent;
+		this->texCoord = rhs.texCoord;
+		//this->bitangent = rhs.bitangent;
+		
 	}
+	ModelVertex& operator= (ModelVertex& rhs)
+	{
+		return rhs;
+	}
+
+	ModelVertex(ModelVertex&& rhs) = default;
+
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT3 normal;
+	//DirectX::XMFLOAT3 tangent;
+	//DirectX::XMFLOAT3 bitangent;
+	DirectX::XMFLOAT2 texCoord;
+};
+struct ModelMaterial
+{
+	aiColor4D	Ambient;				
+	aiColor4D	Diffuse;				
+	aiColor4D	Specular;				
 };
 class ModelManager
 {
 public:
-	struct BoneData
+	struct Mesh
 	{
-		UINT boneIndex[NUM_BONES_PER_VERTEX];
-		float weights[NUM_BONES_PER_VERTEX];
-		void Add(UINT boneID,float weight)
+		Mesh() = default;
+		std::vector<ModelVertex> vertices;
+		std::vector<uint32_t> indices;
+
+		//Material mats;
+		Mesh(std::vector<ModelVertex>& vertices, std::vector<UINT>& indices)
 		{
-			for (size_t i = 0; i < NUM_BONES_PER_VERTEX; i++)
-			{
-				if (weights[i] == 0.0f)
-				{
-					boneIndex[i] = boneID;
-					weights[i] = weight;
-					return;
-				}
-			}
+			this->vertices = vertices;
+			this->indices = indices;
 		}
 	};
 
-	struct BoneInfo
-	{
-		bool isSkinned = false;
-		DirectX::XMFLOAT4X4 boneOffset;
-		DirectX::XMFLOAT4X4 defaultOffset;
-		int parentIndex;
-	};
+	ModelManager(const std::string& path);
 
+	void TraverseNode(const aiScene* scene, aiNode* node);
 
-	ModelManager(const std::string path);
-	std::vector<Mesh> meshes;
-	std::vector<MaterialInfo> materials;
-	std::vector<RenderInfo> renderInfo;
-	std::vector<TextureData > textureHasLoaded;
+	Mesh LoadMesh(const aiScene* scene, aiMesh* mesh);
 
+	std::vector<ModelMaterial> GetMaterials();
 
-	void GetBoneMapping(std::unordered_map<std::string, UINT>& boneMapping) 
-	{
-		boneMapping = this->boneMapping;
-	}
-	void GetBoneOffsets(std::vector<DirectX::XMFLOAT4X4>& boneOffsets) 
-	{
-		for (size_t i = 0; i < boneInfo.size(); i++)
-			boneOffsets.push_back(boneInfo[i].boneOffset);
-	}
+	std::vector<ModelVertex> GetVertices();
 
-	void GetNodeOffsets(std::vector<DirectX::XMFLOAT4X4>& nodeOffsets) 
-	{
-		for (size_t i = 0; i < boneInfo.size(); i++)
-			nodeOffsets.push_back(boneInfo[i].defaultOffset);
-	}
-	void GetBoneHierarchy(std::vector<int>& boneHierarchy) 
-	{
-		for (size_t i = 0; i < boneInfo.size(); i++)
-			boneHierarchy.push_back(boneInfo[i].parentIndex);
-	}
-	void GetAnimations(std::unordered_map<std::string, AnimationClip>& animations) 
-	{
-		animations.insert(this->animations.begin(), this->animations.end());
-	}
-	void LoadTexturesFromFile(ID3D12Device* device, ID3D12GraphicsCommandList* cmdList);
+	std::vector<uint32_t> GetIndices();
 
 private:
 	std::string directory;
-	std::vector<std::string> texturePath;
+	std::vector<Mesh> m_meshs;
 
-	void ProcessNode(const aiScene* scene, aiNode* node);
-	Mesh ProcessMesh(const aiScene* scene, aiMesh* mesh);
-	UINT SetupMaterial(std::vector<UINT> diffuseMaps);
-	void SetupRenderInfo();
-	std::vector<UINT> LoadMaterialTextures(aiMaterial* mat, aiTextureType type);
 
-	//Bone/Animation Information
-	std::vector<BoneInfo> boneInfo;
-	std::unordered_map<std::string, UINT> boneMapping;
-	std::unordered_map<std::string, AnimationClip> animations;
-
-	void LoadBones(const aiMesh* mesh, std::vector<BoneData>& bones);
-	void ReadNodeHierarchy(const aiNode* node, int parentIndex);
-	void LoadAnimations(const aiScene* scene);
 };
-
-bool CompareMaterial(MaterialInfo dest, MaterialInfo source);
-wchar_t* StringToWideChar(const std::string& str);
 #endif

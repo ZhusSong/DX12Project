@@ -149,8 +149,6 @@ DX12API/Camera.h
  DX12API/GeometryGenerator.h
  DX12API/ModelManager.cpp
  DX12API/ModelManager.h
- DX12API/SkinnedData.cpp
- DX12API/SkinnedData.h
  )
  
  #帧资源处理
@@ -173,10 +171,6 @@ DX12API/Camera.h
  set (TextureLoader
  DX12API/TextureLoader/DDSTextureLoader.cpp
 DX12API/TextureLoader/DDSTextureLoader.h
-DX12API/TextureLoader/WICTextureLoader12.cpp
-DX12API/TextureLoader/WICTextureLoader12.h
-DX12API/TextureLoader/TextureData.cpp
-DX12API/TextureLoader/TextureData.h
  )
  #HLSL文件分组
  source_group(HLSL FILES ${HLSL_Files})
