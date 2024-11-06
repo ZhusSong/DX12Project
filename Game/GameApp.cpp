@@ -32,8 +32,6 @@ bool GameApp::Init()
 
     //mWaves = std::make_unique<Waves>(128, 128, 1.0f, 0.03f, 4.0f, 0.2f);
  
-
-
     LoadTextures();
 
     BuildRootSignature();
@@ -129,7 +127,6 @@ void GameApp::Draw(const DXGameTimer& gt)
 
     // 在通过ExecuteCommandList方法将命令列表添加到命令队列之后，我们就可以进行重置
     // 以复用命令列表即复用与之相关的内存
-
     ThrowIfFailed(mCommandList->Reset(cmdListAlloc.Get(), mPSOs["opaque"].Get()));
 
     // Set the viewport and scissor rect.  This needs to be reset whenever the command list is reset.
@@ -943,7 +940,7 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
+    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
 
     auto ModelVertices = ModelTest.GetVertices();
     auto ModelIndices = ModelTest.GetIndices();
@@ -964,7 +961,7 @@ void GameApp::BuildModels()
     uint32_t k = 0;
     for (size_t i = 0; i < ModelVertices.size();++i,++k)
     {
-        localVertices[k].position = { ModelVertices[i].position.x  , ModelVertices[i].position.y, ModelVertices[i].position.z };
+        localVertices[k].position = { ModelVertices[i].position.x/40, ModelVertices[i].position.y / 40, ModelVertices[i].position.z / 40 };
         localVertices[k].normal = ModelVertices[i].normal;
         localVertices[k].texCoord = ModelVertices[i].texCoord;
     }

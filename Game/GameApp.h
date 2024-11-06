@@ -51,7 +51,7 @@ struct RenderItem
     // 该索引指向的GPU常量缓冲区对应于当前渲染项中的物体常量缓冲区
     UINT ObjCBIndex = -1;
 
-    // 此轩然项参与绘制的几何体，绘制一个几何体可能会用到多个渲染项
+    // 此渲染项参与绘制的几何体，绘制一个几何体可能会用到多个渲染项
     Material* Mat = nullptr;
     MeshGeometry* Geo = nullptr;
 
