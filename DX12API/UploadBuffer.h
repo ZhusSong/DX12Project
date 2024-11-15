@@ -1,7 +1,7 @@
 #pragma once
 #include "d3dUtil.h"
-//缓冲区辅助函数
-//实现上传缓冲区资源的构造与析构函数，处理资源的映射与取消映射
+// 缓冲区辅助函数
+// 实现上传缓冲区资源的构造与析构函数，处理资源的映射与取消映射
 template<typename T>
 class UploadBuffer
 {

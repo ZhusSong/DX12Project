@@ -39,14 +39,15 @@ bool GameApp::Init()
 
     BuildShadersAndInputLayout();
 
-    BuildRoomGeometry();
     BuildSkullGeometry();
-    //BuildLandGeometry();
+    BuildModels();
+    BuildSphereAndCylinder();
     BuildFloorGeometry();
+    BuildRoomGeometry();
+    //BuildLandGeometry();
     //BuildWavesGeometry();
     //BuildBoxGeometry();
     //BuildShapeGeometry();
-    BuildModels();
 
     BuildMaterials();
     BuildRenderItems();
@@ -453,8 +454,7 @@ void GameApp::UpdateMainPassCB(const DXGameTimer& gt)
 void GameApp::DrawGame()
 {
     bool show_demo_window = false;
-    if (show_demo_window)
-        ImGui::ShowDemoWindow(&show_demo_window);
+    
     static int counter = 0;
     //test1    控制旋转
     ImGui::Begin("imgui!Test");                          // Create a window called "Hello, world!" and append into it.
@@ -995,6 +995,83 @@ void GameApp::BuildModels()
 
 }
 
+void GameApp::BuildSphereAndCylinder()
+{
+    GeometryGenerator geoGen;
+    GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
+    GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
+  
+    UINT boxVertexOffset = 0;
+    UINT cylinderVertexOffset = boxVertexOffset + (UINT)box.Vertices.size();
+
+    UINT boxIndexOffset = 0;
+    UINT cylinderIndexOffset = boxIndexOffset + (UINT)box.Indices32.size();
+
+    SubmeshGeometry boxSubmesh;
+    boxSubmesh.IndexCount = (UINT)box.Indices32.size();
+    boxSubmesh.StartIndexLocation = boxIndexOffset;
+    boxSubmesh.BaseVertexLocation = boxVertexOffset;
+
+    SubmeshGeometry cylinderSubmesh;
+    cylinderSubmesh.IndexCount = (UINT)cylinder.Indices32.size();
+    cylinderSubmesh.StartIndexLocation = cylinderIndexOffset;
+    cylinderSubmesh.BaseVertexLocation = cylinderVertexOffset;
+
+    // 提取我们需要的顶点元素并将所有网格的顶点置入一个顶点缓冲区
+    auto totalVertexCount =
+        box.Vertices.size() +
+        cylinder.Vertices.size();
+
+    std::vector<Vertex> vertices(totalVertexCount);
+
+    UINT k = 0;
+    for (size_t i = 0; i < box.Vertices.size(); ++i, ++k)
+    {
+        vertices[k].Pos = box.Vertices[i].Position;
+        vertices[k].Normal = box.Vertices[i].Normal;
+        vertices[k].TexC = box.Vertices[i].TexC;
+    }
+    for (size_t i = 0; i < cylinder.Vertices.size(); ++i, ++k)
+    {
+        vertices[k].Pos = cylinder.Vertices[i].Position;
+        vertices[k].Normal = cylinder.Vertices[i].Normal;
+        vertices[k].TexC = cylinder.Vertices[i].TexC;
+    }
+
+    std::vector<std::uint16_t> indices;
+    indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
+    indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
+
+
+    const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+    const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+
+    auto geo = std::make_unique<MeshGeometry>();
+    geo->Name = "shapeGeo";
+
+    ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
+    CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
+    ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
+    CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+    geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
+
+    geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
+        mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+
+    geo->VertexByteStride = sizeof(Vertex);
+    geo->VertexBufferByteSize = vbByteSize;
+    geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+    geo->IndexBufferByteSize = ibByteSize;
+
+    geo->DrawArgs["box"] = boxSubmesh;
+    geo->DrawArgs["cylinder"] = cylinderSubmesh;
+
+    mGeometries[geo->Name] = std::move(geo);
+}
+
 void GameApp::BuildPSO()
 {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
@@ -1211,19 +1288,6 @@ void GameApp::BuildMaterials()
 }
 void GameApp::BuildRenderItems()
 {
-    auto skullRitem = std::make_unique<RenderItem>();
-    skullRitem->World = MathHelper::Identity4x4();
-    skullRitem->TexTransform = MathHelper::Identity4x4();
-    skullRitem->ObjCBIndex = 2;
-    skullRitem->Mat = mMaterials["skullMat"].get();
-    skullRitem->Geo = mGeometries["skullGeo"].get();
-    skullRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    skullRitem->IndexCount = skullRitem->Geo->DrawArgs["skull"].IndexCount;
-    skullRitem->StartIndexLocation = skullRitem->Geo->DrawArgs["skull"].StartIndexLocation;
-    skullRitem->BaseVertexLocation = skullRitem->Geo->DrawArgs["skull"].BaseVertexLocation;
-    mSkullRitem = skullRitem.get();
-    mRitemLayer[(int)RenderLayer::Opaque].push_back(skullRitem.get());
-
     auto floorRitem = std::make_unique<RenderItem>();
     floorRitem->World = MathHelper::Identity4x4();
     floorRitem->TexTransform = MathHelper::Identity4x4();
@@ -1248,9 +1312,22 @@ void GameApp::BuildRenderItems()
     wallsRitem->BaseVertexLocation = wallsRitem->Geo->DrawArgs["wall"].BaseVertexLocation;
     mRitemLayer[(int)RenderLayer::Opaque].push_back(wallsRitem.get());
 
+    auto skullRitem = std::make_unique<RenderItem>();
+    skullRitem->World = MathHelper::Identity4x4();
+    skullRitem->TexTransform = MathHelper::Identity4x4();
+    skullRitem->ObjCBIndex = 2;
+    skullRitem->Mat = mMaterials["skullMat"].get();
+    skullRitem->Geo = mGeometries["skullGeo"].get();
+    skullRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    skullRitem->IndexCount = skullRitem->Geo->DrawArgs["skull"].IndexCount;
+    skullRitem->StartIndexLocation = skullRitem->Geo->DrawArgs["skull"].StartIndexLocation;
+    skullRitem->BaseVertexLocation = skullRitem->Geo->DrawArgs["skull"].BaseVertexLocation;
+    mSkullRitem = skullRitem.get();
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(skullRitem.get());
+
     //创建模型的渲染对象
     auto modelRitem = std::make_unique<RenderItem>();
-    auto modelWorld = DirectX::XMMatrixTranslation(0.f, 0.f, 4.f) * DirectX::XMMatrixRotationY(MathHelper::Pi);
+    auto modelWorld = DirectX::XMMatrixTranslation(-5.f, 0.f, 4.f) * DirectX::XMMatrixRotationY(MathHelper::Pi);
     XMStoreFloat4x4(&modelRitem->World, modelWorld);
     modelRitem->ObjCBIndex = 3;
     modelRitem->Geo = mGeometries["Player"].get();
@@ -1261,19 +1338,39 @@ void GameApp::BuildRenderItems()
     modelRitem->BaseVertexLocation = modelRitem->Geo->DrawArgs["Player"].BaseVertexLocation;
     mRitemLayer[(int)RenderLayer::Opaque].push_back(modelRitem.get());
 
+    auto boxRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(0.0f, 1.5f, -2.0f));
+    boxRitem->ObjCBIndex = 4;
+    boxRitem->Geo = mGeometries["shapeGeo"].get();
+    boxRitem->Mat = mMaterials["checkertile"].get();
+    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    // 构建圆柱体
+    auto cylinderRitem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&cylinderRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(-3.0f, 1.5f, -2.0f));
+    cylinderRitem->ObjCBIndex = 5;
+    cylinderRitem->Geo = mGeometries["shapeGeo"].get();
+    cylinderRitem->Mat = mMaterials["skullMat"].get();
+    cylinderRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    cylinderRitem->IndexCount = cylinderRitem->Geo->DrawArgs["cylinder"].IndexCount;
+    cylinderRitem->StartIndexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
+    cylinderRitem->BaseVertexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(cylinderRitem.get());
+
     // Reflected skull will have different world matrix, so it needs to be its own render item.
     // 被反射的模型将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto reflectedSkullRitem = std::make_unique<RenderItem>();
     *reflectedSkullRitem = *skullRitem;
-    reflectedSkullRitem->ObjCBIndex =4;
+    reflectedSkullRitem->ObjCBIndex =6;
     mReflectedSkullRitem = reflectedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedSkullRitem.get());
 
-  
-
     auto reflectedModelRitem = std::make_unique<RenderItem>();
     *reflectedModelRitem = *modelRitem;
-    reflectedModelRitem->ObjCBIndex = 5;
+    reflectedModelRitem->ObjCBIndex = 7;
     mReflectedModelRitem = reflectedModelRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedModelRitem.get());
 
@@ -1281,7 +1378,7 @@ void GameApp::BuildRenderItems()
     // 阴影将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto shadowedSkullRitem = std::make_unique<RenderItem>();
     *shadowedSkullRitem = *skullRitem;
-    shadowedSkullRitem->ObjCBIndex = 6;
+    shadowedSkullRitem->ObjCBIndex = 8;
     shadowedSkullRitem->Mat = mMaterials["shadowMat"].get();
     mShadowedSkullRitem = shadowedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Shadow].push_back(shadowedSkullRitem.get());
@@ -1289,7 +1386,7 @@ void GameApp::BuildRenderItems()
     auto mirrorRitem = std::make_unique<RenderItem>();
     mirrorRitem->World = MathHelper::Identity4x4();
     mirrorRitem->TexTransform = MathHelper::Identity4x4();
-    mirrorRitem->ObjCBIndex = 7;
+    mirrorRitem->ObjCBIndex = 9;
     mirrorRitem->Mat = mMaterials["icemirror"].get();
     mirrorRitem->Geo = mGeometries["roomGeo"].get();
     mirrorRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1305,6 +1402,8 @@ void GameApp::BuildRenderItems()
     mAllRitems.push_back(std::move(floorRitem));
     mAllRitems.push_back(std::move(wallsRitem));
     mAllRitems.push_back(std::move(skullRitem));
+    mAllRitems.push_back(std::move(boxRitem));
+    mAllRitems.push_back(std::move(cylinderRitem));
     //向渲染对象中添加model
     mAllRitems.push_back(std::move(modelRitem));
 

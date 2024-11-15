@@ -130,6 +130,7 @@ private:
     void BuildFloorGeometry();
 
     void BuildModels();
+    void BuildSphereAndCylinder();
 
    /* void BuildLandGeometry();
     void BuildBoxGeometry();*/
@@ -192,6 +193,7 @@ private:
     RenderItem* mReflectedFloorRitem = nullptr;
     RenderItem* mReflectedModelRitem = nullptr;
     RenderItem* mShadowedSkullRitem = nullptr;
+    RenderItem* mShadowedModelRitem = nullptr;
     XMFLOAT3 mSkullTranslation = { -5.0f, 0.5f, -5.0f };
 
     // List of all the render items.

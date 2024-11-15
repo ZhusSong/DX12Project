@@ -714,7 +714,7 @@ void GameApp::BuildLandGeometry()
     {
         auto& p = grid.Vertices[i].Position;
         vertices[i].Pos = p;
-        vertices[i].Pos.y = GetHillsHeight(p.x, p.z)-100.5f;
+        vertices[i].Pos.y = GetHillsHeight(p.x, p.z);
         vertices[i].Normal = GetHillsNormal(p.x, p.z);
         vertices[i].TexC = grid.Vertices[i].TexC;
     }
@@ -812,7 +812,7 @@ void GameApp::BuildWavesGeometry()
 void GameApp::BuildBoxGeometry()
 {
     GeometryGenerator geoGen;
-    GeometryGenerator::MeshData box = geoGen.CreateBox(0.0f, 0.0f, 0.0f, 3);
+    GeometryGenerator::MeshData box = geoGen.CreateBox(7.0f, 7.0f, 7.0f, 3);
 
     std::vector<Vertex> vertices(box.Vertices.size());
     for (size_t i = 0; i < box.Vertices.size(); ++i)

@@ -57,6 +57,10 @@ DX12App::~DX12App()
 {
     if (md3dDevice != nullptr)
         FlushCommandQueue();
+    //释放ImGui
+    ImGui_ImplDX12_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 HINSTANCE DX12App::AppInstance()const
 {
