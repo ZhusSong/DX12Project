@@ -114,7 +114,7 @@ private:
 
    // void UpdateWaves(const DXGameTimer& gt);
 
-    void DrawGame();
+    void DrawGame(const DXGameTimer& gt);
 
     //读取贴图
     void LoadTextures();
@@ -194,7 +194,12 @@ private:
     RenderItem* mReflectedModelRitem = nullptr;
     RenderItem* mShadowedSkullRitem = nullptr;
     RenderItem* mShadowedModelRitem = nullptr;
-    XMFLOAT3 mSkullTranslation = { -5.0f, 0.5f, -5.0f };
+
+    XMFLOAT3 mSkullTranslation = { -8.0f, 0.5f, -5.0f };
+
+    XMFLOAT3 mSphereTranslation = { 0.0f, 1.5f, -2.0f };
+
+    XMFLOAT3 mCylinderTranslation = { -3.0f, 1.5f, -2.0f };
 
     // List of all the render items.
     // 所有待渲染的成员列表

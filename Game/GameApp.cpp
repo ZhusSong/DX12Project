@@ -82,11 +82,14 @@ void GameApp::Update(const DXGameTimer& gt)
 {
     // 更新输入事件
     OnKeyBoardInput(gt);
-    OnMouseDown();
-    OnMouseUp();
-    OnMouseMove();
-    // 更新摄像机。之后会有更详细的摄像机实现
-    UpdateCamera(gt);
+    if (!ImGui::GetIO().WantCaptureMouse)
+    {
+        OnMouseDown();
+        OnMouseUp();
+        OnMouseMove();
+        // 更新摄像机。之后会有更详细的摄像机实现
+        UpdateCamera(gt);
+    }
 
     // Cycle through the circular frame resource array.
     // 循环获取帧资源循环数组中的元素
@@ -199,7 +202,7 @@ void GameApp::Draw(const DXGameTimer& gt)
 
     // Draw ImGui
     // 绘制ImGui
-    DrawGame();
+    DrawGame(gt);
 
     // Indicate a state transition on the resource usage.
     // 再次对资源文件状态进行转换，将资源从渲染目标状态转换为呈现状态
@@ -237,13 +240,14 @@ void GameApp::Draw(const DXGameTimer& gt)
 
 void GameApp::OnMouseDown()
 {
-    if (ImGui::IsMouseDown((ImGuiMouseButton_Left)) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-    {
-        mLastMousePos.x = ImGui::GetIO().MousePos.x;
-        mLastMousePos.y = ImGui::GetIO().MousePos.y;
+  
+        if (ImGui::IsMouseDown((ImGuiMouseButton_Left)) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+        {
+            mLastMousePos.x = ImGui::GetIO().MousePos.x;
+            mLastMousePos.y = ImGui::GetIO().MousePos.y;
 
-        SetCapture(mhMainWnd);
-    }
+            SetCapture(mhMainWnd);
+        }
 }
 
 void GameApp::OnMouseUp()
@@ -286,14 +290,13 @@ void GameApp::OnMouseMove()
     mLastMousePos.x = ImGui::GetIO().MousePos.x;
     mLastMousePos.y = ImGui::GetIO().MousePos.y;
 
-
 }
 
 void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
 {
     const float dt = gt.GetDeltaTime();
 
-    if (GetAsyncKeyState('A') & 0x8000)
+ /*   if (GetAsyncKeyState('A') & 0x8000)
         mSkullTranslation.x -= 1.0f * dt;
 
     if (GetAsyncKeyState('D') & 0x8000)
@@ -303,7 +306,21 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
         mSkullTranslation.y += 1.0f * dt;
 
     if (GetAsyncKeyState('S') & 0x8000)
+        mSkullTranslation.y -= 1.0f * dt;*/
+
+    if (ImGui::IsKeyDown(ImGuiKey_W))
+        mSkullTranslation.y += 1.0f * dt;
+
+    if (ImGui::IsKeyDown(ImGuiKey_A))
+        mSkullTranslation.x -= 1.0f * dt;
+
+    if (ImGui::IsKeyDown(ImGuiKey_S))
         mSkullTranslation.y -= 1.0f * dt;
+
+    if (ImGui::IsKeyDown(ImGuiKey_D))
+        mSkullTranslation.x += 1.0f * dt;
+
+
 
     // Don't let user move below ground plane.
     // 设置移动范围
@@ -334,21 +351,21 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
 }
 void GameApp::UpdateCamera(const DXGameTimer& gt)
 {
-    // Convert Spherical to Cartesian coordinates.
-    // 球面坐标转笛卡尔坐标
-    mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
-    mEyePos.z = mRadius * sinf(mPhi) * sinf(mTheta);
-    mEyePos.y = mRadius * cosf(mPhi);
+        // Convert Spherical to Cartesian coordinates.
+        // 球面坐标转笛卡尔坐标
+        mEyePos.x = mRadius * sinf(mPhi) * cosf(mTheta);
+        mEyePos.z = mRadius * sinf(mPhi) * sinf(mTheta);
+        mEyePos.y = mRadius * cosf(mPhi);
 
 
-    // Build the view matrix.
-    // 构建观察矩阵
-    XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
-    XMVECTOR target = XMVectorZero();
-    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+        // Build the view matrix.
+        // 构建观察矩阵
+        XMVECTOR pos = XMVectorSet(mEyePos.x, mEyePos.y, mEyePos.z, 1.0f);
+        XMVECTOR target = XMVectorZero();
+        XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-    XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-    XMStoreFloat4x4(&mView, view);
+        XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+        XMStoreFloat4x4(&mView, view);
 
 }
 
@@ -451,10 +468,10 @@ void GameApp::UpdateMainPassCB(const DXGameTimer& gt)
 
 }
 
-void GameApp::DrawGame()
+void GameApp::DrawGame(const DXGameTimer& gt)
 {
     bool show_demo_window = false;
-    
+    //ImGui::ShowDemoWindow(&show_demo_window);
     static int counter = 0;
     //test1    控制旋转
     ImGui::Begin("imgui!Test");                          // Create a window called "Hello, world!" and append into it.
@@ -464,13 +481,14 @@ void GameApp::DrawGame()
 
     //ImGui::SliderFloat("float", &mPhi, 0.1f, 1.0f);  //mPhi立方体的旋转角度
   //  ImGui::SliderFloat("float", &mTheta, 0.1f, 1.0f);  //mTheta也是旋转角度
+    const float dt = gt.GetDeltaTime();
 
-    //if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-    //    counter++;
-    //ImGui::SameLine();
-    //ImGui::Text("counter = %d", counter);
+    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+        counter++;
+    ImGui::SameLine();
+    ImGui::Text("counter = %d", counter);
 
-    //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+  /*  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);*/
 
     ImGui::End();
 
@@ -1342,7 +1360,7 @@ void GameApp::BuildRenderItems()
     XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(0.0f, 1.5f, -2.0f));
     boxRitem->ObjCBIndex = 4;
     boxRitem->Geo = mGeometries["shapeGeo"].get();
-    boxRitem->Mat = mMaterials["checkertile"].get();
+    boxRitem->Mat = mMaterials["bricks"].get();
     boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;

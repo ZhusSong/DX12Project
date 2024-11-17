@@ -4,6 +4,8 @@
 //
 //#include "d3dDebugLogger.h"
 
+////添加ImGui
+
 #pragma warning(disable: 6031)
 using namespace std;
 using namespace DirectX;
@@ -16,6 +18,7 @@ extern "C"
 }
 //ImGui
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 namespace
 {
     // This is just used to forward Windows messages from a global window
@@ -27,9 +30,9 @@ namespace
 LRESULT CALLBACK
 MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    //在窗口处添加imgui响应
-    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
-        return true;
+    ////在窗口处添加imgui响应
+    //if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+    //    return true;
     // Forward hwnd on because we can get messages (e.g., WM_CREATE)
     // before CreateWindow returns, and thus before m_hMainWnd is valid.
     return DX12App::GetApp()->MsgProc(hwnd, msg, wParam, lParam);
@@ -286,8 +289,10 @@ void DX12App::OnResize()
 
 LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    if (ImGui_ImplWin32_WndProcHandler(mhMainWnd, msg, wParam, lParam))
+    if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
         return true;
+    //const ImGuiIO imio = ImGui::GetIO();
+
     switch (msg)
     {	
     // We pause the game when the window is deactivated and unpause it when it becomes active.  
@@ -410,6 +415,7 @@ LRESULT DX12App::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         //OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_MOUSEMOVE:
+       
         //OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         return 0;
     case WM_KEYUP:
@@ -753,7 +759,7 @@ bool DX12App::InitImGui()
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // 允许键盘控制
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.ConfigWindowsMoveFromTitleBarOnly = true;              // 仅允许标题拖动
 
     // 设置ImGui风格
