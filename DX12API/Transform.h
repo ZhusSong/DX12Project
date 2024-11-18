@@ -1,5 +1,5 @@
 #pragma once
-// 简易的transform类，用于描述对象的移动、旋转、缩放等操作相关的数据，后续将用四元数进行重写
+// 简易的transform类，用于描述对象的移动、旋转、缩放等操作相关的数据
 #ifndef  TRANSFORM_H
 #define TRANSFORM_H
 #include <DirectXMath.h>
