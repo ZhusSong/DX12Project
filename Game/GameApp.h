@@ -153,9 +153,12 @@ private:
     void BuildMaterials();
     // 创建渲染对象
     void BuildRenderItems();
+
     // 绘制渲染对象
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
 
+    // 碰撞检测
+    bool CollisionTest();
     // 创建静态采样器
     std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 
@@ -189,6 +192,10 @@ private:
     // Cache render items of interest.
     // 待渲染物体的缓存
     RenderItem* mSkullRitem = nullptr;
+
+    RenderItem* mSphereRitem = nullptr;
+    RenderItem* mCylinderRitem = nullptr;
+
     RenderItem* mReflectedSkullRitem = nullptr;
     RenderItem* mReflectedFloorRitem = nullptr;
     RenderItem* mReflectedModelRitem = nullptr;

@@ -308,7 +308,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
     if (GetAsyncKeyState('S') & 0x8000)
         mSkullTranslation.y -= 1.0f * dt;*/
 
-    if (ImGui::IsKeyDown(ImGuiKey_W))
+   /* if (ImGui::IsKeyDown(ImGuiKey_W))
         mSkullTranslation.y += 1.0f * dt;
 
     if (ImGui::IsKeyDown(ImGuiKey_A))
@@ -318,9 +318,26 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
         mSkullTranslation.y -= 1.0f * dt;
 
     if (ImGui::IsKeyDown(ImGuiKey_D))
-        mSkullTranslation.x += 1.0f * dt;
+        mSkullTranslation.x += 1.0f * dt;*/
 
 
+    if (ImGui::IsKeyDown(ImGuiKey_D))
+    {
+        mCylinderTranslation.x+=1.0f * dt;
+        if(CollisionTest())
+            mSphereRitem->Mat = mMaterials["checkertile"].get();
+        else
+            mSphereRitem->Mat = mMaterials["bricks"].get();
+
+    }
+    if (ImGui::IsKeyDown(ImGuiKey_A))
+    {
+        mCylinderTranslation.x -= 1.0f * dt;
+        if (CollisionTest())
+            mSphereRitem->Mat = mMaterials["checkertile"].get();
+        else
+            mSphereRitem->Mat = mMaterials["bricks"].get();
+    }
 
     // Don't let user move below ground plane.
     // 设置移动范围
@@ -332,6 +349,13 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
     XMMATRIX skullOffset = XMMatrixTranslation(mSkullTranslation.x, mSkullTranslation.y, mSkullTranslation.z);
     XMMATRIX skullWorld = skullRotate * skullScale * skullOffset;
     XMStoreFloat4x4(&mSkullRitem->World, skullWorld);
+
+    XMMATRIX cylinderRotate = XMMatrixRotationY(0.0f);
+    XMMATRIX cylinderScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    XMMATRIX cylinderOffset = XMMatrixTranslation(mCylinderTranslation.x, mCylinderTranslation.y, mCylinderTranslation.z);
+    XMMATRIX cylinderWorld = cylinderRotate * cylinderScale * cylinderOffset;
+    XMStoreFloat4x4(&mCylinderRitem->World, cylinderWorld);
+
 
     // Update reflection world matrix.
     XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
@@ -346,6 +370,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
     XMStoreFloat4x4(&mShadowedSkullRitem->World, skullWorld * S * shadowOffsetY);
 
     mSkullRitem->NumFramesDirty = gNumFrameResources;
+    mCylinderRitem->NumFramesDirty = gNumFrameResources;
     mReflectedSkullRitem->NumFramesDirty = gNumFrameResources;
     mShadowedSkullRitem->NumFramesDirty = gNumFrameResources;
 }
@@ -488,7 +513,7 @@ void GameApp::DrawGame(const DXGameTimer& gt)
     ImGui::SameLine();
     ImGui::Text("counter = %d", counter);
 
-  /*  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);*/
+    ImGui::Text("box x is  %.3f", mCylinderTranslation.x);
 
     ImGui::End();
 
@@ -1365,6 +1390,7 @@ void GameApp::BuildRenderItems()
     boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
     boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
     boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    mSphereRitem = boxRitem.get();
     mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
     // 构建圆柱体
     auto cylinderRitem = std::make_unique<RenderItem>();
@@ -1376,6 +1402,7 @@ void GameApp::BuildRenderItems()
     cylinderRitem->IndexCount = cylinderRitem->Geo->DrawArgs["cylinder"].IndexCount;
     cylinderRitem->StartIndexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
     cylinderRitem->BaseVertexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+    mCylinderRitem = cylinderRitem.get();
     mRitemLayer[(int)RenderLayer::Opaque].push_back(cylinderRitem.get());
 
     // Reflected skull will have different world matrix, so it needs to be its own render item.
@@ -1467,6 +1494,13 @@ void GameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vec
 
         cmdList->DrawIndexedInstanced(ri->IndexCount, 1, ri->StartIndexLocation, ri->BaseVertexLocation, 0);
     }
+}
+
+bool GameApp::CollisionTest()
+{
+    if (mCylinderTranslation.x >= -1.4f)
+        return true;
+    return false;
 }
 
 std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GameApp::GetStaticSamplers()
