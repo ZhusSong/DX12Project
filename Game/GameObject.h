@@ -7,6 +7,7 @@
 #include "GeometryGenerator.h"
 #include "Transform.h"
 #include "RenderState.h"
+#include "d3dUtil.h"
 
 class GameObject
 {
@@ -31,12 +32,22 @@ public:
 	void Draw();
 
 private:
+	// 物体变换信息
 	Transform mTransform;
 
+	// 材质信息
+	Material mMaterial;
+
+	// 物体贴图
+	ComPtr<ID3D12Resource> mTexture;
+	// 定点缓冲区
+	ComPtr<ID3D12Resource> mVertexBuffer;
+	// 索引缓冲区
+	ComPtr<ID3D12Resource> mIndexBuffer;
 	// 顶点字节大小
-	UINT m_VertexStride;
+	UINT mVertexStride;
 	// 索引数目
-	UINT m_IndexCount;
+	UINT mIndexCount;
 
 };
 
