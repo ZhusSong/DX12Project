@@ -934,7 +934,6 @@ void GameApp::BuildFloorGeometry()
 {
     std::array<Vertex, 4> vertices =
     {
-
         // Floor: Observe we tile texture coordinates.
           // 地板顶点信息 位置(3) 法线(3) uv(2)
         Vertex(-8.0f, 0.1f, -8.0f, 0.0f, 1.0f, 0.0f, 0.0f, 4.0f), // 0 

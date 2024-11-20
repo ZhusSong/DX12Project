@@ -22,6 +22,9 @@ public:
 	// 获取物体变换
 	const Transform& GetTransform() const;
 
+	// 设置描述
+	void SetBuffer();
+
 	// 设置纹理
 	void SetTexture();
 

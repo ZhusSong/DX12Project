@@ -145,6 +145,9 @@ DX12API/Camera.h
  )
  #基础几何体相关
  set(ModelsAndGeometry
+ DX12API/BasicGeometry.h
+ DX12API/Vertex.cpp
+ DX12API/Vertex.h
  DX12API/GeometryGenerator.cpp
  DX12API/GeometryGenerator.h
  DX12API/ModelManager.cpp
