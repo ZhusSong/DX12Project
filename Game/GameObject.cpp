@@ -19,6 +19,13 @@ const Transform& GameObject::GetTransform() const
 	return mTransform;
 }
 
+void GameObject::SetBuffer()
+{
+	mVertexBuffer.Reset();
+	mIndexBuffer.Reset();
+	
+}
+
 void GameObject::SetTexture()
 {
 	//mTexture = texture;
