@@ -193,8 +193,8 @@ private:
     // 待渲染物体的缓存
     RenderItem* mSkullRitem = nullptr;
 
-    RenderItem* mSphereRitem = nullptr;
-    RenderItem* mCylinderRitem = nullptr;
+  /*  RenderItem* mSphereRitem = nullptr;
+    RenderItem* mCylinderRitem = nullptr;*/
 
     RenderItem* mReflectedSkullRitem = nullptr;
     RenderItem* mReflectedFloorRitem = nullptr;
@@ -202,7 +202,7 @@ private:
     RenderItem* mShadowedSkullRitem = nullptr;
     RenderItem* mShadowedModelRitem = nullptr;
 
-    XMFLOAT3 mSkullTranslation = { -8.0f, 0.5f, -5.0f };
+    XMFLOAT3 mSkullTranslation = { -4.0f, 0.5f, -5.0f };
 
     XMFLOAT3 mSphereTranslation = { 0.0f, 1.5f, -2.0f };
 

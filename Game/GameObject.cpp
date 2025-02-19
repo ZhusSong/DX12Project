@@ -23,6 +23,7 @@ void GameObject::SetBuffer()
 {
 	mVertexBuffer.Reset();
 	mIndexBuffer.Reset();
+
 	
 }
 

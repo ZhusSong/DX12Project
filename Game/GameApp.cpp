@@ -296,7 +296,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
 {
     const float dt = gt.GetDeltaTime();
 
- /*   if (GetAsyncKeyState('A') & 0x8000)
+    if (GetAsyncKeyState('A') & 0x8000)
         mSkullTranslation.x -= 1.0f * dt;
 
     if (GetAsyncKeyState('D') & 0x8000)
@@ -306,7 +306,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
         mSkullTranslation.y += 1.0f * dt;
 
     if (GetAsyncKeyState('S') & 0x8000)
-        mSkullTranslation.y -= 1.0f * dt;*/
+        mSkullTranslation.y -= 1.0f * dt;
 
    /* if (ImGui::IsKeyDown(ImGuiKey_W))
         mSkullTranslation.y += 1.0f * dt;
@@ -321,7 +321,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
         mSkullTranslation.x += 1.0f * dt;*/
 
 
-    if (ImGui::IsKeyDown(ImGuiKey_D))
+   /* if (ImGui::IsKeyDown(ImGuiKey_D))
     {
         mCylinderTranslation.x+=1.0f * dt;
         if(CollisionTest())
@@ -337,7 +337,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
             mSphereRitem->Mat = mMaterials["checkertile"].get();
         else
             mSphereRitem->Mat = mMaterials["bricks"].get();
-    }
+    }*/
 
     // Don't let user move below ground plane.
     // 设置移动范围
@@ -350,12 +350,12 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
     XMMATRIX skullWorld = skullRotate * skullScale * skullOffset;
     XMStoreFloat4x4(&mSkullRitem->World, skullWorld);
 
-    XMMATRIX cylinderRotate = XMMatrixRotationY(0.0f);
+   /* XMMATRIX cylinderRotate = XMMatrixRotationY(0.0f);
     XMMATRIX cylinderScale = XMMatrixScaling(1.0f, 1.0f, 1.0f);
     XMMATRIX cylinderOffset = XMMatrixTranslation(mCylinderTranslation.x, mCylinderTranslation.y, mCylinderTranslation.z);
     XMMATRIX cylinderWorld = cylinderRotate * cylinderScale * cylinderOffset;
     XMStoreFloat4x4(&mCylinderRitem->World, cylinderWorld);
-
+*/
 
     // Update reflection world matrix.
     XMVECTOR mirrorPlane = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f); // xy plane
@@ -370,7 +370,7 @@ void GameApp::OnKeyBoardInput(const DXGameTimer& gt)
     XMStoreFloat4x4(&mShadowedSkullRitem->World, skullWorld * S * shadowOffsetY);
 
     mSkullRitem->NumFramesDirty = gNumFrameResources;
-    mCylinderRitem->NumFramesDirty = gNumFrameResources;
+    //mCylinderRitem->NumFramesDirty = gNumFrameResources;
     mReflectedSkullRitem->NumFramesDirty = gNumFrameResources;
     mShadowedSkullRitem->NumFramesDirty = gNumFrameResources;
 }
@@ -982,7 +982,7 @@ void GameApp::BuildFloorGeometry()
 void GameApp::BuildModels()
 {
     // 创建模型
-    ModelManager ModelTest("asset\\Models\\Player\\Castle_Guard_01.fbx");
+    ModelManager ModelTest("asset\\Models\\Player\\snowman.obj");
 
     auto ModelVertices = ModelTest.GetVertices();
     auto ModelIndices = ModelTest.GetIndices();
@@ -1003,7 +1003,7 @@ void GameApp::BuildModels()
     uint32_t k = 0;
     for (size_t i = 0; i < ModelVertices.size();++i,++k)
     {
-        localVertices[k].position = { ModelVertices[i].position.x/40, ModelVertices[i].position.y / 40, ModelVertices[i].position.z / 40 };
+        localVertices[k].position = { ModelVertices[i].position.x, ModelVertices[i].position.y, ModelVertices[i].position.z };
         localVertices[k].normal = ModelVertices[i].normal;
         localVertices[k].texCoord = ModelVertices[i].texCoord;
     }
@@ -1380,41 +1380,41 @@ void GameApp::BuildRenderItems()
     modelRitem->BaseVertexLocation = modelRitem->Geo->DrawArgs["Player"].BaseVertexLocation;
     mRitemLayer[(int)RenderLayer::Opaque].push_back(modelRitem.get());
 
-    auto boxRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(0.0f, 1.5f, -2.0f));
-    boxRitem->ObjCBIndex = 4;
-    boxRitem->Geo = mGeometries["shapeGeo"].get();
-    boxRitem->Mat = mMaterials["bricks"].get();
-    boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
-    boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
-    boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
-    mSphereRitem = boxRitem.get();
-    mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
-    // 构建圆柱体
-    auto cylinderRitem = std::make_unique<RenderItem>();
-    XMStoreFloat4x4(&cylinderRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(-3.0f, 1.5f, -2.0f));
-    cylinderRitem->ObjCBIndex = 5;
-    cylinderRitem->Geo = mGeometries["shapeGeo"].get();
-    cylinderRitem->Mat = mMaterials["skullMat"].get();
-    cylinderRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    cylinderRitem->IndexCount = cylinderRitem->Geo->DrawArgs["cylinder"].IndexCount;
-    cylinderRitem->StartIndexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
-    cylinderRitem->BaseVertexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
-    mCylinderRitem = cylinderRitem.get();
-    mRitemLayer[(int)RenderLayer::Opaque].push_back(cylinderRitem.get());
+    //auto boxRitem = std::make_unique<RenderItem>();
+    //XMStoreFloat4x4(&boxRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(0.0f, 1.5f, -2.0f));
+    //boxRitem->ObjCBIndex = 4;
+    //boxRitem->Geo = mGeometries["shapeGeo"].get();
+    //boxRitem->Mat = mMaterials["bricks"].get();
+    //boxRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    //boxRitem->IndexCount = boxRitem->Geo->DrawArgs["box"].IndexCount;
+    //boxRitem->StartIndexLocation = boxRitem->Geo->DrawArgs["box"].StartIndexLocation;
+    //boxRitem->BaseVertexLocation = boxRitem->Geo->DrawArgs["box"].BaseVertexLocation;
+    //mSphereRitem = boxRitem.get();
+    //mRitemLayer[(int)RenderLayer::Opaque].push_back(boxRitem.get());
+    //// 构建圆柱体
+    //auto cylinderRitem = std::make_unique<RenderItem>();
+    //XMStoreFloat4x4(&cylinderRitem->World, XMMatrixScaling(2.0f, 2.0f, 2.0f) * XMMatrixTranslation(-3.0f, 1.5f, -2.0f));
+    //cylinderRitem->ObjCBIndex = 5;
+    //cylinderRitem->Geo = mGeometries["shapeGeo"].get();
+    //cylinderRitem->Mat = mMaterials["skullMat"].get();
+    //cylinderRitem->PrimitiveType = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    //cylinderRitem->IndexCount = cylinderRitem->Geo->DrawArgs["cylinder"].IndexCount;
+    //cylinderRitem->StartIndexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].StartIndexLocation;
+    //cylinderRitem->BaseVertexLocation = cylinderRitem->Geo->DrawArgs["cylinder"].BaseVertexLocation;
+    //mCylinderRitem = cylinderRitem.get();
+    //mRitemLayer[(int)RenderLayer::Opaque].push_back(cylinderRitem.get());
 
     // Reflected skull will have different world matrix, so it needs to be its own render item.
     // 被反射的模型将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto reflectedSkullRitem = std::make_unique<RenderItem>();
     *reflectedSkullRitem = *skullRitem;
-    reflectedSkullRitem->ObjCBIndex =6;
+    reflectedSkullRitem->ObjCBIndex =4;
     mReflectedSkullRitem = reflectedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedSkullRitem.get());
 
     auto reflectedModelRitem = std::make_unique<RenderItem>();
     *reflectedModelRitem = *modelRitem;
-    reflectedModelRitem->ObjCBIndex = 7;
+    reflectedModelRitem->ObjCBIndex = 5;
     mReflectedModelRitem = reflectedModelRitem.get();
     mRitemLayer[(int)RenderLayer::Reflected].push_back(reflectedModelRitem.get());
 
@@ -1422,7 +1422,7 @@ void GameApp::BuildRenderItems()
     // 阴影将有不同的世界矩阵，所以它需要成为它自己的渲染项。
     auto shadowedSkullRitem = std::make_unique<RenderItem>();
     *shadowedSkullRitem = *skullRitem;
-    shadowedSkullRitem->ObjCBIndex = 8;
+    shadowedSkullRitem->ObjCBIndex = 6;
     shadowedSkullRitem->Mat = mMaterials["shadowMat"].get();
     mShadowedSkullRitem = shadowedSkullRitem.get();
     mRitemLayer[(int)RenderLayer::Shadow].push_back(shadowedSkullRitem.get());
@@ -1430,7 +1430,7 @@ void GameApp::BuildRenderItems()
     auto mirrorRitem = std::make_unique<RenderItem>();
     mirrorRitem->World = MathHelper::Identity4x4();
     mirrorRitem->TexTransform = MathHelper::Identity4x4();
-    mirrorRitem->ObjCBIndex = 9;
+    mirrorRitem->ObjCBIndex = 7;
     mirrorRitem->Mat = mMaterials["icemirror"].get();
     mirrorRitem->Geo = mGeometries["roomGeo"].get();
     mirrorRitem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -1446,8 +1446,8 @@ void GameApp::BuildRenderItems()
     mAllRitems.push_back(std::move(floorRitem));
     mAllRitems.push_back(std::move(wallsRitem));
     mAllRitems.push_back(std::move(skullRitem));
-    mAllRitems.push_back(std::move(boxRitem));
-    mAllRitems.push_back(std::move(cylinderRitem));
+  /*  mAllRitems.push_back(std::move(boxRitem));
+    mAllRitems.push_back(std::move(cylinderRitem));*/
     //向渲染对象中添加model
     mAllRitems.push_back(std::move(modelRitem));
 
@@ -1497,8 +1497,8 @@ void GameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vec
 
 bool GameApp::CollisionTest()
 {
-    if (mCylinderTranslation.x >= -1.4f)
-        return true;
+   /* if (mCylinderTranslation.x >= -1.4f)
+        return true;*/
     return false;
 }
 
