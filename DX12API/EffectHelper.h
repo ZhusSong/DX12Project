@@ -105,6 +105,33 @@ struct CBufferObject : CBufferBase
             m_resource->GetGPUVirtualAddress()
         );
     }
-
+    void BindHS(ID3D12GraphicsCommandList* cmdList)  override
+    {
+        cmdList->SetGraphicsRootConstantBufferView(
+            RootParamIndex,
+            m_resource->GetGPUVirtualAddress()
+        );
+    }
+    void BindDS(ID3D12GraphicsCommandList* cmdList)override
+    {
+        cmdList->SetGraphicsRootConstantBufferView(
+            RootParamIndex,
+            m_resource->GetGPUVirtualAddress()
+        );
+    }
+    void BindGS(ID3D12GraphicsCommandList* cmdList) override
+    {
+        cmdList->SetGraphicsRootConstantBufferView(
+            RootParamIndex,
+            m_resource->GetGPUVirtualAddress()
+        );
+    }
+    void BindCS(ID3D12GraphicsCommandList* cmdList)override
+    {
+        cmdList->SetGraphicsRootConstantBufferView(
+            RootParamIndex,
+            m_resource->GetGPUVirtualAddress()
+        );
+    }
 };
 #endif
